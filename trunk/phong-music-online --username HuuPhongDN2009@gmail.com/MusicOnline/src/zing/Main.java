@@ -133,6 +133,7 @@ public class Main extends JFrame {
 				startDuration.setText(AudioPlayer.toDuaration(player.getCurrentDuration()));
 				if (!slider.dragging) slider.setValue(player.getCurrentDuration());
 				setTitle(player.getPlayingInfo());
+				System.out.println("Samples Calc :" + player.getCurrentDuration() / 1000.0 * player.getAudioInfo().getFrequency());
 			}
 			
 			public void paused(AudioPlayer player) {
@@ -163,6 +164,7 @@ public class Main extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			
 			public void windowClosing(WindowEvent arg0) {
+				player.release();
 				configure.save();
 			}
 		});
@@ -790,7 +792,7 @@ public class Main extends JFrame {
 								try {
 									final List<Song> songs = new ArrayList<Song>();
 						            for (File file : files) {
-						            	if (!file.getAbsolutePath().toLowerCase().endsWith(".mp3")) continue;
+//						            	if (!file.getAbsolutePath().toLowerCase().endsWith(".mp3") || !file.getAbsolutePath().toLowerCase().endsWith(".flac")) continue;
 						            	Song song = new Song();
 						            	song.title = file.getName().substring(0, file.getName().length() - 4);
 						            	song.lineTwo = file.getAbsolutePath();
