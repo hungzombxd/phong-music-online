@@ -21,8 +21,8 @@ public class MP3FileDecoder implements AudioDecoder{
 	private AudioInfo audioInfo;
 	private int duration;
 	private int metaDataLength;
-	private Object locked = new Object();
-	private boolean seeking = false;
+//	private Object locked = new Object();
+//	private boolean seeking = false;
 	
 	public MP3FileDecoder(AudioStream in) {
 		this.in = in;
@@ -46,16 +46,16 @@ public class MP3FileDecoder implements AudioDecoder{
 		return fmt;
 	}
 
-	public int getPCMData(byte[] buffer) {
-		if (seeking){
-			synchronized (locked) {
-				try {
-					locked.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+	public synchronized int getPCMData(byte[] buffer) {
+//		if (seeking){
+//			synchronized (locked) {
+//				try {
+//					locked.wait();
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 		if (header == null) return -1;
 		try {
 			output = (SampleBuffer)decoder.decodeFrame(header, bitstream);
@@ -83,14 +83,20 @@ public class MP3FileDecoder implements AudioDecoder{
 		}
 	}
 
-	public int seek(int time) {
-		seeking = false;
-		in.seek(durationToSize(time * 1000) + metaDataLength);
-		seeking = false;
-		synchronized (locked) {
-			locked.notifyAll();
+	public synchronized int seek(int duration) {
+//		seeking = false;
+		in.seek(durationToSize(duration) + metaDataLength);
+		bitstream.closeFrame();
+		try {
+			header = bitstream.readFrame();
+		} catch (BitstreamException e) {
+			e.printStackTrace();
 		}
-		return time;
+//		seeking = false;
+//		synchronized (locked) {
+//			locked.notifyAll();
+//		}
+		return duration;
 	}
 
 	public AudioInfo getAudioInfo() {
@@ -101,16 +107,12 @@ public class MP3FileDecoder implements AudioDecoder{
 		return duration;
 	}
 	
-	public int timeToSize(int time){
-		return (audioInfo.getBitrate() * 1000 * time) / 8;
-	}
-
 	public boolean seekable() {
 		return true;
 	}
 
 	public int durationToSize(int duration) {
-		return (audioInfo.getBitrate() * duration) / 8;
+		return (int) (audioInfo.getBitrate() / 8.0 * duration);
 	}
 
 	public int sizeToDuration(int size) {

@@ -35,13 +35,13 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	}
 	
 	private void prepare(String url){
-		in = new AudioStream(url, streaming);
+		in = new FileAudioStream(url, streaming);
 		switch (in.getType()) {
-		case AudioStream.MP3_STREAM:
+		case MemoryAudioStream.MP3_STREAM:
 			decoder = new MP3FileDecoder(in);
 			break;
 			
-		case AudioStream.FLAC_STREAM:
+		case MemoryAudioStream.FLAC_STREAM:
 			decoder = new FLACFileDecoder(in);
 			break;
 
@@ -53,36 +53,38 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	}
 	
 	public int getBuffering(){
+		if (decoder == null) return 0;
 		return decoder.sizeToDuration(in.getBufferingValue());
 	}
 	
 	public int getLength(){
+		if (in == null) return 0;
 		return in.getLength();
 	}
 	
 	public boolean isBuffered(){
+		if (in == null) return false;
 		return in.isCompleted();
 	}
 	
-	public void seek(int time){
+	public void seek(int duration){
 		if (source == null) return;
-//		pause();
+		pause();
 		source.flush();
 		source.stop();
 		source.close();
-		time = time / 1000;
-		plusDuration = time * 1000;
-		decoder.seek(time);
+		plusDuration = duration;
+		decoder.seek(plusDuration);
 		try {
 			source.open(fmtTarget);
 		} catch (LineUnavailableException e) {
 			e.printStackTrace();
 		}
 		source.start();
-//		resume();
+		resume();
 	}
 	
-	public void play(String url){
+	public synchronized void play(String url){
 		stop();
 		prepare(url);
 		createSource();
@@ -103,9 +105,11 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 			listener.playing(this);
 			source.write(buffer, 0, reading);
 		}
-		if (in != null) in.closeStream();
-		in = null;
-		source.drain();
+		if (in != null){
+			in.closeStream();
+			in = null;
+		}
+		if (source != null) source.drain();
 		listener.playing(this);
 		decoder = null;
 		stoped = true;
@@ -148,6 +152,7 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	}
 	
 	public int getDuration(){
+		if (decoder == null) return 0;
 		return decoder.getDuration();
 	}
 	
@@ -184,19 +189,24 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	}
 	
 	public int durationToSize(int duration){
+		if (decoder == null) return 0;
 		return decoder.durationToSize(duration);
 	}
 	
 	public int sizeToDuration(int size){
+		if (decoder == null) return 0;
 		return decoder.sizeToDuration(size);
 	}
 	
+	public void release(){
+		if (in != null) in.release();
+	}
+	
 	public static void main(String[] args) {
-//		new AudioPlayer().play("file:D:\\Music\\Lam Hung\\04 - Moi Nguoi Mot Qua Khu.flac");
+		new AudioPlayer().play("file:D:\\Music\\Lam Hung\\04 - Moi Nguoi Mot Qua Khu.flac");
 //		new AudioPlayer().play("file:D:\\Music\\Lam Hung\\Lam Hung - Ky Tuc Xa Chieu Mua.Ape");
 //		new AudioPlayer().play("file:D:\\Download\\huuphongdn2009\\Pham Truong - Het.mp3");
-		new AudioPlayer().play("http://stream2.mp3.zdn.vn/fsfsdfdsfdserwrwq3/5e031d88f409f0e3ebc923c6d2d66466/51407f2f/2012/02/07/a/2/a2a1f0bc045ed2efd4dfe6bc0d11a534.mp3");
-		
+//		new AudioPlayer().play("http://205.196.120.148/nrla8il61k6g/mag4kzxnizn/03+-+L%E1%BB%9Di+Nguy%E1%BB%81n+-AkiraPhan.flac");
 	}
 
 	public void playing(AudioPlayer player) {
@@ -217,7 +227,7 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	}
 
 	public void buffering(int length) {
-		System.out.println((length * 100.0 / getLength()));
+//		System.out.println((length * 100.0 / getLength()));
 	}
 
 	public void init(AudioPlayer player) {
