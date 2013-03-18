@@ -182,15 +182,6 @@ public class FileAudioStream extends AudioStream{
 	@Override
 	public void closeStream(){
 		length = 0;
-		if (buffering){
-			synchronized (buffer) {
-				try {
-					buffer.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 		release();
 	}
 
@@ -212,6 +203,15 @@ public class FileAudioStream extends AudioStream{
 
 	@Override
 	public void release() {
+		if (buffering){
+			synchronized (buffer) {
+				try {
+					buffer.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		if (in != null){
 			try {
 				in.close();
