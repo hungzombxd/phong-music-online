@@ -69,8 +69,6 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	
 	public void seek(int duration){
 		if (source == null) return;
-		pause();
-		source.flush();
 		source.stop();
 		source.close();
 		plusDuration = duration;
@@ -81,44 +79,43 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 			e.printStackTrace();
 		}
 		source.start();
-		resume();
 	}
 	
-	public synchronized void play(String url){
+	public void play(String url){
 		stop();
-		prepare(url);
-		createSource();
-		stoped = false;
-		plusDuration = 0;
-		while (!stoped && (reading = decoder.getPCMData(buffer)) != -1){
-			if (paused){
-				synchronized (this) {
-					source.flush();
-					listener.paused(this);
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+		synchronized (this) {
+			prepare(url);
+			createSource();
+			stoped = false;
+			plusDuration = 0;
+			while (!stoped && (reading = decoder.getPCMData(buffer)) != -1){
+				if (paused){
+					synchronized (source) {
+						source.stop();
+						listener.paused(this);
+						try {
+							source.wait();
+							source.start();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 				}
+				listener.playing(this);
+				source.write(buffer, 0, reading);
 			}
+			if (in != null){
+				in.closeStream();
+				in = null;
+			}
+			source.drain();
 			listener.playing(this);
-			source.write(buffer, 0, reading);
-		}
-		if (in != null){
-			in.closeStream();
-			in = null;
-		}
-		if (source != null) source.drain();
-		listener.playing(this);
-		decoder = null;
-		stoped = true;
-		if (source != null){
+			decoder = null;
 			source.flush();
 			source.close();
-			source = null;
+			stoped = true;
+			listener.finished(this);
 		}
-		listener.finished(this);
 	}
 	
 	private void createSource(){
@@ -146,8 +143,8 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	
 	public void resume(){
 		paused = false;
-		synchronized (this) {
-			notifyAll();
+		synchronized (source) {
+			source.notifyAll();
 		}
 	}
 	

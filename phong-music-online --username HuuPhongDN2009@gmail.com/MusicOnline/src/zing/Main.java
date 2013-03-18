@@ -133,7 +133,7 @@ public class Main extends JFrame {
 				startDuration.setText(AudioPlayer.toDuaration(player.getCurrentDuration()));
 				if (!slider.dragging) slider.setValue(player.getCurrentDuration());
 				setTitle(player.getPlayingInfo());
-				System.out.println("Samples Calc :" + player.getCurrentDuration() / 1000.0 * player.getAudioInfo().getFrequency());
+//				System.out.println("Samples Calc :" + player.getCurrentDuration() / 1000.0 * player.getAudioInfo().getFrequency());
 			}
 			
 			public void paused(AudioPlayer player) {
@@ -157,6 +157,7 @@ public class Main extends JFrame {
 			
 			public void buffering(int length) {
 				slider.setRange(player.getBuffering());
+				System.out.println(player.getBuffering());
 			}
 		});
 		zing = Zing.getInstance();
@@ -1314,7 +1315,6 @@ public class Main extends JFrame {
 				try {
 					if (configure.defaultMediaPlayer == null || configure.defaultMediaPlayer.equals("")
 							|| !(new File(configure.defaultMediaPlayer).exists())) {
-						player.stop();
 						player.play(configure.songs.get(index).getOriginLink());
 					} else {
 						Song song = configure.songs.get(index);

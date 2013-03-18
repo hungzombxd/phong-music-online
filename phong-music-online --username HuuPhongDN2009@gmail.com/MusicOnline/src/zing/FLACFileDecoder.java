@@ -24,8 +24,8 @@ public class FLACFileDecoder implements AudioDecoder{
 	private AudioInfo audioInfo;
 	private int metaDataLength;
 	private SeekTable seekTable;
-//	private Object locked = new Object();
-//	private boolean seeking = false;
+	private Object locked = new Object();
+	private boolean seeking = false;
 	private double sampleSize;
 	private Padding padding;
 	private int audioSize;
@@ -43,8 +43,8 @@ public class FLACFileDecoder implements AudioDecoder{
 			
 			@Override
 			public void processFrame(Frame frame) {
-				System.out.println("==========================================");
-				System.out.println("Sample Origin: " + frame.header.sampleNumber);
+//				System.out.println("==========================================");
+//				System.out.println("Sample Origin: " + frame.header.sampleNumber);
 //				System.out.println(frame.header.sampleNumber * 1000.0 / streamInfo.getSampleRate());
 			}
 			
@@ -85,15 +85,15 @@ public class FLACFileDecoder implements AudioDecoder{
 	}
 
 	public synchronized int getPCMData(byte[] buffer) {
-//		if (seeking){
-//			synchronized (locked) {
-//				try {
-//					locked.wait();
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
+		if (seeking){
+			synchronized (locked) {
+				try {
+					locked.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		try {
 			Frame frame = decoder.readNextFrame();
 			if (frame != null) {
@@ -108,18 +108,18 @@ public class FLACFileDecoder implements AudioDecoder{
 		return pcmData.getLen();
 	}
 
-	public synchronized int seek(int duration){
-//		seeking = true;
+	public int seek(int duration){
+		seeking = true;
 		int samplesOfTime = (int) ((duration / 1000.0) * streamInfo.getSampleRate());
-		System.out.println(samplesOfTime);
-		System.out.println(samplesOfTime / 2.0 * duration / streamInfo.getTotalSamples());
-		System.out.println(durationToSize(duration));
+//		System.out.println(samplesOfTime);
+//		System.out.println(samplesOfTime / 2.0 * duration / streamInfo.getTotalSamples());
+//		System.out.println(durationToSize(duration));
 		decoder.setSamplesDecoded(samplesOfTime);
 		in.seek(durationToSize(duration));
-//		seeking = false;
-//		synchronized (locked) {
-//			locked.notifyAll();
-//		}
+		seeking = false;
+		synchronized (locked) {
+			locked.notifyAll();
+		}
 		return 0;
 	}
 
@@ -136,7 +136,7 @@ public class FLACFileDecoder implements AudioDecoder{
 	}
 
 	public int durationToSize(int duration) {
-		System.out.println("Size: " + bitrate / 8000.0 * duration);
+//		System.out.println("Size: " + bitrate / 8000.0 * duration);
 		return (int) (bitrate / 8000.0 * duration);
 	}
 

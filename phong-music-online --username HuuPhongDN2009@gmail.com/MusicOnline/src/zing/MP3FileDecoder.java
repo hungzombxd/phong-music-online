@@ -21,8 +21,8 @@ public class MP3FileDecoder implements AudioDecoder{
 	private AudioInfo audioInfo;
 	private int duration;
 	private int metaDataLength;
-//	private Object locked = new Object();
-//	private boolean seeking = false;
+	private Object locked = new Object();
+	private boolean seeking = false;
 	
 	public MP3FileDecoder(AudioStream in) {
 		this.in = in;
@@ -47,15 +47,21 @@ public class MP3FileDecoder implements AudioDecoder{
 	}
 
 	public synchronized int getPCMData(byte[] buffer) {
-//		if (seeking){
-//			synchronized (locked) {
-//				try {
-//					locked.wait();
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
+		if (seeking){
+			synchronized (locked) {
+				try {
+					locked.wait();
+					bitstream.closeFrame();
+					try {
+						header = bitstream.readFrame();
+					} catch (BitstreamException e) {
+						e.printStackTrace();
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		if (header == null) return -1;
 		try {
 			output = (SampleBuffer)decoder.decodeFrame(header, bitstream);
@@ -83,19 +89,13 @@ public class MP3FileDecoder implements AudioDecoder{
 		}
 	}
 
-	public synchronized int seek(int duration) {
-//		seeking = false;
+	public int seek(int duration) {
+		seeking = false;
 		in.seek(durationToSize(duration) + metaDataLength);
-		bitstream.closeFrame();
-		try {
-			header = bitstream.readFrame();
-		} catch (BitstreamException e) {
-			e.printStackTrace();
+		seeking = false;
+		synchronized (locked) {
+			locked.notifyAll();
 		}
-//		seeking = false;
-//		synchronized (locked) {
-//			locked.notifyAll();
-//		}
 		return duration;
 	}
 
