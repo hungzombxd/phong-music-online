@@ -200,7 +200,10 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	}
 	
 	public void release(){
-		if (in != null) in.release();
+		if (in != null){
+			in.closeStream();
+			in.release();
+		}
 	}
 	
 	public void playing(AudioPlayer player) {
