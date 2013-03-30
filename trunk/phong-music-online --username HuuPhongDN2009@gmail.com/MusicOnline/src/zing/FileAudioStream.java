@@ -1,6 +1,7 @@
 package zing;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,10 +10,19 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 
 public class FileAudioStream extends AudioStream{
+	private static File audioFile;
 	private OutputStream out;
 	private InputStream remote;
 	private RandomAccessFile in;
 	private boolean buffering = false;
+	static {
+		try {
+			audioFile = File.createTempFile("Music Online ", ".music");
+			audioFile.deleteOnExit();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public FileAudioStream(String link, Streaming listener) {
 		streaming = listener;
@@ -107,7 +117,7 @@ public class FileAudioStream extends AudioStream{
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		if (currentPosition >= length) return -1;
-		while (!isCompleted() && currentPosition + len > offset){
+		while (!isCompleted() && (currentPosition + len > offset)){
 			synchronized (buffer) {
 				try {
 					buffer.wait();
@@ -116,7 +126,7 @@ public class FileAudioStream extends AudioStream{
 				}
 			}
 		}
-		len = in.read(b, off, len);
+		len = in.read(b, off, Math.min(Math.min(len, b.length - off), length - currentPosition));
 		currentPosition += len;
 		return len;
 	}
@@ -124,7 +134,6 @@ public class FileAudioStream extends AudioStream{
 	@Override
 	public void seek(int bytes){
 		currentPosition = Math.min(bytes, length);
-		System.out.println(bytes < length);
 		try {
 			in.seek(currentPosition);
 		} catch (IOException e) {
@@ -182,27 +191,6 @@ public class FileAudioStream extends AudioStream{
 	@Override
 	public void closeStream(){
 		length = 0;
-		release();
-	}
-
-	@Override
-	public synchronized void mark(int readlimit) {
-		limit = readlimit;
-		markPosition = currentPosition;
-	}
-
-	@Override
-	public synchronized void reset() throws IOException {
-		if ((currentPosition - markPosition) >= limit){
-			currentPosition = currentPosition - limit;
-		}else{
-			currentPosition = markPosition;
-		}
-		in.seek(currentPosition);
-	}
-
-	@Override
-	public void release() {
 		if (buffering){
 			synchronized (buffer) {
 				try {
@@ -233,5 +221,27 @@ public class FileAudioStream extends AudioStream{
 			}
 			remote = null;
 		}
+	}
+
+	@Override
+	public synchronized void mark(int readlimit) {
+		limit = readlimit;
+		markPosition = currentPosition;
+	}
+
+	@Override
+	public synchronized void reset() throws IOException {
+		if ((currentPosition - markPosition) >= limit){
+			currentPosition = currentPosition - limit;
+		}else{
+			currentPosition = markPosition;
+		}
+		in.seek(currentPosition);
+	}
+
+	@Override
+	public void release() {
+		audioFile.delete();
+		audioFile = null;
 	}
 }

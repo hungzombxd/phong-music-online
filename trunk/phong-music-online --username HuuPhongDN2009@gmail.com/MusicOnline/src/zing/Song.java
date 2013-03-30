@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.StringTokenizer;
 
+
 public class Song implements Serializable {
 	private static final long serialVersionUID = -1080772505347758185L;
 	String link = "";

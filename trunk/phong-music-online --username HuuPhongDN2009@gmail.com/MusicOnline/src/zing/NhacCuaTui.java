@@ -10,6 +10,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class NhacCuaTui extends MusicSite {
 	private static NhacCuaTui nhacCuaTui;
 	
@@ -177,5 +178,9 @@ public class NhacCuaTui extends MusicSite {
 	public List<String> getLyric(String html) throws IOException {
 		List<String> lyrics = new ArrayList<String>();
 		return lyrics;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		System.out.println(NhacCuaTui.getInstance().searchSong("pham truong", 1, ""));
 	}
 }

@@ -1,6 +1,5 @@
 package zing;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -13,7 +12,6 @@ public abstract class AudioStream extends InputStream{
 	public static final int APE_STREAM = 2;
 	public static final String[] CODECS = { "ID3", "fLaC", "MAC" };
 	
-	protected static File audioFile;
 	protected int length;
 	protected int currentPosition;
 	protected int numberReconnect;
@@ -26,14 +24,6 @@ public abstract class AudioStream extends InputStream{
 	protected Streaming streaming;
 	protected int markPosition;
 	protected int limit;
-	static {
-		try {
-			audioFile = File.createTempFile("Music Online ", ".music");
-			audioFile.deleteOnExit();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 	public abstract int read() throws IOException;
 

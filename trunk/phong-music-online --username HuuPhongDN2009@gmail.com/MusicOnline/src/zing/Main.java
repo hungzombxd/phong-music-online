@@ -73,6 +73,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+
 import javazoom.jl.decoder.JavaLayerException;
 
 
@@ -117,6 +118,7 @@ public class Main extends JFrame {
 	int fromPage;
 	MusicSite musicSite;
 	AudioPlayer player;
+	private String currentTitle;
 	
 	public Main() {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -132,8 +134,7 @@ public class Main extends JFrame {
 			public void playing(AudioPlayer player) {
 				startDuration.setText(AudioPlayer.toDuaration(player.getCurrentDuration()));
 				if (!slider.dragging) slider.setValue(player.getCurrentDuration());
-				setTitle(player.getPlayingInfo());
-//				System.out.println("Samples Calc :" + player.getCurrentDuration() / 1000.0 * player.getAudioInfo().getFrequency());
+				setTitle(currentTitle + " " + player.getPlayingInfo());
 			}
 			
 			public void paused(AudioPlayer player) {
@@ -142,8 +143,8 @@ public class Main extends JFrame {
 			}
 			
 			public void finished(AudioPlayer player) {
-				// TODO Auto-generated method stub
-				
+				System.out.println("FINISHED");
+				setTitle(Configure.getInstance().title);
 			}
 
 			public void init(AudioPlayer player) {
@@ -157,7 +158,6 @@ public class Main extends JFrame {
 			
 			public void buffering(int length) {
 				slider.setRange(player.getBuffering());
-				System.out.println(player.getBuffering());
 			}
 		});
 		zing = Zing.getInstance();
@@ -1315,6 +1315,9 @@ public class Main extends JFrame {
 				try {
 					if (configure.defaultMediaPlayer == null || configure.defaultMediaPlayer.equals("")
 							|| !(new File(configure.defaultMediaPlayer).exists())) {
+						Song song = configure.songs.get(index);
+						currentTitle = song.getTitle();
+						setTitle("Getting: '" + song.getTitle() +"'...");
 						player.play(configure.songs.get(index).getOriginLink());
 					} else {
 						Song song = configure.songs.get(index);
