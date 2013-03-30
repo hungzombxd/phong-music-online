@@ -20,6 +20,7 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	private int plusDuration = 0;
 	private Streaming streaming;
 	private AudioInfo audioInfo;
+	private Object locked = new Object();
 	
 	public AudioPlayer(){
 		listener = this;
@@ -83,12 +84,12 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	
 	public void play(String url){
 		stop();
-		synchronized (this) {
+		synchronized (locked) {
 			prepare(url);
 			createSource();
 			stoped = false;
 			plusDuration = 0;
-			while (!stoped && (reading = decoder.getPCMData(buffer)) != -1){
+			while (!stoped && ((reading = decoder.getPCMData(buffer)) != -1)){
 				if (paused){
 					synchronized (source) {
 						source.stop();
@@ -101,21 +102,24 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 						}
 					}
 				}
-				listener.playing(this);
+				if(!stoped) listener.playing(this);
 				source.write(buffer, 0, reading);
 			}
 			if (in != null){
 				in.closeStream();
-				in = null;
 			}
-			source.drain();
-			listener.playing(this);
-			decoder = null;
+			if(!stoped){
+				source.drain();
+				listener.playing(this);
+			}
 			source.flush();
 			source.close();
+			source = null;
+			decoder = null;
 			stoped = true;
 			listener.finished(this);
 		}
+		
 	}
 	
 	private void createSource(){
@@ -199,35 +203,18 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 		if (in != null) in.release();
 	}
 	
-	public static void main(String[] args) {
-		new AudioPlayer().play("file:D:\\Music\\Lam Hung\\04 - Moi Nguoi Mot Qua Khu.flac");
-//		new AudioPlayer().play("file:D:\\Music\\Lam Hung\\Lam Hung - Ky Tuc Xa Chieu Mua.Ape");
-//		new AudioPlayer().play("file:D:\\Download\\huuphongdn2009\\Pham Truong - Het.mp3");
-//		new AudioPlayer().play("http://205.196.120.148/nrla8il61k6g/mag4kzxnizn/03+-+L%E1%BB%9Di+Nguy%E1%BB%81n+-AkiraPhan.flac");
-	}
-
 	public void playing(AudioPlayer player) {
-		System.out.println(getAudioInfo() + " | " + getPlayingDuration());
-//		int current = getCurrentDuration();
-//		if (current >= 10000 && current < 11000){
-//			System.out.println(source.getLongFramePosition());
-//			System.out.println(current);
-//			seek(200000);
-//		}
 	}
 
 	public void finished(AudioPlayer player) {
-		System.out.println("FINISH");
 	}
 
 	public void paused(AudioPlayer player) {
 	}
 
 	public void buffering(int length) {
-//		System.out.println((length * 100.0 / getLength()));
 	}
 
 	public void init(AudioPlayer player) {
-		
 	}
 }

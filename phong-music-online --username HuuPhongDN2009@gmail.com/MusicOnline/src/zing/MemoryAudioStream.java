@@ -64,7 +64,7 @@ public class MemoryAudioStream extends AudioStream{
 
 	@Override
 	public int read() throws IOException {
-		if (currentPosition == length) return -1;
+		if (currentPosition >= length) return -1;
 		while (currentPosition + 1 > offset){
 			synchronized (buffer) {
 				try {
@@ -79,7 +79,7 @@ public class MemoryAudioStream extends AudioStream{
 	
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
-		if (currentPosition == length) return -1;
+		if (currentPosition >= length) return -1;
 		while (!isCompleted() && currentPosition + len > offset){
 			synchronized (buffer) {
 				try {

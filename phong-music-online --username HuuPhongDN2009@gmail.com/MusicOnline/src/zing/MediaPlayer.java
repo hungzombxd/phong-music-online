@@ -17,7 +17,6 @@ public class MediaPlayer extends Thread{
     private Configure configure;
     private int duration = 0;
     int actualDuration = 0;
-    private int currentDuration = 0;
     int plusDuration = 0;
     boolean dragged = false;
     boolean buffered = false;

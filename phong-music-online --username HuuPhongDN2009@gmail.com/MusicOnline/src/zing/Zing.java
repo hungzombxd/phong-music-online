@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+
 public class Zing extends MusicSite{
 	private static Map<String, String> songByType = new HashMap<String, String>();
 	private static Map<String, String> songByAlbum = new HashMap<String, String>();
