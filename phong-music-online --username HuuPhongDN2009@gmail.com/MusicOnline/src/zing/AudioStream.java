@@ -5,13 +5,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-public abstract class AudioStream extends InputStream{
-
-	public static final int MP3_STREAM = 0;
-	public static final int FLAC_STREAM = 1;
-	public static final int APE_STREAM = 2;
-	public static final String[] CODECS = { "ID3", "fLaC", "MAC" };
-	
+public abstract class AudioStream extends InputStream{	
 	protected int length;
 	protected int currentPosition;
 	protected int numberReconnect;
@@ -60,5 +54,9 @@ public abstract class AudioStream extends InputStream{
 	public abstract void reset() throws IOException;
 
 	public abstract void release();
+	
+	public int getCurrentPosition(){
+		return currentPosition;
+	}
 
 }

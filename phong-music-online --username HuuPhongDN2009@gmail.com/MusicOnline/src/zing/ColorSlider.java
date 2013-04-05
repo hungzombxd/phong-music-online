@@ -52,12 +52,12 @@ public class ColorSlider extends JComponent{
 		});
         addMouseMotionListener(new MouseAdapter() {
         	public void mouseMoved(MouseEvent e){
-				setToolTipText(AudioPlayer.toDuaration(valueAtPoint(e)));
+//				setToolTipText(AudioPlayer.toDuaration(valueAtPoint(e)));
 			}
 			public void mouseDragged(MouseEvent e) {
 				if (!SwingUtilities.isLeftMouseButton(e)) return;
 		        setValue(valueAtPoint(e));
-		        setToolTipText(AudioPlayer.toDuaration(getValue()));
+//		        setToolTipText(AudioPlayer.toDuaration(getValue()));
 		        MouseEvent event = new MouseEvent(
                         ColorSlider.this,
                         MouseEvent.MOUSE_MOVED,
@@ -94,20 +94,20 @@ public class ColorSlider extends JComponent{
 		g.drawRect(0, y - 1, width - 1, 5);
 		g.setColor(normalColor);
 		g.fillRect(x, y, width - 2, 4);
-		rangeWidth = (this.range * (width - 2)) / max;
+		rangeWidth = (int) ((this.range * (width - 2.0)) / max);
 		g.setColor(rangeColor);
-		if (rangeWidth > x) g.fillRect(x, y, rangeWidth, 4);
-		if(range < max && rangeWidth > 0){
-			g.setColor(rangeTextColor);
-			if (rangeWidth + 27 > width){
-				g.drawString(AudioPlayer.toDuaration(this.range), width - 27, y - 1);
-			}else{
-				g.drawString(AudioPlayer.toDuaration(this.range), rangeWidth, y - 1);
-			}
-		}
-		valueWidth = (getValue() * (width - 2)) / max;
+		if (rangeWidth >= x) g.fillRect(x, y, rangeWidth, 4);
+//		if(range < max && rangeWidth >= 0){
+//			g.setColor(rangeTextColor);
+//			if (rangeWidth + 27 > width){
+//				g.drawString(String.valueOf(this.range * 100 / max) + " %", width - 27, y - 1);
+//			}else{
+//				g.drawString(String.valueOf(this.range * 100 / max) + " %", rangeWidth, y - 1);
+//			}
+//		}
+		valueWidth = (int) ((getValue() * (width - 2.0)) / max);
 		g.setColor(valueColor);
-		if (valueWidth > x) g.fillRect(x, y, valueWidth, 4);
+		if (valueWidth >= x) g.fillRect(x, y, valueWidth, 4);
 		g.setColor(oldColor);
 	}
 	
@@ -116,7 +116,7 @@ public class ColorSlider extends JComponent{
 	}
 	
 	public int valueAtPoint(MouseEvent e){
-		int value = (e.getPoint().x - 1) * max / (width - 2);
+		int value = (int) ((e.getPoint().x - 1.0) * max / (width - 2));
 		if (value < 0) {
 			return 0;
 		}else if(value > max){

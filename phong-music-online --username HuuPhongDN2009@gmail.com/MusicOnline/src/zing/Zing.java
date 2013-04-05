@@ -18,8 +18,13 @@ import java.util.StringTokenizer;
 public class Zing extends MusicSite{
 	private static Map<String, String> songByType = new HashMap<String, String>();
 	private static Map<String, String> songByAlbum = new HashMap<String, String>();
+	
 	public static String[] titlesSongType;
 	public static String[] titlesAlbumType;
+	
+	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", ""), new ItemCombo("Title", "&t=title"), new ItemCombo("Artist", "&t=artist"), new ItemCombo("Composer", "&t=composer"), new ItemCombo("Lyric", "&t=lyrics")};
+	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", ""),new ItemCombo("HQ", "&filter=2"),new ItemCombo("Hit", "&filter=1"),new ItemCombo("Official", "&filter=3"), new ItemCombo("Lyric", "&filter=4")};
+	
 	private static Zing zing;
 	String htmlSongInfo = "";
 	
@@ -394,5 +399,15 @@ public class Zing extends MusicSite{
 		}
 		in.close();
 		return lyrics;
+	}
+
+	@Override
+	public ItemCombo[] getBys() {
+		return BYS;
+	}
+
+	@Override
+	public ItemCombo[] getFilters() {
+		return FILTERS;
 	}
 }

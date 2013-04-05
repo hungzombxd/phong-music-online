@@ -89,9 +89,9 @@ public class MP3FileDecoder implements AudioDecoder{
 		}
 	}
 
-	public void seek(int duration) {
+	public void seek(int size) {
 		seeking = false;
-		in.seek(durationToSize(duration) + metaDataLength);
+		in.seek(size);
 		seeking = false;
 		synchronized (locked) {
 			locked.notifyAll();
@@ -115,6 +115,6 @@ public class MP3FileDecoder implements AudioDecoder{
 	}
 
 	public int sizeToDuration(int size) {
-		return (int) header.total_ms(size - metaDataLength);
+		return (int) header.total_ms(size);
 	}
 }

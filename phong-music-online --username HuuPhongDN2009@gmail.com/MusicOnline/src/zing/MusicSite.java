@@ -141,4 +141,8 @@ public abstract class MusicSite{
 		writer.flush();
 		writer.close();
 	}
+	
+	public abstract ItemCombo[] getBys();
+	
+	public abstract ItemCombo[] getFilters();
 }

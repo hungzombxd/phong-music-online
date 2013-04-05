@@ -23,7 +23,11 @@ public class MyEventQueue extends EventQueue {
 	}
 	
 	protected void dispatchEvent(AWTEvent event) {
-		super.dispatchEvent(event);
+		try{
+			super.dispatchEvent(event);
+		}catch (ArrayIndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 
 		// interested only in mouseevents
 		if (!(event instanceof MouseEvent))

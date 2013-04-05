@@ -14,6 +14,9 @@ public class ChiaSeNhac extends MusicSite{
 	
 	private static ChiaSeNhac chiaSeNhac = new ChiaSeNhac();
 	
+	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", ""), new ItemCombo("Artist", "&mode=artist"), new ItemCombo("Composer", "&mode=composer"), new ItemCombo("Album", "&mode=album"), new ItemCombo("Lyric", "&mode=lyric")};
+	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", "&cat=music")};
+	
 	public static ChiaSeNhac getInstance(){
 		return chiaSeNhac;
 	}
@@ -26,7 +29,7 @@ public class ChiaSeNhac extends MusicSite{
 			throws IOException {
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Song> songs = new ArrayList<Song>();
-		URL url = new URL("http://search.chiasenhac.com/search.php?mode=&order=quality&cat=music&s=" + value + "&page=" + page);
+		URL url = new URL("http://search.chiasenhac.com/search.php?mode=&order=quality&cat=music&s=" + value + "&page=" + page + filter);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
 		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
@@ -92,5 +95,15 @@ public class ChiaSeNhac extends MusicSite{
 	
 	public static void main(String[] args) throws IOException {
 		new ChiaSeNhac().getLink("http://chiasenhac.com/mp3/vietnam/v-pop/no~pham-truong~1004374.html");
+	}
+
+	@Override
+	public ItemCombo[] getBys() {
+		return BYS;
+	}
+
+	@Override
+	public ItemCombo[] getFilters() {
+		return FILTERS;
 	}
 }

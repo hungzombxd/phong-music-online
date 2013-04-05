@@ -77,9 +77,9 @@ public class FLACFileDecoder implements AudioDecoder{
 		return pcmData.getLen();
 	}
 
-	public void seek(int duration){
+	public void seek(int size){
 		seeking = true;
-		in.seek(durationToSize(duration) + metaDataLength);
+		in.seek(size);
 		seeking = false;
 		synchronized (locked) {
 			locked.notifyAll();
@@ -103,6 +103,8 @@ public class FLACFileDecoder implements AudioDecoder{
 	}
 
 	public int sizeToDuration(int size) {
+		size -= metaDataLength;
+		if (size < 0) size = 0;
 		return (int) ((size) * 1.0 / (in.getLength() - metaDataLength) * duration);
 	}
 }

@@ -13,6 +13,9 @@ import java.util.List;
 public class MusicGoVn extends MusicSite{
 	private static MusicGoVn musicGoVn;
 	
+	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", ""), new ItemCombo("Artist", "&mode=artist"), new ItemCombo("Composer", "&mode=composer"), new ItemCombo("Album", "&mode=album"), new ItemCombo("Lyric", "&mode=lyric")};
+	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", "&cat=music")};
+	
 	public static MusicGoVn getInstance(){
 		if (musicGoVn == null) musicGoVn = new MusicGoVn();
 		return musicGoVn;
@@ -123,5 +126,15 @@ public class MusicGoVn extends MusicSite{
 	public List<String> getLyric(String html) throws IOException {
 		List<String> lyrics = new ArrayList<String>();
 		return lyrics;
+	}
+
+	@Override
+	public ItemCombo[] getBys() {
+		return BYS;
+	}
+
+	@Override
+	public ItemCombo[] getFilters() {
+		return FILTERS;
 	}
 }
