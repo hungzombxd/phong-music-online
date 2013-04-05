@@ -10,7 +10,7 @@ public interface AudioDecoder {
 	
 	boolean seekable();
 	
-	void seek(int duration);
+	void seek(int size);
 	
 	AudioInfo getAudioInfo();
 

@@ -7,7 +7,7 @@ import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-public class AudioPlayer implements AudioPlayerListener, Streaming{
+public class AudioPlayer{
 	private AudioStream in;
 	private byte[] buffer = new byte[32768];
 	private boolean stoped = false;
@@ -23,8 +23,30 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	private Object locked = new Object();
 	
 	public AudioPlayer(){
-		listener = this;
-		streaming = this;
+		listener = new AudioPlayerListener() {
+			
+			@Override
+			public void playing(AudioPlayer player) {
+			}
+			
+			@Override
+			public void paused(AudioPlayer player) {
+			}
+			
+			@Override
+			public void init(AudioPlayer player) {
+			}
+			
+			@Override
+			public void finished(AudioPlayer player) {
+			}
+		};
+		streaming = new Streaming() {
+			
+			@Override
+			public void buffering(int length) {
+			}
+		};
 	}
 	
 	public void setListener(AudioPlayerListener listener){
@@ -38,11 +60,11 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	private void prepare(String url){
 		in = new FileAudioStream(url, streaming);
 		switch (in.getType()) {
-		case MemoryAudioStream.MP3_STREAM:
+		case AudioCodec.MP3_STREAM:
 			decoder = new MP3FileDecoder(in);
 			break;
 			
-		case MemoryAudioStream.FLAC_STREAM:
+		case AudioCodec.FLAC_STREAM:
 			decoder = new FLACFileDecoder(in);
 			break;
 
@@ -54,8 +76,8 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	}
 	
 	public int getBuffering(){
-		if (decoder == null) return 0;
-		return decoder.sizeToDuration(in.getBufferingValue());
+		if (in == null) return 0;
+		return in.getBufferingValue();
 	}
 	
 	public int getLength(){
@@ -68,12 +90,12 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 		return in.isCompleted();
 	}
 	
-	public void seek(int duration){
+	public void seek(int size){
 		if (source == null) return;
 		source.stop();
 		source.close();
-		plusDuration = duration;
-		decoder.seek(plusDuration);
+		plusDuration = sizeToDuration(size);
+		decoder.seek(size);
 		try {
 			source.open(fmtTarget);
 		} catch (LineUnavailableException e) {
@@ -116,10 +138,9 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 			source.close();
 			source = null;
 			decoder = null;
+			if (!stoped) listener.finished(this);
 			stoped = true;
-			listener.finished(this);
 		}
-		
 	}
 	
 	private void createSource(){
@@ -146,6 +167,7 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 	}
 	
 	public void resume(){
+		if (source == null) return;
 		paused = false;
 		synchronized (source) {
 			source.notifyAll();
@@ -206,18 +228,12 @@ public class AudioPlayer implements AudioPlayerListener, Streaming{
 		}
 	}
 	
-	public void playing(AudioPlayer player) {
+	public int getCurrentSize(){
+		if (in == null) return 0;
+		return in.getCurrentPosition();
 	}
-
-	public void finished(AudioPlayer player) {
-	}
-
-	public void paused(AudioPlayer player) {
-	}
-
-	public void buffering(int length) {
-	}
-
-	public void init(AudioPlayer player) {
+	
+	public boolean isPaused() {
+		return paused;
 	}
 }

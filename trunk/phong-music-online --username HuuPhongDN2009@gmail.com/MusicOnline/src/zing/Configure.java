@@ -27,7 +27,7 @@ public class Configure implements Serializable{
 	public int buffered = 5000;
 	public String type = "Song";
 	public boolean highQuality = false;
-	public ItemCombo filter = new ItemCombo("All", "");
+	public ItemCombo filter = new ItemCombo("Default", "");
 	public String repeat = "Default";
 	public String value = "";
 	public Point location = null;

@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
-import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -50,6 +49,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -73,10 +73,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-
-import javazoom.jl.decoder.JavaLayerException;
-
-
 public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JList songs;
@@ -87,9 +83,9 @@ public class Main extends JFrame {
 	private JTextField page, total, value;
 	private JComboBox types, repeats, sites;
 	private JComboBox filters, bys;
+	private DefaultComboBoxModel modelFilters, modelBys;
 	private JFileChooser chooser;
 	private Zing zing;
-	private MediaPlayer mediaPlayer;
 	private Radio radio = Radio.getIntance();
 	private Toolkit toolkit = Toolkit.getDefaultToolkit();
 	private Clipboard clipboard = toolkit.getSystemClipboard();
@@ -127,35 +123,37 @@ public class Main extends JFrame {
 		setIconImage(toolkit.getImage((object.getResource("/images/zing.png"))));
 
 		configure = Configure.getInstance();
-		mediaPlayer = new MediaPlayer(Main.this, configure);
 		player = new AudioPlayer();
 		player.setListener(new AudioPlayerListener() {
 			
 			public void playing(AudioPlayer player) {
 				startDuration.setText(AudioPlayer.toDuaration(player.getCurrentDuration()));
-				if (!slider.dragging) slider.setValue(player.getCurrentDuration());
+				if (!slider.dragging) slider.setValue(player.getCurrentSize());
 				setTitle(currentTitle + " " + player.getPlayingInfo());
+				mediaPlay.setIcon(PAUSED);
 			}
 			
 			public void paused(AudioPlayer player) {
-				// TODO Auto-generated method stub
-				
+				mediaPlay.setIcon(PLAY);
 			}
 			
 			public void finished(AudioPlayer player) {
-				System.out.println("FINISHED");
 				setTitle(Configure.getInstance().title);
+				slider.max = 0;
+				slider.setRange(0);
+				startDuration.setText("00:00");
+				endDuration.setText("00:00");
+				mediaPlay.setIcon(PLAY);
 			}
 
 			public void init(AudioPlayer player) {
-				slider.max = player.getDuration();
+				slider.max = player.getLength();
 				endDuration.setText(AudioPlayer.toDuaration(player.getDuration()));
 				setTitle(player.getPlayingInfo());
 			}
 		});
 		
 		player.setStreaming(new Streaming() {
-			
 			public void buffering(int length) {
 				slider.setRange(player.getBuffering());
 			}
@@ -163,7 +161,6 @@ public class Main extends JFrame {
 		zing = Zing.getInstance();
 		history = new History<List<Song>>();
 		addWindowListener(new WindowAdapter() {
-			
 			public void windowClosing(WindowEvent arg0) {
 				player.release();
 				configure.save();
@@ -392,21 +389,7 @@ public class Main extends JFrame {
 		mediaPrevious.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent arg0) {
 				mediaPrevious.setSelected(false);
-				new Thread(){
-					public void run(){
-						try {
-							mediaPlayer.previous();
-						} catch (MalformedURLException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (JavaLayerException e) {
-							e.printStackTrace();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}.start();
+				//TODO
 			}
 		});
 		menuBar.add(mediaPlay = new JMenu());
@@ -417,14 +400,14 @@ public class Main extends JFrame {
 			}
 		});
 		mediaPlay.addMouseListener(new MouseAdapter() {
-//			public void mousePressed(MouseEvent arg0) {
-//				mediaPlay.setSelected(false);
-//				if (!mediaPlayer.player.paused){
-//					mediaPlayer.player.pause();
-//				}else{
-//					mediaPlayer.player.resume();
-//				}
-//			}
+			public void mousePressed(MouseEvent arg0) {
+				mediaPlay.setSelected(false);
+				if (!player.isPaused()){
+					player.pause();
+				}else{
+					player.resume();
+				}
+			}
 		});
 		menuBar.add(mediaNext = new JMenu());
 		mediaNext.setIcon(getImage("next.png"));
@@ -436,21 +419,7 @@ public class Main extends JFrame {
 		mediaNext.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent arg0) {
 				mediaNext.setSelected(false);
-				new Thread(){
-					public void run(){
-						try {
-							mediaPlayer.next();
-						} catch (MalformedURLException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (JavaLayerException e) {
-							e.printStackTrace();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}.start();
+				//TODO
 			}
 		});
 		dimension = menuBar.getPreferredSize();
@@ -955,6 +924,7 @@ public class Main extends JFrame {
 		types.setSelectedItem(configure.type);
 		filters.setSelectedItem(configure.filter);
 		bys.setSelectedItem(configure.by);
+		System.out.println(bys.getModel().getSize());
 		repeats.setSelectedItem(configure.repeat);
 		value.setText(configure.value);
 		startup();
@@ -1619,7 +1589,6 @@ public class Main extends JFrame {
 		panelSearch.add(sites = new JComboBox(new String[]{"mp3.zing.vn", "nhaccuatui.com", "music.go.vn", "chiasenhac.com"}));
 		sites.setFocusable(false);
 		sites.addActionListener(new ActionListener() {
-			
 			public void actionPerformed(ActionEvent arg0) {
 				configure.site = sites.getSelectedItem().toString();
 				configure.lastPageSong = 0;
@@ -1633,13 +1602,18 @@ public class Main extends JFrame {
 				}else if (configure.site.equals("chiasenhac.com")){
 					musicSite = ChiaSeNhac.getInstance();
 				}
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						setFilterAndBy();
+					}
+				});
 			}
 		});
 		panelSearch.add(new JLabel("Type "));
 		panelSearch.add(types = new JComboBox(new String[]{"Song", "Album"}));
 		types.setFocusable(false);
 		types.addActionListener(new ActionListener() {
-			
 			public void actionPerformed(ActionEvent arg0) {
 				configure.type = types.getSelectedItem().toString();
 				if (configure.type.equals("Song")){
@@ -1652,21 +1626,19 @@ public class Main extends JFrame {
 			}
 		});
 		panelSearch.add(new JLabel("By "));
-		panelSearch.add(bys = new JComboBox(new ItemCombo[]{new ItemCombo("Default", ""), new ItemCombo("Title", "&t=title"), new ItemCombo("Artist", "&t=artist"), new ItemCombo("Composer", "&t=composer"), new ItemCombo("Lyric", "&t=lyrics")}));
+		panelSearch.add(bys = new JComboBox(modelBys = new DefaultComboBoxModel()));
 		bys.setEditable(false);
 		bys.setFocusable(false);
 		bys.addActionListener(new ActionListener() {
-			
 			public void actionPerformed(ActionEvent arg0) {
 				configure.by = (ItemCombo) bys.getSelectedItem();
 			}
 		});
 		panelSearch.add(new JLabel("Filter "));
-		panelSearch.add(filters = new JComboBox(new ItemCombo[]{new ItemCombo("All", ""),new ItemCombo("HQ", "&filter=2"),new ItemCombo("Hit", "&filter=1"),new ItemCombo("Official", "&filter=3"), new ItemCombo("Lyric", "&filter=4")}));
+		panelSearch.add(filters = new JComboBox(modelFilters = new DefaultComboBoxModel()));
 		filters.setEditable(false);
 		filters.setFocusable(false);
 		filters.addActionListener(new ActionListener() {
-			
 			public void actionPerformed(ActionEvent arg0) {
 				configure.filter = (ItemCombo) filters.getSelectedItem();
 			}
@@ -1887,18 +1859,6 @@ public class Main extends JFrame {
 		});
 	}
 	
-	public void setRange(int value){
-		slider.setRange(value);
-	}
-	
-	public void setMax(int value){
-		slider.max = value;
-	}
-	
-	public void setValue(int value){
-		slider.setValue(value);
-	}
-	
 	public void setIconStatus(boolean set){
 		iconStatus.setVisible(set);
 	}
@@ -1959,6 +1919,17 @@ public class Main extends JFrame {
 				}
 			}
 		});
+	}
+	
+	private void setFilterAndBy(){
+		modelBys.removeAllElements();
+		for (ItemCombo item : musicSite.getBys()){
+			modelBys.addElement(item);
+		}
+		modelFilters.removeAllElements();
+		for (ItemCombo item : musicSite.getFilters()){
+			modelFilters.addElement(item);
+		}
 	}
 	
 	public static void main(String[] args) {

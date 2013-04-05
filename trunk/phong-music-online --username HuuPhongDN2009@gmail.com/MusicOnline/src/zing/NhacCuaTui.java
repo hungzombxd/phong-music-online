@@ -14,6 +14,9 @@ import java.util.List;
 public class NhacCuaTui extends MusicSite {
 	private static NhacCuaTui nhacCuaTui;
 	
+	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", ""), new ItemCombo("Artist", "&mode=artist"), new ItemCombo("Composer", "&mode=composer"), new ItemCombo("Album", "&mode=album"), new ItemCombo("Lyric", "&mode=lyric")};
+	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", "&cat=music")};
+	
 	public static NhacCuaTui getInstance(){
 		if (nhacCuaTui == null) nhacCuaTui = new NhacCuaTui();
 		return nhacCuaTui;
@@ -99,27 +102,32 @@ public class NhacCuaTui extends MusicSite {
 	public List<Song> searchSong(String value, int page, String filter) throws IOException{
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Song> songs = new ArrayList<Song>();
-		URL url = new URL("http://www.nhaccuatui.com/tim-nang-cao?title=" + value + "&page=" + page);
+		URL url = new URL("http://www.nhaccuatui.com/tim-nang-cao?title=" + value + "&type=1&page=" + page);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
 		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 		String str;
-		String title = "";
-		String artist = "";
-		String link = "";
-		String info = "";
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<ul class=\"list-song\">")){
 				while ((str = in.readLine()) != null && !str.contains("</ul>")){
 					if (str.contains("<li class=\"clearfix\">")){
+						for (int i = 0; i < 3; i++){
+							in.readLine();
+						}
 						str = in.readLine();
-						link = "http://www.nhaccuatui.com" + getAttribute(str, "href=\"");
-						title = htmlToText(str).trim();
-						artist = htmlToText(in.readLine()).trim();
-						info = htmlToText("Lượt nghe: " + htmlToText(in.readLine()) + " | Upload bởi: " + htmlToText(in.readLine()));
-						
-						Song song = new Song(title + " - " + artist, link, "nhaccuatui.com");
-						song.lineTwo = info;
+						Song song = new Song();
+						song.highQuality = str.contains("320kb");
+						str = in.readLine();
+						song.link = "http://www.nhaccuatui.com" + getAttribute(str, "href=\"");
+						song.title = getAttribute(str, "title=\"");
+						str = in.readLine();
+						while ((str = in.readLine()) != null){
+							if (!str.contains("class=\"singer\"")) continue;
+							song.title = song.title + " - " + htmlToText(str).trim();
+							song.lineTwo = "Lượt nghe: " + htmlToText(in.readLine()).trim() + " | Upload bởi: " + htmlToText(in.readLine()).trim();
+							break;
+						}
+						song.host = "nhaccuatui.com";
 						songs.add(song);
 					}
 				}
@@ -182,5 +190,15 @@ public class NhacCuaTui extends MusicSite {
 	
 	public static void main(String[] args) throws IOException {
 		System.out.println(NhacCuaTui.getInstance().searchSong("pham truong", 1, ""));
+	}
+
+	@Override
+	public ItemCombo[] getBys() {
+		return BYS;
+	}
+
+	@Override
+	public ItemCombo[] getFilters() {
+		return FILTERS;
 	}
 }

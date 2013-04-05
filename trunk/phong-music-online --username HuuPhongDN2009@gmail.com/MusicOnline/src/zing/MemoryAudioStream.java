@@ -3,6 +3,7 @@ package zing;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 public class MemoryAudioStream extends AudioStream{
 	private  byte[] bytes = new byte[60000000];
@@ -100,7 +101,7 @@ public class MemoryAudioStream extends AudioStream{
 	}
 	
 	public int getType(){
-		while (offset < 4){
+		while (offset < AudioCodec.MAX_LENGTH){
 			synchronized (buffer) {
 				try {
 					buffer.wait();
@@ -109,23 +110,8 @@ public class MemoryAudioStream extends AudioStream{
 				}
 			}
 		}
-		int ret = -1;
-		for (int i = 0; i < AudioStream.CODECS.length; i++){
-			if (compareBytes(bytes, AudioStream.CODECS[i].getBytes())){
-				ret = i;
-				break;
-			}
-		}
-		return ret;
-	}
-	
-	private boolean compareBytes(byte[] source, byte[] code){
-		boolean ret = false;
-		for (int i = 0; i < code.length; i++){
-			ret = code[i] == source[i];
-			if (!ret) break;
-		}
-		return ret;
+		byte[] bytes = Arrays.copyOfRange(this.bytes, 0, AudioCodec.MAX_LENGTH);
+		return AudioCodec.getType(bytes);
 	}
 	
 	public void closeStream(){

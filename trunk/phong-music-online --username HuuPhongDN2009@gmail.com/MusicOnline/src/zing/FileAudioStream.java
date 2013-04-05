@@ -1,5 +1,6 @@
 package zing;
 
+import java.awt.Point;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -8,6 +9,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class FileAudioStream extends AudioStream{
 	private static File audioFile;
@@ -15,6 +20,9 @@ public class FileAudioStream extends AudioStream{
 	private InputStream remote;
 	private RandomAccessFile in;
 	private boolean buffering = false;
+	private Object locked = new Object();
+	byte[] bytes = new byte[8096];
+	
 	static {
 		try {
 			audioFile = File.createTempFile("Music Online ", ".music");
@@ -24,10 +32,21 @@ public class FileAudioStream extends AudioStream{
 		}
 	}
 	
+	private synchronized void startBuffer(final List<Point> points){
+		buffer = new Thread(){
+			public void run(){
+				for (Point point : points){
+					while (buffering){
+					}
+				}
+			}
+		};
+	}
+		
 	public FileAudioStream(String link, Streaming listener) {
 		streaming = listener;
 		try {
-			in = new RandomAccessFile(audioFile, "r");
+			in = new RandomAccessFile(audioFile, "rw");
 			out = new BufferedOutputStream(new FileOutputStream(audioFile));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -35,7 +54,9 @@ public class FileAudioStream extends AudioStream{
 		try {
 			url = new URL(link);
 			connection = url.openConnection();
+			connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.43 Safari/537.31");
 			length = connection.getContentLength();
+			in.setLength(length);
 			remote = connection.getInputStream();
 			buffer = new Thread(){
 	        	public void run(){
@@ -56,6 +77,7 @@ public class FileAudioStream extends AudioStream{
 									if (remote != null) remote.close();
 							        if(++numberReconnect <= totalNumberConnect && offset < length){
 							        	connection = url.openConnection();
+										connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.43 Safari/537.31");
 							        	connection.setRequestProperty("Accept-Ranges", "bytes");
 										connection.setRequestProperty("Range", "bytes=" + offset + "-");
 										connection.connect();
@@ -86,8 +108,8 @@ public class FileAudioStream extends AudioStream{
 						e.printStackTrace();
 					}
 	    			buffering = false;
-	    			synchronized (buffer) {
-						buffer.notifyAll();
+	    			synchronized (locked) {
+						locked.notifyAll();
 					}
 	        	}
 	        };
@@ -133,9 +155,10 @@ public class FileAudioStream extends AudioStream{
 	
 	@Override
 	public void seek(int bytes){
-		currentPosition = Math.min(bytes, length);
+		bytes = Math.min(bytes, length);
 		try {
-			in.seek(currentPosition);
+			in.seek(bytes);
+			currentPosition = bytes;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -143,7 +166,7 @@ public class FileAudioStream extends AudioStream{
 	
 	@Override
 	public int getType(){
-		while (offset < 4){
+		while (offset < AudioCodec.MAX_LENGTH){
 			synchronized (buffer) {
 				try {
 					buffer.wait();
@@ -153,13 +176,10 @@ public class FileAudioStream extends AudioStream{
 			}
 		}
 		int ret = -1;
-		for (int i = 0; i < CODECS.length; i++){
-			if (compareBytes(in, CODECS[i].getBytes())){
-				ret = i;
-				break;
-			}
-		}
 		try {
+			byte[] bytes = new byte[AudioCodec.MAX_LENGTH];
+			in.read(bytes, 0, AudioCodec.MAX_LENGTH);
+			ret = AudioCodec.getType(bytes);
 			in.seek(0);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -168,33 +188,13 @@ public class FileAudioStream extends AudioStream{
 		return ret;
 	}
 	
-	private boolean compareBytes(RandomAccessFile in, byte[] code){
-		boolean ret = false;
-		try {
-			in.seek(0);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		try {
-			for (int i = 0; i < code.length; i++){
-				ret = code[i] == in.readByte();
-				if (!ret) break;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-		return ret;
-	}
-	
 	@Override
 	public void closeStream(){
 		length = 0;
 		if (buffering){
-			synchronized (buffer) {
+			synchronized (locked) {
 				try {
-					buffer.wait();
+					locked.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -221,6 +221,8 @@ public class FileAudioStream extends AudioStream{
 			}
 			remote = null;
 		}
+		currentPosition = 0;
+		offset = 0;
 	}
 
 	@Override
@@ -243,5 +245,69 @@ public class FileAudioStream extends AudioStream{
 	public void release() {
 		audioFile.delete();
 		audioFile = null;
+	}
+	
+	public List<Point> joinBuffer(List<Point> points, int index){
+		Collections.sort(points, new Comparator<Point>() {
+			@Override
+			public int compare(Point o1, Point o2) {
+				return o1.x - o2.x;
+			}
+		});
+		List<Point> ret = new ArrayList<Point>();
+		
+		for (Point p : points){
+			if (index > p.x && index < p.y){
+				points.remove(p);
+				ret.add(new Point(index, p.y));
+				for (Point pp : points){
+					if (pp.x > p.y){
+						ret.add(pp);
+					}
+				}
+				for (Point pp : points){
+					if (pp.x < p.y){
+						ret.add(pp);
+					}
+				}
+				ret.add(new Point(p.x, index - 1));
+				break;
+			}
+			if (index <= p.x){
+				points.remove(p);
+				ret.add(p);
+				for (Point pp : points){
+					if (pp.x > p.y){
+						ret.add(pp);
+					}
+				}
+				for (Point pp : points){
+					if (pp.x < p.y){
+						ret.add(pp);
+					}
+				}
+				break;
+			}
+		}
+		return ret;
+	}
+	
+	public List<Point> getBufferedPoints(List<Point> points, int length){
+		Collections.sort(points, new Comparator<Point>() {
+			@Override
+			public int compare(Point o1, Point o2) {
+				return o1.x - o2.x;
+			}
+		});
+		List<Point> ret = new ArrayList<Point>();
+		int index = 0;
+		for (Point p : points){
+			if (p.x > index){
+				ret.add(new Point(index, p.x));
+			}
+			index = p.y + 1;
+		}
+		if (index < length) ret.add(new Point(index, length));
+		return ret;
 	}
 }
