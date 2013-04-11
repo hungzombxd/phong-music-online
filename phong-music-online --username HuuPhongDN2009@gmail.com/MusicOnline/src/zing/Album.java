@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 
 
+
 public class Album implements Serializable{
 	private static final long serialVersionUID = -2824232816762868663L;
 	String title = "";

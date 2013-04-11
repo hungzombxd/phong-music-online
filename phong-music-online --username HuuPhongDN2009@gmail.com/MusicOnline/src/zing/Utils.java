@@ -27,7 +27,7 @@ public class Utils extends Thread{
 					"ỷ", "ỹ", "ô", "ê", "ơ", "ư", "ă", "â" };
 	public Utils() throws AWTException{
 		robot = new Robot();
-		this.start();
+//		this.start();
 	}
 	
 	public String toANSI(String str){

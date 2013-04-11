@@ -111,10 +111,12 @@ public class MP3FileDecoder implements AudioDecoder{
 	}
 
 	public int durationToSize(int duration) {
+		if (audioInfo == null) return 0;
 		return (int) (audioInfo.getBitrate() / 8.0 * duration);
 	}
 
 	public int sizeToDuration(int size) {
+		if (header == null) return 0;
 		return (int) header.total_ms(size);
 	}
 }

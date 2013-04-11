@@ -21,12 +21,6 @@ public abstract class AudioStream extends InputStream{
 
 	public abstract int read() throws IOException;
 
-	public int read(byte[] buff) throws IOException{
-		return read(buff, 0, buff.length);
-	}
-
-	public abstract int read(byte[] b, int off, int len) throws IOException;
-
 	public boolean isCompleted(){
 		return offset == length;
 	}
@@ -41,7 +35,20 @@ public abstract class AudioStream extends InputStream{
 
 	public abstract void seek(int bytes);
 
-	public abstract int getType();
+	public int getType(){
+		int ret = -1;
+		try {
+			byte[] bytes = new byte[AudioCodec.MAX_LENGTH];
+			mark(AudioCodec.MAX_LENGTH);
+			read(bytes, 0, AudioCodec.MAX_LENGTH);
+			ret = AudioCodec.getType(bytes);
+			reset();
+		} catch (IOException e) {
+			e.printStackTrace();
+			ret = -1;
+		}
+		return ret;
+	}
 
 	public abstract void closeStream();
 

@@ -1,5 +1,8 @@
 package zing;
 
+import java.io.IOException;
+import java.util.Stack;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -21,6 +24,9 @@ public class AudioPlayer{
 	private Streaming streaming;
 	private AudioInfo audioInfo;
 	private Object locked = new Object();
+	private Stack<Thread> threads = new Stack<Thread>();
+	private Thread processPlay;
+	private boolean playing = false;
 	
 	public AudioPlayer(){
 		listener = new AudioPlayerListener() {
@@ -47,6 +53,35 @@ public class AudioPlayer{
 			public void buffering(int length) {
 			}
 		};
+		processPlay = new Thread(){
+			public void run(){
+				while (true){
+					while (!threads.isEmpty()){
+						Thread thread = threads.lastElement();
+						thread.start();
+						if (thread.equals(threads.lastElement())){
+							threads.clear();
+						} else {
+							AudioPlayer.this.stop();
+							continue;
+						}
+						try {
+							thread.join();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					synchronized (locked) {
+						try {
+							locked.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		};
+		processPlay.start();
 	}
 	
 	public void setListener(AudioPlayerListener listener){
@@ -104,43 +139,60 @@ public class AudioPlayer{
 		source.start();
 	}
 	
-	public void play(String url){
+	public void play(final Song song){
 		stop();
+		threads.add(new Thread(){
+			public void run(){
+				try {
+					prepare(song.getDirectLink());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				play();
+			}
+		});
 		synchronized (locked) {
-			prepare(url);
-			createSource();
-			stoped = false;
-			plusDuration = 0;
-			while (!stoped && ((reading = decoder.getPCMData(buffer)) != -1)){
-				if (paused){
-					synchronized (source) {
-						source.stop();
-						listener.paused(this);
-						try {
-							source.wait();
-							source.start();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+			locked.notifyAll();
+		}
+	}
+	
+	private synchronized void play(){
+		createSource();
+		stoped = false;
+		plusDuration = 0;
+		while (!stoped){
+			reading = decoder.getPCMData(buffer);
+			if (reading == -1){
+				break;
+			}
+			if (paused){
+				synchronized (source) {
+					source.stop();
+					listener.paused(AudioPlayer.this);
+					try {
+						source.wait();
+						source.start();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
-				if(!stoped) listener.playing(this);
-				source.write(buffer, 0, reading);
 			}
-			if (in != null){
-				in.closeStream();
-			}
-			if(!stoped){
-				source.drain();
-				listener.playing(this);
-			}
-			source.flush();
-			source.close();
-			source = null;
-			decoder = null;
-			if (!stoped) listener.finished(this);
-			stoped = true;
+			if(!stoped) listener.playing(AudioPlayer.this);
+			source.write(buffer, 0, reading);
 		}
+		if (in != null){
+			in.closeStream();
+		}
+		if(!stoped){
+			source.drain();
+			listener.playing(AudioPlayer.this);
+		}
+		source.flush();
+		source.close();
+		source = null;
+		decoder = null;
+		if (!stoped) listener.finished(AudioPlayer.this);
+		stoped = true;
 	}
 	
 	private void createSource(){
@@ -170,7 +222,7 @@ public class AudioPlayer{
 		if (source == null) return;
 		paused = false;
 		synchronized (source) {
-			source.notifyAll();
+			source.notify();
 		}
 	}
 	
@@ -235,5 +287,9 @@ public class AudioPlayer{
 	
 	public boolean isPaused() {
 		return paused;
+	}
+	
+	public boolean isPlaying(){
+		return playing;
 	}
 }
