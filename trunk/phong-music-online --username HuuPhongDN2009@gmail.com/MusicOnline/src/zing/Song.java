@@ -15,7 +15,7 @@ public class Song implements Serializable {
 	private static final long serialVersionUID = -1080772505347758185L;
 	String link = "";
 	String title = "";
-	String originLink = "";
+	String directLink = "";
 	String host = "mp3.zing.vn";
 	boolean highQuality = false;
 	String songInfo = "(^_^) Không tìm thấy thông tin (^_^)";
@@ -53,33 +53,33 @@ public class Song implements Serializable {
 		this.title = title;
 	}
 
-	public void setOriginLink(String originLink) {
-		this.originLink = originLink;
+	public void setDirectLink(String directLink) {
+		this.directLink = directLink;
 	}
 
-	public String getOriginLink() throws IOException {
-		if (link.equals("") || ((System.currentTimeMillis() - time) <= Configure.getInstance().timeLive && !originLink.equals(""))) return originLink;
+	public String getDirectLink() throws IOException {
+		if (link.equals("") || ((System.currentTimeMillis() - time) <= Configure.getInstance().timeLive && !directLink.equals(""))) return directLink;
 		time = System.currentTimeMillis();
 		if (host.equals("mp3.zing.vn")) {
-			originLink = Zing.getInstance().getLink(link);
+			directLink = Zing.getInstance().getLink(link);
 			songInfo = Zing.getInstance().htmlSongInfo.replace("128kb/s | ", "");
 		}else if (host.equals("radio.vnmedia.vn")){
-			if (!originLink.equals("")) return originLink;
-			originLink = Radio.getIntance().getSong(link);
+			if (!directLink.equals("")) return directLink;
+			directLink = Radio.getIntance().getSong(link);
 		}else if (host.equals("nhaccuatui.com")){
-			originLink = NhacCuaTui.getInstance().getLink(link);
+			directLink = NhacCuaTui.getInstance().getLink(link);
 		}else if (host.equals("music.go.vn")){
-			originLink = MusicGoVn.getInstance().getLink(link);
+			directLink = MusicGoVn.getInstance().getLink(link);
 		}else if (host.equals("chiasenhac.com")){
-			originLink = ChiaSeNhac.getInstance().getLink(link);
+			directLink = ChiaSeNhac.getInstance().getLink(link);
 		}
-		return originLink;
+		return directLink;
 	}
 	
 	public void saveToFile(String dir){
 		dir = (dir.endsWith(File.separator))? dir : dir + File.separator;
 		try {
-			URLConnection connection = new URL(getOriginLink()).openConnection();
+			URLConnection connection = new URL(getDirectLink()).openConnection();
 			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
 			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dir + toTitle(title) + ".mp3"));
 			int readed = -1;

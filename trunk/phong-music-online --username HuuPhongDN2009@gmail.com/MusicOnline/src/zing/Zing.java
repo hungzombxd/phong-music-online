@@ -167,7 +167,7 @@ public class Zing extends MusicSite{
 
 	// Get link to mp3 of HTML mp3 link
 	public String getLink(String mp3URL) throws IOException {
-		return XMLToSongs(getXML(mp3URL)).get(0).originLink;
+		return XMLToSongs(getXML(mp3URL)).get(0).directLink;
 	}
 
 	// Get XML file for song or album
@@ -300,7 +300,7 @@ public class Zing extends MusicSite{
 				artist = in.readLine();
 				link = in.readLine();
 				song = new Song();
-				song.setOriginLink(getContent(link));
+				song.setDirectLink(getContent(link));
 				song.setTitle(title + " - " + getContent(artist));
 				songs.add(song);
 			}

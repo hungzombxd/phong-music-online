@@ -15,6 +15,7 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EtchedBorder;
 
+
 public class AlbumRenderer implements ListCellRenderer{
 	public static final ImageIcon DEFAULT_DETAIL_ALBUM_ART = new ImageIcon(Album.class.getResource("/images/default_albumart.jpg"));
 	public static final ImageIcon DEFAULT_CLASSIC_ALBUM_ART = new ImageIcon(Album.class.getResource("/images/album.png"));

@@ -73,6 +73,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+
 public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JList songs;
@@ -104,17 +105,18 @@ public class Main extends JFrame {
 	public ImageIcon PLAY = new ImageIcon(object.getResource("/images/play.png"));
 	public ImageIcon PAUSED = new ImageIcon(object.getResource("/images/pause.png"));
 	private ColorSlider slider;
-	JLabel startDuration, endDuration, info, songInfo, labelSearch, iconStatus;
-	JToggleButton highQuality;
-	JPopupMenu popupMenu;
-	History<List<Song>> history;
-	Dimension dimension;
-	Thread updateSong = null, updateAlbum = null;
-	int toPage;
-	int fromPage;
-	MusicSite musicSite;
-	AudioPlayer player;
+	private JLabel startDuration, endDuration, info, songInfo, labelSearch, iconStatus;
+	private JToggleButton highQuality;
+	private JPopupMenu popupMenu;
+	private History<List<Song>> history;
+	private Dimension dimension;
+	private Thread updateSong = null, updateAlbum = null;
+	private int toPage;
+	private int fromPage;
+	private MusicSite musicSite;
+	private AudioPlayer player;
 	private String currentTitle;
+	private int currentIndex = -1;
 	
 	public Main() {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -144,6 +146,7 @@ public class Main extends JFrame {
 				startDuration.setText("00:00");
 				endDuration.setText("00:00");
 				mediaPlay.setIcon(PLAY);
+				next();
 			}
 
 			public void init(AudioPlayer player) {
@@ -389,7 +392,7 @@ public class Main extends JFrame {
 		mediaPrevious.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent arg0) {
 				mediaPrevious.setSelected(false);
-				//TODO
+				previous();
 			}
 		});
 		menuBar.add(mediaPlay = new JMenu());
@@ -419,7 +422,7 @@ public class Main extends JFrame {
 		mediaNext.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent arg0) {
 				mediaNext.setSelected(false);
-				//TODO
+				next();
 			}
 		});
 		dimension = menuBar.getPreferredSize();
@@ -572,7 +575,7 @@ public class Main extends JFrame {
 						setStatus("COPYING LINK: 0/" + save.length);
 						for (int i = 0; i < save.length; i++){
 							try {
-								saveString += configure.songs.get(save[i]).getOriginLink() + "\n";
+								saveString += configure.songs.get(save[i]).getDirectLink() + "\n";
 							} catch (IOException e) {
 								setTitle(e.toString());
 								e.printStackTrace();
@@ -767,7 +770,7 @@ public class Main extends JFrame {
 						            	song.title = file.getName().substring(0, file.getName().length() - 4);
 						            	song.lineTwo = file.getAbsolutePath();
 						            	song.songInfo = file.getAbsolutePath();
-						            	song.originLink = "file:" + file.getAbsolutePath();
+						            	song.directLink = "file:" + file.getAbsolutePath();
 						            	song.host = "My Computer";
 						            	songs.add(song);
 						            }
@@ -924,7 +927,6 @@ public class Main extends JFrame {
 		types.setSelectedItem(configure.type);
 		filters.setSelectedItem(configure.filter);
 		bys.setSelectedItem(configure.by);
-		System.out.println(bys.getModel().getSize());
 		repeats.setSelectedItem(configure.repeat);
 		value.setText(configure.value);
 		startup();
@@ -947,7 +949,7 @@ public class Main extends JFrame {
 						Song song = listSongs.get(lists[i]);
 						out.write("#EXTINF:-1," + song.getTitle());
 						out.newLine();
-						out.write(song.getOriginLink());
+						out.write(song.getDirectLink());
 						out.newLine();
 						setStatus("SAVING LINK: " + (i + 1) + "/" + lists.length);
 					}
@@ -975,7 +977,7 @@ public class Main extends JFrame {
 					setStatus("SAVING LINK: 0/" + lists.length);
 					for (int i = 0; i < lists.length; i++) {
 						Song song = listSongs.get(lists[i]);
-						out.write(song.getOriginLink());
+						out.write(song.getDirectLink());
 						out.newLine();
 						setStatus("SAVING LINK: " + (i + 1) + "/" + lists.length);
 					}
@@ -1278,32 +1280,50 @@ public class Main extends JFrame {
 	}
 
 	private void play() {
-		final int index = songs.getSelectedIndex();
+		play(songs.getSelectedIndex());
+	}
+	
+	private void play(int index){
 		if (configure.songs.isEmpty() || index >= configure.songs.size()) return;
-		new Thread(){
-			public void run(){
-				try {
-					if (configure.defaultMediaPlayer == null || configure.defaultMediaPlayer.equals("")
-							|| !(new File(configure.defaultMediaPlayer).exists())) {
-						Song song = configure.songs.get(index);
-						currentTitle = song.getTitle();
-						setTitle("Getting: '" + song.getTitle() +"'...");
-						player.play(configure.songs.get(index).getOriginLink());
-					} else {
-						Song song = configure.songs.get(index);
-						setTitle("Sending: '" + song.getTitle() +"'...");
-						runtime.exec(configure.defaultMediaPlayer + " " + song.getOriginLink());
-						if (itemSendStatus.isSelected()){
-							utils.sendStatus(song.getTitle(), song.getLink());
-						}
-						setTitle("Sended '" + song.getTitle() + "' - " + configure.title);
-					}
-				} catch (Exception e) {
-					setTitle(e.toString());
-					e.printStackTrace();
+		currentIndex = index;
+		setCurrentSong(index);
+		Song song = configure.songs.get(currentIndex);
+		currentTitle = song.getTitle();
+		try {
+			if (configure.defaultMediaPlayer == null || configure.defaultMediaPlayer.equals("")
+					|| !(new File(configure.defaultMediaPlayer).exists())) {
+				setTitle("Getting: '" + currentTitle +"'...");
+				player.play(song);
+			} else {
+				setTitle("Sending: '" + currentTitle + "'...");
+				runtime.exec(configure.defaultMediaPlayer + " " + song.getDirectLink());
+				if (itemSendStatus.isSelected()){
+					utils.sendStatus(song.getTitle(), song.getLink());
 				}
+				setTitle("Sended '" + song.getTitle() + "' - " + configure.title);
 			}
-		}.start();
+		} catch (Exception e) {
+			setTitle(e.toString());
+			e.printStackTrace();
+		}
+	}
+	
+	private void next(){
+		if (configure.songs.isEmpty()) return;
+		currentIndex++;
+		if (currentIndex >= configure.songs.size()){
+			currentIndex = 0;
+		}
+		play(currentIndex);
+	}
+	
+	private void previous(){
+		if (configure.songs.isEmpty()) return;
+		currentIndex--;
+		if (currentIndex <= -1){
+			currentIndex = configure.songs.size() - 1;
+		}
+		play(currentIndex);
 	}
 
 	public void setStatus(String str) {

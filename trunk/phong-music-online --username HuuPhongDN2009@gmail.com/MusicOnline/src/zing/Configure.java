@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+
 public class Configure implements Serializable{
 	private static final long serialVersionUID = 96678343791424943L;
 	private transient static Configure configure;

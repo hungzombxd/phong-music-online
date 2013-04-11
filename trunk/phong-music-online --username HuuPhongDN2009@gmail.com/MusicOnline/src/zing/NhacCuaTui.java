@@ -39,7 +39,7 @@ public class NhacCuaTui extends MusicSite {
 				link = getTab(str, "location");
 				Song song = new Song();
 				song.setTitle(title + " - " + artist);
-				song.setOriginLink(link);
+				song.setDirectLink(link);
 				song.setHost("nhaccuatui.com");
 				songs.add(song);
 			}

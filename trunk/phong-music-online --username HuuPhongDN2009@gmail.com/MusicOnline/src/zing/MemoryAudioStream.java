@@ -3,11 +3,12 @@ package zing;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 
 public class MemoryAudioStream extends AudioStream{
-	private  byte[] bytes = new byte[60000000];
+	private  byte[] bytes = new byte[6000000];
 	private InputStream in;
+	private boolean buffering = false;
+	private Object locked = new Object();
 	
 	public MemoryAudioStream(String link, Streaming listener) {
 		streaming = listener;
@@ -21,6 +22,7 @@ public class MemoryAudioStream extends AudioStream{
 			}
 			buffer = new Thread(){
 	        	public void run(){
+	        		buffering = true;
 	    			while (true){
     					try {
 							if (offset < length && in != null && (reading = in.read(bytes, offset, length - offset)) >= 0){
@@ -54,6 +56,10 @@ public class MemoryAudioStream extends AudioStream{
 							break;
 						}
 	    			}
+	    			buffering = false;
+	    			synchronized (locked) {
+	    				locked.notifyAll();
+					}
 	        	}
 	        };
 	        buffer.start();
@@ -75,47 +81,24 @@ public class MemoryAudioStream extends AudioStream{
 				}
 			}
 		}
-		return bytes[currentPosition++];
-	}
-	
-	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
-		if (currentPosition >= length) return -1;
-		while (!isCompleted() && currentPosition + len > offset){
-			synchronized (buffer) {
-				try {
-					buffer.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		len = Math.min(Math.min(len, b.length - off), length - currentPosition);
-		System.arraycopy(bytes, currentPosition, b, off, len);
-		currentPosition += len;
-		return len;
+		return bytes[currentPosition++] & 0xff;
 	}
 	
 	public void seek(int bytes){
 		currentPosition = Math.min(bytes, length);
 	}
 	
-	public int getType(){
-		while (offset < AudioCodec.MAX_LENGTH){
-			synchronized (buffer) {
+	public void closeStream(){
+		length = 0;
+		if (buffering){
+			synchronized (locked) {
 				try {
-					buffer.wait();
+					locked.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		byte[] bytes = Arrays.copyOfRange(this.bytes, 0, AudioCodec.MAX_LENGTH);
-		return AudioCodec.getType(bytes);
-	}
-	
-	public void closeStream(){
-		length = 0;
 		if (in != null){
 			try {
 				in.close();

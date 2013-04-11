@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+
 public class SongRenderer implements ListCellRenderer{
 	ImageIcon first = new ImageIcon(SongRenderer.class.getResource("/images/song.png"));
 	Color odd = new Color(238, 238, 238);
