@@ -9,6 +9,7 @@ public class MemoryAudioStream extends AudioStream{
 	private InputStream in;
 	private boolean buffering = false;
 	private Object locked = new Object();
+	private Thread buffer = null;
 	
 	public MemoryAudioStream(String link, Streaming listener) {
 		streaming = listener;

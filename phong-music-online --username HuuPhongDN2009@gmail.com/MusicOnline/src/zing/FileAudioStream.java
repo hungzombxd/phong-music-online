@@ -16,6 +16,7 @@ public class FileAudioStream extends AudioStream{
 	private RandomAccessFile in;
 	private boolean buffering = false;
 	private Object locked = new Object();
+	private Thread buffer = null;
 	
 	static {
 		try {
