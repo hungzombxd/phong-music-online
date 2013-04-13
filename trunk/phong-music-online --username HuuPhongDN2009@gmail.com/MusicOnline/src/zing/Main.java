@@ -40,7 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +76,12 @@ import javax.swing.UIManager;
 
 public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
+	
+	public static final DataFlavor DRAG_DROP_URI = new DataFlavor("application/x-java-url;class=java.net.URL", "URL");
+	
+	public static final ImageIcon PLAY = new ImageIcon(Main.class.getResource("/images/play.png"));
+	public static final ImageIcon PAUSED = new ImageIcon(Main.class.getResource("/images/pause.png"));
+	
 	private JList songs;
 	private JList albums;
 	private DefaultListModel modelSongs;
@@ -94,16 +100,14 @@ public class Main extends JFrame {
 	private Runtime runtime = Runtime.getRuntime();
 	private Utils utils;
 	private JMenuBar menuBar;
-	JMenuItem itemOpenLink, itemTopPhong, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemSaveCurrentSong, itemUndo, itemRedo, itemSetProxy, itemOpen, itemSave, itemExit, itemAlbumStartup, itemTopStartup, itemLoadFirstPlaylist, itemSendStatus, itemGetHighQuality, itemIcludeAlbum;
+	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemSaveCurrentSong, itemUndo, itemRedo, itemSetProxy, itemOpen, itemSave, itemExit, itemAlbumStartup, itemTopStartup, itemLoadFirstPlaylist, itemSendStatus, itemGetHighQuality, itemIcludeAlbum;
 	private JMenu menuFile, menuSetup, menuMedia, menuUserPlaylists, menuAddToPlaylist;
-	JMenuItem mediaPlay, mediaNext, mediaPrevious, menuTopSong;
+	private JMenuItem mediaPlay, mediaNext, mediaPrevious, menuTopSong;
 	private ButtonGroup group;
 	private ProxySelector dialogProxy;
 	private FrameLyric frameLyric;
 	private Configure configure;
 	private Class<?> object = this.getClass();
-	public ImageIcon PLAY = new ImageIcon(object.getResource("/images/play.png"));
-	public ImageIcon PAUSED = new ImageIcon(object.getResource("/images/pause.png"));
 	private ColorSlider slider;
 	private JLabel startDuration, endDuration, info, songInfo, labelSearch, iconStatus;
 	private JToggleButton highQuality;
@@ -359,25 +363,6 @@ public class Main extends JFrame {
 				}.start();
 			}
 		});
-//		menuTopSong.add(itemTopPhong = new JMenuItem("Special"));
-//		itemTopPhong.addActionListener(new ActionListener() {
-//			
-//			public void actionPerformed(ActionEvent arg0) {
-//				new Thread(){
-//					public void run(){
-//						setTitle("Loading...");
-//						try {
-//							setSongs(zing.getTopPhong(), true);
-//							setTitle(configure.title);
-//						} catch (UnsupportedEncodingException e) {
-//							e.printStackTrace();
-//						} catch (IOException e) {
-//							e.printStackTrace();
-//						}
-//					}
-//				}.start();
-//			}
-//		});
 		menuBar.add(initMenuAlbum());
 		menuBar.add(initMenuMedia());
 		menuBar.add(initMenuUserPlaylists());
@@ -751,40 +736,57 @@ public class Main extends JFrame {
 		});
 		songs.setDragEnabled(true);
 		songs.setDropTarget(new DropTarget(){
+			
 			private static final long serialVersionUID = 5159432887394239344L;
+			
 			public synchronized void drop(DropTargetDropEvent evt) {
 				try {
 					evt.acceptDrop(DnDConstants.ACTION_COPY);
-					DataFlavor[] flavors = evt.getTransferable().getTransferDataFlavors();
-					for (DataFlavor flavor : flavors){
-						if (!flavor.isFlavorJavaFileListType()) continue;
-						@SuppressWarnings("unchecked")
-						final List<File> files = (List<File>) evt.getTransferable().getTransferData(flavor);
+					if (evt.isDataFlavorSupported(DRAG_DROP_URI)){
+						final URL url = (URL) evt.getTransferable().getTransferData(DRAG_DROP_URI);
 						new Thread(){
 							public void run(){
-								try {
-									final List<Song> songs = new ArrayList<Song>();
-						            for (File file : files) {
-//						            	if (!file.getAbsolutePath().toLowerCase().endsWith(".mp3") || !file.getAbsolutePath().toLowerCase().endsWith(".flac")) continue;
-						            	Song song = new Song();
-						            	song.title = file.getName().substring(0, file.getName().length() - 4);
-						            	song.lineTwo = file.getAbsolutePath();
-						            	song.songInfo = file.getAbsolutePath();
-						            	song.directLink = "file:" + file.getAbsolutePath();
-						            	song.host = "My Computer";
-						            	songs.add(song);
-						            }
-						            configure.songs.addAll(songs);
-						            SwingUtilities.invokeLater(new Runnable() {
-										public void run() {
-											for (Song song : songs){
-												modelSongs.addElement(song);
-											}
+								final Song song = new Song();
+								song.title = url.toString();
+								song.lineTwo = song.title;
+								song.songInfo = song.title;
+								song.directLink = song.title;
+								song.host = url.getAuthority();
+								configure.songs.add(song);
+					            SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										modelSongs.addElement(song);
+									}
+								});
+							}
+						}.start();
+					}
+					if (evt.isDataFlavorSupported(DataFlavor.javaFileListFlavor)){
+						final List<?> files = (List<?>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+						new Thread(){
+							public void run(){
+								final List<Song> songs = new ArrayList<Song>();
+								for (Object object : files) {
+									if (object instanceof File){
+										File file = (File) object;
+										if (!file.getName().toLowerCase().endsWith(".mp3") && !file.getName().toLowerCase().endsWith(".flac")) continue;
+										Song song = new Song();
+										song.title = file.getName();
+										song.lineTwo = file.getAbsolutePath();
+										song.songInfo = file.getAbsolutePath();
+										song.directLink = "file:" + file.getAbsolutePath();
+										song.host = "My Computer";
+					            		songs.add(song);
+									}
+								}
+								configure.songs.addAll(songs);
+					            SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
+										for (Song song : songs){
+											modelSongs.addElement(song);
 										}
-									});
-						        } catch (Exception ex) {
-						            ex.printStackTrace();
-						        }
+									}
+								});
 							}
 						}.start();
 					}
@@ -1884,24 +1886,18 @@ public class Main extends JFrame {
 	}
 	
 	private void shareFacebook(String link) {
-	    if (Desktop.isDesktopSupported()) {
-	        try {
-				Desktop.getDesktop().browse(new URI("http://www.facebook.com/sharer.php?u=" + URLEncoder.encode(link, "UTF-8")));
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	    }
+		try {
+			openLink("http://www.facebook.com/sharer.php?u=" + URLEncoder.encode(link, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void openLink(String link) {
 	    if (Desktop.isDesktopSupported()) {
 	        try {
 				Desktop.getDesktop().browse(new URI(link));
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 	    }
