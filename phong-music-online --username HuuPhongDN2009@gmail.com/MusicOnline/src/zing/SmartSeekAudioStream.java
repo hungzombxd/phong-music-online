@@ -85,25 +85,34 @@ public class SmartSeekAudioStream extends AudioStream{
 						}
 						try {
 							reading = remote.read(bytes);
-							if (reading == -1) break;
-							if (buffering){
-								out.write(bytes, 0, reading);
-								offset += reading;
-								streaming.buffering(offset);
-								synchronized (wait) {
-									wait.notifyAll();
-								}
-							}
 						} catch (IOException e) {
-							e.printStackTrace();
+							try{
+								if (remote != null) remote.close();
+						        if(++numberReconnect <= totalNumberConnect && offset < point.y + 1){
+									remote = prepareStream(new Point(offset, point.y));
+						        	continue;
+						        }else if (numberReconnect >= totalNumberConnect){
+						        	break;
+						        }
+							}catch (IOException exception) {
+								break;
+							}
+						}
+						if (reading == -1) break;
+						if (buffering){
+							try {
+								out.write(bytes, 0, reading);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							offset += reading;
+							streaming.buffering(offset);
+							synchronized (wait) {
+								wait.notifyAll();
+							}
 						}
 					}
-					try {
-						out.close();
-						remote.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					closeStream();
 					if (!buffering) break;
 					allPoints.remove(point);
 				}
