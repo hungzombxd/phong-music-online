@@ -93,7 +93,7 @@ public class AudioPlayer{
 	}
 	
 	private void prepare(String url){
-		in = new FileAudioStream(url, streaming);
+		in = new SmartSeekAudioStream(url, streaming);
 		switch (in.getType()) {
 		case AudioCodec.MP3_STREAM:
 			decoder = new MP3FileDecoder(in);
