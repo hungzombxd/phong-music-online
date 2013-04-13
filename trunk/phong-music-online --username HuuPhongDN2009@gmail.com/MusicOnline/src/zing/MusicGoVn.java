@@ -45,7 +45,7 @@ public class MusicGoVn extends MusicSite{
 					song.title = title + " - " + artist;
 					str = str.substring(str.indexOf("<div class='song_info'>"));
 					song.lineTwo = htmlToText(str.substring(0, str.indexOf("</div>"))).replace("&nbsp;", "").trim();
-					song.highQuality = song.lineTwo.contains("320kb/s");
+					song.quality = song.lineTwo.contains("320kb/s") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
 					songs.add(song);
 				}
 				break;
@@ -113,7 +113,7 @@ public class MusicGoVn extends MusicSite{
 					song.title = title + " - " + artist;
 					str = str.substring(str.indexOf("<div class='song_info'>"));
 					song.lineTwo = htmlToText(str.substring(0, str.indexOf("</div>"))).replace("&nbsp;", "").trim();
-					song.highQuality = song.lineTwo.contains("320kb/s");
+					song.quality = song.lineTwo.contains("320kb/s") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
 					songs.add(song);
 				}
 				break;

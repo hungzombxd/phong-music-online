@@ -47,7 +47,7 @@ public class ChiaSeNhac extends MusicSite{
 				}
 				info = htmlToText(str.replace("<br />", " | ")).trim();
 				Song song = new Song(title + " - " + artist, link, "chiasenhac.com");
-				song.highQuality = (info.contains("Lossless") || info.contains("320kbps"));
+				song.quality = info.contains("Lossless") ? Song.LOSSLESS : info.contains("320kbps") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
 				song.lineTwo = info.replace("Lossless", "<b style='color: blue'>Lossless</b>");
 				songs.add(song);
 				if (songs.size() == 25) break;

@@ -21,7 +21,8 @@ public class SongRenderer implements ListCellRenderer{
 	Dimension dimension;
 	public static final int VIEW_MODE_CLASSIC = 1;
 	public static final int VIEW_MODE_DETAIL = 0;
-	public static final ImageIcon DEFAULT_HQ = new ImageIcon(Album.class.getResource("/images/hq-selected.png"));
+	public static final ImageIcon MP3_320_KBPS = new ImageIcon(Album.class.getResource("/images/mp3.png"));
+	public static final ImageIcon LOSSLESS = new ImageIcon(Album.class.getResource("/images/lossless.png"));
 	
 	public SongRenderer(){
 		
@@ -44,9 +45,19 @@ public class SongRenderer implements ListCellRenderer{
 		JLabel hq = null;
 		JLabel number = new JLabel(" " + numberToString(index + 1) + ".");
 		number.setForeground(Color.BLUE);
-		if (song.isHighQuality()){
-			hq = new JLabel(DEFAULT_HQ);
+		switch (song.getQuality()) {
+		case Song.LOSSLESS:
+			hq = new JLabel(LOSSLESS);
 			hq.setText(" ");
+			break;
+
+		case Song.MP3_320_KBPS:
+			hq = new JLabel(MP3_320_KBPS);
+			hq.setText(" ");
+			break;
+			
+		default:
+			break;
 		}
 		if (index % 2 == 1){
 			both.setBackground(odd);
@@ -68,7 +79,7 @@ public class SongRenderer implements ListCellRenderer{
 		dimension = list.getVisibleRect().getSize();
 		dimension.height = 25;
 		both.setPreferredSize(dimension);
-		dimension.width = dimension.width - 50;
+		dimension.width = dimension.width - MP3_320_KBPS.getIconWidth() - number.getPreferredSize().width - 5;
 		label.setPreferredSize(dimension);
 		label.setMaximumSize(dimension);
 		label.setMinimumSize(dimension);
@@ -89,9 +100,19 @@ public class SongRenderer implements ListCellRenderer{
 		number.setHorizontalTextPosition(JLabel.LEFT);
 		number.setIconTextGap(1);
 		number.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-		if (song.isHighQuality()){
-			hq = new JLabel(DEFAULT_HQ);
+		switch (song.getQuality()) {
+		case Song.LOSSLESS:
+			hq = new JLabel(LOSSLESS);
 			hq.setText(" ");
+			break;
+
+		case Song.MP3_320_KBPS:
+			hq = new JLabel(MP3_320_KBPS);
+			hq.setText(" ");
+			break;
+			
+		default:
+			break;
 		}
 		if (index % 2 == 1){
 			both.setBackground(odd);
