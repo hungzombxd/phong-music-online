@@ -13,14 +13,17 @@ import java.util.StringTokenizer;
 
 public class Song implements Serializable {
 	private static final long serialVersionUID = -1080772505347758185L;
-	String link = "";
-	String title = "";
-	String directLink = "";
-	String host = "mp3.zing.vn";
-	boolean highQuality = false;
-	String songInfo = "(^_^) Không tìm thấy thông tin (^_^)";
-	String lineOne = "";
-	String lineTwo = "";
+	public static final int MP3_128_KBPS = 0;
+	public static final int MP3_320_KBPS = 1;
+	public static final int LOSSLESS = 2;
+	public String link = "";
+	public String title = "";
+	public String directLink = "";
+	public String host = "mp3.zing.vn";
+	public int quality = MP3_128_KBPS;
+	public String songInfo = "(^_^) Không tìm thấy thông tin (^_^)";
+	public String lineOne = "";
+	public String lineTwo = "";
 	long time = 0;
 	
 	public Song() {
@@ -121,12 +124,12 @@ public class Song implements Serializable {
 		return false;
 	}
 
-	public boolean isHighQuality() {
-		return highQuality;
+	public int getQuality() {
+		return quality;
 	}
 
-	public void setHighQuality(boolean highQuality) {
-		this.highQuality = highQuality;
+	public void setQuality(int quality) {
+		this.quality = quality;
 	}
 	
 	public String toString(){

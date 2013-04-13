@@ -72,7 +72,7 @@ public class Album implements Serializable{
 			}
 			for (Song song : songs){
 				if (song.lineTwo.equals("")) song.lineTwo = "Album: " + title;
-				if (highQuality) song.highQuality = true;
+				if (highQuality) song.quality = Song.MP3_320_KBPS;
 			}
 		}
 		return songs;

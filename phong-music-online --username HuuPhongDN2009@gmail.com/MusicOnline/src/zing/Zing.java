@@ -211,7 +211,7 @@ public class Zing extends MusicSite{
 				Song song = new Song(title, link);
 				while ((str = in.readLine()) != null){
 					if (str.trim().equalsIgnoreCase("</h3>")) break;
-					if (str.contains("title=\"Bài hát chất lượng cao\"")) song.setHighQuality(true);
+					if (str.contains("title=\"Bài hát chất lượng cao\"")) song.setQuality(Song.MP3_320_KBPS);
 				}
 				in.readLine();
 				song.lineTwo = htmlToText(in.readLine()).replace("Đăng bởi:  |", "");

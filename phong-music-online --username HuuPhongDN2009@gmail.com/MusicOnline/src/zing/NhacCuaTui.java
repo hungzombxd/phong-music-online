@@ -116,7 +116,7 @@ public class NhacCuaTui extends MusicSite {
 						}
 						str = in.readLine();
 						Song song = new Song();
-						song.highQuality = str.contains("320kb");
+						song.quality = str.contains("320kb") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
 						str = in.readLine();
 						song.link = "http://www.nhaccuatui.com" + getAttribute(str, "href=\"");
 						song.title = getAttribute(str, "title=\"");

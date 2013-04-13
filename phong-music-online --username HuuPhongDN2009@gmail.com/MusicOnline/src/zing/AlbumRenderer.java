@@ -107,7 +107,7 @@ public class AlbumRenderer implements ListCellRenderer{
 		both.add(icon, BorderLayout.WEST);
 		both.add(label, BorderLayout.CENTER);
 		if (album.highQuality){
-			both.add(new JLabel(" ", SongRenderer.DEFAULT_HQ, JLabel.LEADING), BorderLayout.EAST);
+			both.add(new JLabel(" ", SongRenderer.MP3_320_KBPS, JLabel.LEADING), BorderLayout.EAST);
 		}
 		if (isSelected) {
 			both.setBackground(selected);
@@ -129,7 +129,7 @@ public class AlbumRenderer implements ListCellRenderer{
 		JLabel number = new JLabel(" " + numberToString(index + 1) + ".");
 		number.setForeground(Color.BLUE);
 		if (album.highQuality){
-			hq = new JLabel(SongRenderer.DEFAULT_HQ);
+			hq = new JLabel(SongRenderer.MP3_320_KBPS);
 			hq.setText(" ");
 		}
 		if (index % 2 == 1){
@@ -152,7 +152,7 @@ public class AlbumRenderer implements ListCellRenderer{
 		dimension = list.getVisibleRect().getSize();
 		dimension.height = 25;
 		both.setPreferredSize(dimension);
-		dimension.width = dimension.width - 50;
+		dimension.width = dimension.width - SongRenderer.MP3_320_KBPS.getIconWidth() - number.getPreferredSize().width - 5;
 		label.setPreferredSize(dimension);
 		label.setMaximumSize(dimension);
 		label.setMinimumSize(dimension);
