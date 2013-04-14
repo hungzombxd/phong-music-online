@@ -12,18 +12,22 @@ public final class AudioCodec {
 	public static final int[][] FLAC_FORMAT = {{0x66, 0x4C, 0x61, 0x43}};
 	public static final int FLAC_STREAM = 1;
 	
-	public static final int[][] APE_FORMAT = {{0x4D, 0x41, 0x43}};
+	public static final int[][] APE_FORMAT = {{0x4D, 0x41, 0x43, -1, -1, -1, -1, 0x57, 0x41, 0x56, 0x45}};
 	public static final int APE_STREAM = 2;
+	
+	public static final int[][] WAV_FORMAT = {{0x52, 0x49, 0x46, 0x46}};
+	public static final int WAV_STREAM = 3;
 	
 	public static final int UNKNOW_STREAM = -1;
 	
-	public static final int MAX_LENGTH = 4;
+	public static final int MAX_LENGTH = 11;
 	
 	private static final Map<Integer, int[][]> types = new HashMap<Integer, int[][]>();
 	static{
 		types.put(MP3_STREAM, MP3_FORMAT);
 		types.put(FLAC_STREAM, FLAC_FORMAT);
 		types.put(APE_STREAM, APE_FORMAT);
+		types.put(WAV_STREAM, WAV_FORMAT);
 	}
 	
 	public static int getType(byte[] bytes){
@@ -41,6 +45,7 @@ public final class AudioCodec {
 	
 	private static boolean match(byte[] bytes, int[] codec){
 		for (int i = 0; i < codec.length; i++){
+			if (codec[i] == -1) continue;
 			if (codec[i] != (0xFF & bytes[i])){
 				return false;
 			}

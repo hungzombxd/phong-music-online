@@ -51,13 +51,13 @@ public class SmartSeekAudioStream extends AudioStream{
 			allPoints.add(new Point(0, length - 1));
 			Vector<Point> currentPoints = new Vector<Point>();
 			currentPoints.addAll(allPoints);
-			startBuffer(currentPoints);
+			startBuffer(currentPoints, connection.getInputStream());
 		} catch (Exception e) {
 			throw new RuntimeException("Can not get stream audio");
 		}
 	}
 	
-	private void startBuffer(final Vector<Point> points){
+	private void startBuffer(final Vector<Point> points, final InputStream in){
 		buffer = new BufferThread(){
 			public void run(){
 				byte[] bytes = new byte[8096];
@@ -65,12 +65,17 @@ public class SmartSeekAudioStream extends AudioStream{
 				for (Point point : points){
 					try {
 						out = new RandomAccessFile(audioFile, "rw");
-						remote = prepareStream(point);
+						if (in == null){
+							remote = prepareStream(point);
+						}else{
+							remote = in;
+						}
 						offset = point.x;
 						out.seek(offset);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+					
 					while (offset < point.y + 1){
 						if (!buffering){
 							synchronized (paused) {
@@ -99,17 +104,15 @@ public class SmartSeekAudioStream extends AudioStream{
 							}
 						}
 						if (reading == -1) break;
-						if (buffering){
-							try {
-								out.write(bytes, 0, reading);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-							offset += reading;
-							streaming.buffering(offset);
-							synchronized (wait) {
-								wait.notifyAll();
-							}
+						try {
+							out.write(bytes, 0, reading);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						offset += reading;
+						streaming.buffering(offset);
+						synchronized (wait) {
+							wait.notifyAll();
 						}
 					}
 					closeStream();
@@ -166,7 +169,7 @@ public class SmartSeekAudioStream extends AudioStream{
 			if (currentPoints.isEmpty()) return;
 			if (currentPoints.get(0).x != offset){
 				buffer.stopBuffer();
-				startBuffer(currentPoints);
+				startBuffer(currentPoints, null);
 			}else{
 				buffer.resumeBuffer();
 			}
@@ -214,7 +217,7 @@ public class SmartSeekAudioStream extends AudioStream{
 		audioFile = null;
 	}
 	
-	public Vector<Point> joinBuffer(Vector<Point> points, int index){
+	private Vector<Point> joinBuffer(Vector<Point> points, int index){
 		Point point = points.get(0);
 		if (offset < point.y) point.x = offset;
 		Collections.sort(points, comparator);
@@ -250,7 +253,6 @@ public class SmartSeekAudioStream extends AudioStream{
 						ret.add(pp);
 					}
 				}
-				
 				break;
 			}
 		}
