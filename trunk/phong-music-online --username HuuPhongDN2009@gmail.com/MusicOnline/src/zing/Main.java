@@ -769,7 +769,7 @@ public class Main extends JFrame {
 								for (Object object : files) {
 									if (object instanceof File){
 										File file = (File) object;
-										if (!file.getName().toLowerCase().endsWith(".mp3") && !file.getName().toLowerCase().endsWith(".flac")) continue;
+										if (!file.getName().toLowerCase().endsWith(".mp3") && !file.getName().toLowerCase().endsWith(".wav") && !file.getName().toLowerCase().endsWith(".flac")) continue;
 										Song song = new Song();
 										song.title = file.getName();
 										song.lineTwo = file.getAbsolutePath();

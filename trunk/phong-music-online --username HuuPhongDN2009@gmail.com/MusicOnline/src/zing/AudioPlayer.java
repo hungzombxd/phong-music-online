@@ -102,7 +102,11 @@ public class AudioPlayer{
 		case AudioCodec.FLAC_STREAM:
 			decoder = new FLACFileDecoder(in);
 			break;
-
+			
+		case AudioCodec.WAV_STREAM:
+			decoder = new WavFileDecoder(in);
+			break;
+			
 		default:
 			throw new RuntimeException("Not support this file type");
 		}

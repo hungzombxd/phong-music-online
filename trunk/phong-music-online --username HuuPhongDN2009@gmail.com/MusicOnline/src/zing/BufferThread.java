@@ -35,12 +35,14 @@ public class BufferThread extends Thread {
 				remote.close();
 			} catch (IOException e) {
 			}
+			remote = null;
 		}
 		if (out != null){
 			try {
 				out.close();
 			} catch (IOException e) {
 			}
+			out = null;
 		}
 	}
 }
