@@ -13,7 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
-import zing.audio.AudioPlayer;
+import zing.utils.Utils;
 
 public class ColorSlider extends JComponent{
 	private static final long serialVersionUID = 1495787053831058306L;
@@ -114,7 +114,7 @@ public class ColorSlider extends JComponent{
 	}
 	
 	public String durationAtMouse(MouseEvent e){
-		return AudioPlayer.toDuaration(valueAtPoint(e));
+		return Utils.toDuaration(valueAtPoint(e));
 	}
 	
 	public int valueAtPoint(MouseEvent e){
