@@ -39,9 +39,9 @@ public class NhacCuaTui extends MusicSite {
 		str = HtmlUtil.readJoinLines(in);
 		while ((from = str.indexOf("<track>")) != -1){
 			str = str.substring(from + 7);
-			title = HtmlUtil.getTab(str, "title");
-			artist = HtmlUtil.getTab(str, "creator");
-			link = HtmlUtil.getTab(str, "location");
+			title = HtmlUtil.getTag(str, "title");
+			artist = HtmlUtil.getTag(str, "creator");
+			link = HtmlUtil.getTag(str, "location");
 			Song song = new Song();
 			song.setTitle(title + " - " + artist);
 			song.setDirectLink(link);

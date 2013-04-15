@@ -14,14 +14,14 @@ public final class HtmlUtil {
 		return ret;
 	}
 	
-	public static String getHTMLTag(String line, String tag){
+	public static String getHtmlTag(String line, String tag){
 		int from = line.indexOf("<" + tag + ">") + tag.length() + 2;
 		int to = line.indexOf("</" + tag + ">");
 		line = line.substring(from, to);
 		return line;
 	}
 	
-	public static String getTab(String line, String tab){
+	public static String getTag(String line, String tab){
 		int from = line.indexOf("<" + tab + ">") + tab.length() + 2;
 		int to = line.indexOf("</" + tab + ">");
 		line = line.substring(from, to);
