@@ -81,8 +81,9 @@ public class Radio {
 					title = Utils.toUTF8(title);
 					i++;
 					Song song = new Song(title, ln, "radio.vnmedia.vn");
+					song.songInfo = "";
 					while ((str = in.readLine()) != null && !str.contains("</dl>")){
-						song.songInfo +=str; 
+						song.songInfo += str; 
 					}
 					song.songInfo = HtmlUtil.htmlToText(song.songInfo);
 					songs.add(song);
