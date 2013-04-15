@@ -1,15 +1,15 @@
-package zing;
+package zing.model;
 
 import java.util.ArrayList;
 
 public class History<T> extends ArrayList<T> {
-	int maxSize = 10;
-	int redo = 0;
-	int undo = 0;
-	int redoIndex = -1;
-	int undoIndex = -1;
-	T result = null;
-	boolean action = false;
+	public int maxSize = 10;
+	public int redo = 0;
+	public int undo = 0;
+	public int redoIndex = -1;
+	public int undoIndex = -1;
+	public T result = null;
+	public boolean action = false;
 	
 	private static final long serialVersionUID = 6997084527209941815L;
 	

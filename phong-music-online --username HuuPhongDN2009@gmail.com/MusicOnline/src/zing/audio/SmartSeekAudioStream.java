@@ -1,4 +1,4 @@
-package zing;
+package zing.audio;
 
 import java.awt.Point;
 import java.io.File;
@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
+
 
 public class SmartSeekAudioStream extends AudioStream{
 	private static File audioFile;

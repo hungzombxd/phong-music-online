@@ -1,4 +1,4 @@
-package zing;
+package zing.sites;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import zing.model.Album;
+import zing.model.ItemCombo;
+import zing.model.Song;
+import zing.utils.HtmlUtil;
+
 
 public class Zing extends MusicSite{
 	private static Map<String, String> songByType = new HashMap<String, String>();
@@ -26,11 +31,6 @@ public class Zing extends MusicSite{
 	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", ""),new ItemCombo("HQ", "&filter=2"),new ItemCombo("Hit", "&filter=1"),new ItemCombo("Official", "&filter=3"), new ItemCombo("Lyric", "&filter=4")};
 	
 	private static Zing zing;
-	String htmlSongInfo = "";
-	
-	private Zing(){
-		
-	}
 	
 	public static Zing getInstance(){
 		if (zing == null){
@@ -156,8 +156,8 @@ public class Zing extends MusicSite{
 		String str, title, link;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("href=\"/bai-hat/") && str.contains("<h3>")) {
-				title = getAttribute(str, "title=\"");
-				link = "http://mp3.zing.vn" + getAttribute(str, "href=\"");
+				title = HtmlUtil.getAttribute(str, "title=\"");
+				link = "http://mp3.zing.vn" + HtmlUtil.getAttribute(str, "href=\"");
 				lists.add(new Song(title, link));
 			}
 		}
@@ -180,7 +180,7 @@ public class Zing extends MusicSite{
 		int index = 0;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<p class=\"song-info\">")){
-				htmlSongInfo = "<html>" + str.trim() + "</html>";
+				information = "<html>" + str.trim() + "</html>";
 			}
 			if (str.contains("<param name=\"flashvars\" value=\"")) {
 				index = str.indexOf("http://mp3.zing.vn/xml/");
@@ -206,15 +206,15 @@ public class Zing extends MusicSite{
 		String str, title, link;
 		while ((str = in.readLine()) != null) {
 			if(str.contains("/bai-hat/")){
-				title = getAttribute(str, "title=\"");
-				link = "http://mp3.zing.vn" + getAttribute(str, "href=\"");
+				title = HtmlUtil.getAttribute(str, "title=\"");
+				link = "http://mp3.zing.vn" + HtmlUtil.getAttribute(str, "href=\"");
 				Song song = new Song(title, link);
 				while ((str = in.readLine()) != null){
 					if (str.trim().equalsIgnoreCase("</h3>")) break;
 					if (str.contains("title=\"Bài hát chất lượng cao\"")) song.setQuality(Song.MP3_320_KBPS);
 				}
 				in.readLine();
-				song.lineTwo = htmlToText(in.readLine()).replace("Đăng bởi:  |", "");
+				song.songInfo = HtmlUtil.htmlToText(in.readLine()).replace("Đăng bởi:  |", "");
 				lists.add(song);
 				if (lists.size() >= 20) break;
 			}
@@ -239,7 +239,7 @@ public class Zing extends MusicSite{
 		    	   return "";
 		    }
 	    	if (line.contains("<h3><a href")){
-	    	   ret = getAttribute(line, "href=\"");
+	    	   ret = HtmlUtil.getAttribute(line, "href=\"");
 	    	}
 	    }
 	    wr.close();
@@ -273,7 +273,7 @@ public class Zing extends MusicSite{
 						if (str.trim().equalsIgnoreCase("</h3>")) break;
 						if (str.contains("title=\"Album chất lượng cao\"")) album.highQuality = true;
 					}
-					album.info = htmlToText(in.readLine()) + "<br/>" + htmlToText(in.readLine());
+					album.info = HtmlUtil.htmlToText(in.readLine()) + "<br/>" + HtmlUtil.htmlToText(in.readLine());
 					album.albumArt = albumArt;
 					lists.add(album);
 					if(lists.size() >= 20) break;
@@ -296,27 +296,17 @@ public class Zing extends MusicSite{
 		Song song;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<item")) {
-				title = getContent(in.readLine());
+				title = HtmlUtil.getContent(in.readLine());
 				artist = in.readLine();
 				link = in.readLine();
 				song = new Song();
-				song.setDirectLink(getContent(link));
-				song.setTitle(title + " - " + getContent(artist));
+				song.setDirectLink(HtmlUtil.getContent(link));
+				song.setTitle(title + " - " + HtmlUtil.getContent(artist));
 				songs.add(song);
 			}
 		}
 		in.close();
 		return songs;
-	}
-
-	private String getContent(String str) {
-		int from = str.lastIndexOf("[");
-		int to = str.indexOf("]");
-		if (from == -1) {
-			from = str.indexOf(">");
-			to = str.lastIndexOf("<");
-		}
-		return str.substring(from + 1, to).trim();
 	}
 
 	private List<Song> getSongsType(String linkType, int page) throws UnsupportedEncodingException, IOException {
@@ -334,8 +324,7 @@ public class Zing extends MusicSite{
 				token.nextElement();
 				link = "http://mp3.zing.vn" + token.nextToken();
 				Song song = new Song(title, link);
-				song.lineOne = htmlToText(in.readLine());
-				song.lineTwo = htmlToText(in.readLine());
+				song.songInfo = HtmlUtil.htmlToText(in.readLine());
 				lists.add(song);
 			}
 		}
@@ -361,7 +350,7 @@ public class Zing extends MusicSite{
 		String img = "";
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<span class=\"album-detail-img\">")){
-				img = getAttribute(str, "src=\"");
+				img = HtmlUtil.getAttribute(str, "src=\"");
 			}
 			if (str.contains("<a class=\"_trackLink\"") && str.trim().startsWith("<a class=\"_trackLink\"")) {
 				from = str.indexOf("title=\"");
@@ -371,7 +360,7 @@ public class Zing extends MusicSite{
 				in.readLine();
 				in.readLine();
 				Album album = new Album(title, link);
-				album.info = "Năm phát hành : " + htmlToText(in.readLine().trim()) + " | " + "Lượt nghe trong tuần: " + htmlToText(in.readLine().trim());
+				album.info = "Năm phát hành : " + HtmlUtil.htmlToText(in.readLine().trim()) + " | " + "Lượt nghe trong tuần: " + HtmlUtil.htmlToText(in.readLine().trim());
 				album.albumArt = img;
 				albums.add(album);
 			}
@@ -388,7 +377,7 @@ public class Zing extends MusicSite{
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<p class=\"_lyricContent")) {
 				while ((str = in.readLine()) != null){
-					lyric = htmlToText(str);
+					lyric = HtmlUtil.htmlToText(str);
 					if (!lyric.trim().equals("")) lyrics.add(lyric);
 					if (str.contains("</p>")){
 						in.close();

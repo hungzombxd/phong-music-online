@@ -1,9 +1,10 @@
-package zing;
+package zing.audio;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+
 
 public abstract class AudioStream extends InputStream{	
 	protected int length;

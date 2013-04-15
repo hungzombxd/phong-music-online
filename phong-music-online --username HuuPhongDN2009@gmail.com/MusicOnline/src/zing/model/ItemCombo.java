@@ -1,11 +1,11 @@
-package zing;
+package zing.model;
 
 import java.io.Serializable;
 
 public class ItemCombo implements Serializable {
 	private static final long serialVersionUID = -8299958599947591679L;
-	String text;
-	String value;
+	public String text;
+	public String value;
 	
 	public ItemCombo(){
 		

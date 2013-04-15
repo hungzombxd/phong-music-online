@@ -1,4 +1,4 @@
-package zing;
+package zing.audio;
 
 import java.io.IOException;
 import java.util.Stack;
@@ -9,6 +9,8 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+
+import zing.model.Song;
 
 public class AudioPlayer{
 	private AudioStream in;

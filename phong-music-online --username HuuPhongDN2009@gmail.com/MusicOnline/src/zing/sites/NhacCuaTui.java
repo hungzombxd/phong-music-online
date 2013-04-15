@@ -1,4 +1,4 @@
-package zing;
+package zing.sites;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,12 +10,17 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import zing.model.Album;
+import zing.model.ItemCombo;
+import zing.model.Song;
+import zing.utils.HtmlUtil;
+
 
 public class NhacCuaTui extends MusicSite {
 	private static NhacCuaTui nhacCuaTui;
 	
-	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", ""), new ItemCombo("Artist", "&mode=artist"), new ItemCombo("Composer", "&mode=composer"), new ItemCombo("Album", "&mode=album"), new ItemCombo("Lyric", "&mode=lyric")};
-	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", "&cat=music")};
+	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", "")};
+	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", "")};
 	
 	public static NhacCuaTui getInstance(){
 		if (nhacCuaTui == null) nhacCuaTui = new NhacCuaTui();
@@ -31,33 +36,20 @@ public class NhacCuaTui extends MusicSite {
 		String title = "";
 		String link = "";
 		String artist = "";
-		while ((str = in.readLine()) != null) {
-			while ((from = str.indexOf("<track>")) != -1){
-				str = str.substring(from + 7);
-				title = getTab(str, "title");
-				artist = getTab(str, "creator");
-				link = getTab(str, "location");
-				Song song = new Song();
-				song.setTitle(title + " - " + artist);
-				song.setDirectLink(link);
-				song.setHost("nhaccuatui.com");
-				songs.add(song);
-			}
+		str = HtmlUtil.readJoinLines(in);
+		while ((from = str.indexOf("<track>")) != -1){
+			str = str.substring(from + 7);
+			title = HtmlUtil.getTab(str, "title");
+			artist = HtmlUtil.getTab(str, "creator");
+			link = HtmlUtil.getTab(str, "location");
+			Song song = new Song();
+			song.setTitle(title + " - " + artist);
+			song.setDirectLink(link);
+			song.setHost("nhaccuatui.com");
+			songs.add(song);
 		}
 		in.close();
 		return songs;
-	}
-	
-	public String getTab(String line, String tab){
-		int from = line.indexOf("<" + tab + ">") + tab.length() + 2;
-		int to = line.indexOf("</" + tab + ">");
-		line = line.substring(from, to);
-		from = line.lastIndexOf("[");
-		if (from != -1){
-			to = line.indexOf("]");
-			line = line.substring(from + 1, to);
-		}
-		return line;
 	}
 	
 	public String htmlToXML(String html) throws IOException{
@@ -66,43 +58,38 @@ public class NhacCuaTui extends MusicSite {
 		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
 		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 		String str;
-		int from = -1;
 		while ((str = in.readLine()) != null) {
-			if ((from = str.indexOf("file=")) != -1){
-				str = str.substring(from + 5);
-				str = str.substring(0, str.indexOf("\""));
+			if (str.indexOf("NCTNowPlaying.intFlashPlayer") != -1){
+				str = HtmlUtil.getAttribute(str, "\"song\", \"");
 				break;
 			}
 		}
 		connection.disconnect();
 		in.close();
-		return str;
+		return "http://www.nhaccuatui.com/flash/xml?key1=" + str;
 	}
 	
 	public String getLink(String html) throws IOException{
 		URL url = new URL("http://www.nhaccuatui.com/download/song/" + html.substring(html.length() - 15).substring(0, 10));
-		System.out.println(url.getPath());
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
 		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("Success")){
-				System.out.println(str);
 				str = str.substring(str.indexOf("http:\\/\\/"));
-				str = str.substring(0, str.indexOf("\"")).replace("/", "").trim();
-				System.out.println(str);
+				str = str.substring(0, str.indexOf("\"")).replace("\\", "").trim();
 				break;
 			}
 		}
 		in.close();
-		return str == null ? null : str.trim();
+		return str == null ? xmlToSongs(htmlToXML(html)).get(0).getDirectLink() : str.trim();
 	}
 	
 	public List<Song> searchSong(String value, int page, String filter) throws IOException{
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Song> songs = new ArrayList<Song>();
-		URL url = new URL("http://www.nhaccuatui.com/tim-nang-cao?title=" + value + "&type=1&page=" + page);
+		URL url = new URL("http://www.nhaccuatui.com/tim-kiem/bai-hat?q=" + value + "&page=" + page);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
 		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
@@ -110,21 +97,23 @@ public class NhacCuaTui extends MusicSite {
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<ul class=\"list-song\">")){
 				while ((str = in.readLine()) != null && !str.contains("</ul>")){
-					if (str.contains("<li class=\"clearfix\">")){
+					if (str.contains("<li class=\"clearfix song-item\"")){
 						for (int i = 0; i < 3; i++){
 							in.readLine();
 						}
 						str = in.readLine();
 						Song song = new Song();
-						song.quality = str.contains("320kb") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
+						song.quality = str.contains("320kb") || str.contains("Official") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
 						str = in.readLine();
-						song.link = "http://www.nhaccuatui.com" + getAttribute(str, "href=\"");
-						song.title = getAttribute(str, "title=\"");
-						str = in.readLine();
+						song.link = HtmlUtil.getAttribute(str, "href=\"");
+						if (!song.link.startsWith("http")) song.link = "http://www.nhaccuatui.com" + song.link;
+						song.title = HtmlUtil.getAttribute(str, "title=\"");
 						while ((str = in.readLine()) != null){
 							if (!str.contains("class=\"singer\"")) continue;
-							song.title = song.title + " - " + htmlToText(str).trim();
-							song.lineTwo = "Lượt nghe: " + htmlToText(in.readLine()).trim() + " | Upload bởi: " + htmlToText(in.readLine()).trim();
+							str = in.readLine();
+							song.title = song.title + " - " + HtmlUtil.htmlToText(str).trim();
+							str = in.readLine();
+							song.songInfo = "Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim() + " | Upload bởi: " + HtmlUtil.htmlToText(in.readLine()).trim();
 							break;
 						}
 						song.host = "nhaccuatui.com";
@@ -154,10 +143,10 @@ public class NhacCuaTui extends MusicSite {
 				while ((str = in.readLine()) != null && !str.contains("</ul>")){
 					if (str.contains("<li >")){
 						str = in.readLine();
-						link = "http://www.nhaccuatui.com" + getAttribute(str, "href=\"");
-						title = getAttribute(str, "title=\"");
+						link = "http://www.nhaccuatui.com" + HtmlUtil.getAttribute(str, "href=\"");
+						title = HtmlUtil.getAttribute(str, "title=\"");
 						Album album = new Album(title, link);
-						album.albumArt = getAttribute(str, "src=\"");
+						album.albumArt = HtmlUtil.getAttribute(str, "src=\"");
 						in.readLine();
 						str = "";
 						for (int i = 0; i < 5; i++){
@@ -166,7 +155,7 @@ public class NhacCuaTui extends MusicSite {
 								break;
 							}
 						}
-						album.info = htmlToText(str) + "<br/>" + in.readLine().trim();
+						album.info = HtmlUtil.htmlToText(str) + "<br/>" + in.readLine().trim();
 						albums.add(album);
 					}
 				}

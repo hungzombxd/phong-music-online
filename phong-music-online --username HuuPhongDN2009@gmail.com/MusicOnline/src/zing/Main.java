@@ -1,6 +1,5 @@
 package zing;
 
-import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -73,6 +72,23 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import zing.audio.AudioPlayer;
+import zing.audio.AudioPlayerListener;
+import zing.audio.Streaming;
+import zing.model.Album;
+import zing.model.AlbumRenderer;
+import zing.model.History;
+import zing.model.ItemCombo;
+import zing.model.Playlist;
+import zing.model.Song;
+import zing.model.SongRenderer;
+import zing.sites.ChiaSeNhac;
+import zing.sites.MusicGoVn;
+import zing.sites.MusicSite;
+import zing.sites.NhacCuaTui;
+import zing.sites.Radio;
+import zing.sites.Zing;
+import zing.utils.Utils;
 
 public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -98,7 +114,6 @@ public class Main extends JFrame {
 	private Clipboard clipboard = toolkit.getSystemClipboard();
 	private boolean allowSaveFiles = false;
 	private Runtime runtime = Runtime.getRuntime();
-	private Utils utils;
 	private JMenuBar menuBar;
 	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemSaveCurrentSong, itemUndo, itemRedo, itemSetProxy, itemOpen, itemSave, itemExit, itemAlbumStartup, itemTopStartup, itemLoadFirstPlaylist, itemSendStatus, itemGetHighQuality, itemIcludeAlbum;
 	private JMenu menuFile, menuSetup, menuMedia, menuUserPlaylists, menuAddToPlaylist;
@@ -223,7 +238,7 @@ public class Main extends JFrame {
 				String file = showOpen("Open playlist", new File(configure.oldFolder), "Links.m3u");
 				if(file == null) return;
 				try {
-					setSongs(zing.m3uToSongs(file), true);
+					setSongs(Utils.m3uToSongs(file), true);
 				} catch (IOException e1) {
 					setTitle(e1.toString());
 					e1.printStackTrace();
@@ -236,7 +251,7 @@ public class Main extends JFrame {
 				String file = showSave("Save playlist (*.m3u)", new File(configure.oldFolder), "Links.m3u");
 				if (file == null) return;
 				try {
-					zing.SongsToM3UFile(configure.songs, file);
+					Utils.songsToM3UFile(configure.songs, file);
 				} catch (IOException e) {
 					setTitle(e.toString());
 					e.printStackTrace();
@@ -456,13 +471,6 @@ public class Main extends JFrame {
 		setJMenuBar(menuBar);
 		
 		chooser = new JFileChooser();
-		try {
-			utils = new Utils();
-		} catch (AWTException e2) {
-			setTitle(e2.toString());
-			e2.printStackTrace();
-		}
-		utils.setClipboard(clipboard);
 		dialogProxy = new ProxySelector();
 		dialogProxy.setMain(Main.this);
 		dialogProxy.setConfigure(configure);
@@ -748,8 +756,8 @@ public class Main extends JFrame {
 							public void run(){
 								final Song song = new Song();
 								song.title = url.toString();
-								song.lineTwo = song.title;
 								song.songInfo = song.title;
+//								song.songInfo = song.title;
 								song.directLink = song.title;
 								song.host = url.getAuthority();
 								configure.songs.add(song);
@@ -772,8 +780,8 @@ public class Main extends JFrame {
 										if (!file.getName().toLowerCase().endsWith(".mp3") && !file.getName().toLowerCase().endsWith(".wav") && !file.getName().toLowerCase().endsWith(".flac")) continue;
 										Song song = new Song();
 										song.title = file.getName();
-										song.lineTwo = file.getAbsolutePath();
 										song.songInfo = file.getAbsolutePath();
+//										song.songInfo = file.getAbsolutePath();
 										song.directLink = "file:" + file.getAbsolutePath();
 										song.host = "My Computer";
 					            		songs.add(song);
@@ -1299,9 +1307,6 @@ public class Main extends JFrame {
 			} else {
 				setTitle("Sending: '" + currentTitle + "'...");
 				runtime.exec(configure.defaultMediaPlayer + " " + song.getDirectLink());
-				if (itemSendStatus.isSelected()){
-					utils.sendStatus(song.getTitle(), song.getLink());
-				}
 				setTitle("Sended '" + song.getTitle() + "' - " + configure.title);
 			}
 		} catch (Exception e) {
@@ -1348,16 +1353,6 @@ public class Main extends JFrame {
 		}
 	}
 	
-	public void sendToYM(String content, String link){
-		if (itemSendStatus.isSelected())
-			try {
-				utils.sendStatus(content, link);
-			} catch (AWTException e) {
-				setTitle(e.toString());
-				e.printStackTrace();
-			}
-	}
-
 	private void startup(){
 		new Thread(){
 			public void run(){

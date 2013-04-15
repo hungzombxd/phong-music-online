@@ -1,4 +1,4 @@
-package zing;
+package zing.model;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -11,6 +11,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+
+import zing.Configure;
 
 
 public class SongRenderer implements ListCellRenderer{

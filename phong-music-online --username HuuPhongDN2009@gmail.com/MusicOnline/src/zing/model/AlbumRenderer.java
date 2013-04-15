@@ -1,4 +1,4 @@
-package zing;
+package zing.model;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -14,6 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EtchedBorder;
+
+import zing.Configure;
 
 
 public class AlbumRenderer implements ListCellRenderer{
