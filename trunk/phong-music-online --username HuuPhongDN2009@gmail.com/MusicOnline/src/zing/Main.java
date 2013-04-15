@@ -148,7 +148,7 @@ public class Main extends JFrame {
 		player.setListener(new AudioPlayerListener() {
 			
 			public void playing(AudioPlayer player) {
-				startDuration.setText(AudioPlayer.toDuaration(player.getCurrentDuration()));
+				startDuration.setText(Utils.toDuaration(player.getCurrentDuration()));
 				if (!slider.dragging) slider.setValue(player.getCurrentSize());
 				setTitle(currentTitle + " " + player.getPlayingInfo());
 				mediaPlay.setIcon(PAUSED);
@@ -170,7 +170,7 @@ public class Main extends JFrame {
 
 			public void init(AudioPlayer player) {
 				slider.max = player.getLength();
-				endDuration.setText(AudioPlayer.toDuaration(player.getDuration()));
+				endDuration.setText(Utils.toDuaration(player.getDuration()));
 				setTitle(player.getPlayingInfo());
 			}
 		});

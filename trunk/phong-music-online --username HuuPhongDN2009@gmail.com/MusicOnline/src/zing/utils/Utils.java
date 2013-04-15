@@ -92,4 +92,18 @@ public final class Utils{
 		writer.flush();
 		writer.close();
 	}
+	
+	public static String numberToString(int number){
+		String ret = String.valueOf(number);
+		while (ret.length() < 2){
+			ret = "0" + ret;
+		}
+		return ret;
+	}
+	
+	public static String toDuaration(int position){
+		int min = position / 60000;
+		int sec = (position / 1000) % 60;
+		return numberToString(min) + ":" + numberToString(sec);
+	}
 }

@@ -15,7 +15,6 @@ public abstract class AudioStream extends InputStream{
 	protected URL url;
 	protected int offset = 0;
 	protected int reading = -1;
-//	protected Thread buffer;
 	protected Streaming streaming;
 	protected int markPosition;
 	protected int limit;

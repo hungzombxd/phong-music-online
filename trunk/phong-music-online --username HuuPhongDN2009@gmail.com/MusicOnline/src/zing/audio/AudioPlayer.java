@@ -11,6 +11,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 import zing.model.Song;
+import zing.utils.Utils;
 
 public class AudioPlayer{
 	private AudioStream in;
@@ -242,27 +243,13 @@ public class AudioPlayer{
 		return audioInfo;
 	}
 	
-	public static String toDuaration(int position){
-		int min = position / 60000;
-		int sec = (position / 1000) % 60;
-		return numberToString(min) + ":" + numberToString(sec);
-	}
-
-	private static String numberToString(int number){
-		String ret = String.valueOf(number);
-		while (ret.length() < 2){
-			ret = "0" + ret;
-		}
-		return ret;
-	}
-	
 	public int getCurrentDuration(){
 		if (source == null) return 0;
 		return (int) (plusDuration + (source.getMicrosecondPosition() / 1000));
 	}
 	
 	public String getPlayingDuration(){
-		return toDuaration(getCurrentDuration()) + " / " + toDuaration(getDuration());
+		return Utils.toDuaration(getCurrentDuration()) + " / " + Utils.toDuaration(getDuration());
 	}
 	
 	public String getPlayingInfo(){
