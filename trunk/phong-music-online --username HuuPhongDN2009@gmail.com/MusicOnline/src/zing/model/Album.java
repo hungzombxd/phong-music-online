@@ -1,4 +1,4 @@
-package zing;
+package zing.model;
 
 import java.awt.MediaTracker;
 import java.io.IOException;
@@ -10,18 +10,23 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
+import zing.Configure;
+import zing.sites.MusicGoVn;
+import zing.sites.NhacCuaTui;
+import zing.sites.Zing;
+
 
 
 public class Album implements Serializable{
 	private static final long serialVersionUID = -2824232816762868663L;
-	String title = "";
-	String info = "";
-	List<Song> songs = new ArrayList<Song>();
-	long time = 0;
-	String link = "";
-	boolean highQuality = false;
-	String albumArt = "";
-	transient ImageIcon icon;
+	public String title = null;
+	public String info = null;
+	public List<Song> songs = new ArrayList<Song>();
+	public long time = 0;
+	public String link = null;
+	public boolean highQuality = false;
+	public String albumArt = null;
+	public transient ImageIcon icon;
 	
 	public Album(){
 		
@@ -53,7 +58,7 @@ public class Album implements Serializable{
 	}
 	
 	public String toString(){
-		if (info.equals("")){
+		if (info == null){
 			return "<html><b>" + title + "</b></html>";
 		}else{
 			return "<html><b>" + title + "</b><br/>" + info + "<html>";
@@ -71,7 +76,7 @@ public class Album implements Serializable{
 				songs = MusicGoVn.getInstance().getAlbum(link);
 			}
 			for (Song song : songs){
-				if (song.lineTwo.equals("")) song.lineTwo = "Album: " + title;
+				if (song.songInfo == null) song.songInfo = "Album: " + title;
 				if (highQuality) song.quality = Song.MP3_320_KBPS;
 			}
 		}

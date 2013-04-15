@@ -13,6 +13,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
+import zing.model.Song;
+import zing.sites.MusicSite;
+
 
 public class FrameLyric extends JFrame {
 	private static final long serialVersionUID = -2675197512423718784L;

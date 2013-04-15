@@ -1,8 +1,9 @@
-package zing;
+package zing.audio;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+
 
 public class MemoryAudioStream extends AudioStream{
 	private  byte[] bytes = new byte[6000000];

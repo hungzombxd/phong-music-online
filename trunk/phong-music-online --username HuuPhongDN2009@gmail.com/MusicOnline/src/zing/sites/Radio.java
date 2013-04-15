@@ -1,4 +1,4 @@
-package zing;
+package zing.sites;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import zing.model.Song;
+import zing.utils.HtmlUtil;
+import zing.utils.Utils;
 
 public class Radio {
 	public String[] radioTypes = new String[]{
@@ -38,24 +42,6 @@ public class Radio {
 	
 	private Map<String, String> mapRadio;
 	
-	private String[] ncrDecimal = new String[] { "&#225;", "&#224;", "&#7843;",
-			"&#7841;", "&#227;", "&#7855;", "&#7857;", "&#7863;", "&#7859;",
-			"&#7861;", "&#7845;", "&#7847;", "&#7849;", "&#7851;", "&#7853;",
-			"&#7899;", "&#7901;", "&#7907;", "&#7903;", "&#7905;", "&#243;",
-			"&#242;", "&#7885;", "&#7887;", "&#245;", "&#7889;", "&#7891;",
-			"&#7897;", "&#7893;", "&#7895;", "&#7913;", "&#7915;", "&#7921;",
-			"&#7917;", "&#7919;", "&#273;", "&#233;", "&#232;", "&#7865;",
-			"&#7867;", "&#7869;", "&#7871;", "&#7873;", "&#7879;", "&#7875;",
-			"&#7877;", "&#237;", "&#236;", "&#7883;", "&#7881;", "&#297;",
-			"&#250;", "&#249;", "&#7909;", "&#7911;", "&#361;", "&#253;",
-			"&#7923;", "&#7925;", "&#7927;", "&#7929;", "&#244;", "&#234;",
-			"&#417;", "&#432;", "&#259;", "&#226;" };
-	private String[] utf8 = new String[] { "á", "à", "ả", "ạ", "ã", "ắ", "ằ",
-			"ặ", "ẳ", "ẵ", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ớ", "ờ", "ợ", "ở", "ỡ",
-			"ó", "ò", "ọ", "ỏ", "õ", "ố", "ồ", "ộ", "ổ", "ỗ", "ứ", "ừ", "ự",
-			"ử", "ữ", "đ", "é", "è", "ẹ", "ẻ", "ẽ", "ế", "ề", "ệ", "ể", "ễ",
-			"í", "ì", "ị", "ỉ", "ĩ", "ú", "ù", "ụ", "ủ", "ũ", "ý", "ỳ", "ỵ",
-			"ỷ", "ỹ", "ô", "ê", "ơ", "ư", "ă", "â" };
 	private static Radio radio;
 	
 	public static Radio getIntance(){
@@ -72,14 +58,6 @@ public class Radio {
 		}
 	}
 	
-	public String toUTF8(String str){
-		for (int i = 0; i < utf8.length; i++) {
-			str = str.replaceAll(ncrDecimal[i], utf8[i]);
-			str = str.replaceAll(ncrDecimal[i].toUpperCase(), utf8[i].toUpperCase());
-		}
-		return str;
-	}
-
 	public List<Song> getRadio(int page, String radioType) {
 		return getSongs(mapRadio.get(radioType) + "&page=" + page);
 	}
@@ -100,13 +78,13 @@ public class Radio {
 					ln = "http://radio.vnmedia.vn"
 							+ new StringTokenizer(ln, "\"").nextToken();
 					title = in.readLine().trim();
-					title = toUTF8(title);
+					title = Utils.toUTF8(title);
 					i++;
 					Song song = new Song(title, ln, "radio.vnmedia.vn");
 					while ((str = in.readLine()) != null && !str.contains("</dl>")){
-						song.lineTwo +=str; 
+						song.songInfo +=str; 
 					}
-					song.lineTwo = htmlToText(song.lineTwo);
+					song.songInfo = HtmlUtil.htmlToText(song.songInfo);
 					songs.add(song);
 				}
 			}
@@ -117,16 +95,6 @@ public class Radio {
 		return songs;
 	}
 
-	public String htmlToText(String html){
-		int first = -1;
-		int last = -1;
-		while ((first = html.indexOf("<")) != -1){
-			last = html.indexOf(">");
-			html = html.replace(html.substring(first, last + 1), "");
-		}
-		return html;
-	}
-	
 	public String getSong(String link) {
 		String ret = "";
 		try {

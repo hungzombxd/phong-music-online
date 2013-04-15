@@ -14,6 +14,13 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import zing.model.Album;
+import zing.model.AlbumRenderer;
+import zing.model.ItemCombo;
+import zing.model.Playlist;
+import zing.model.Song;
+import zing.model.SongRenderer;
+
 
 public class Configure implements Serializable{
 	private static final long serialVersionUID = 96678343791424943L;
@@ -21,7 +28,7 @@ public class Configure implements Serializable{
 	public List<Song> songs;
 	public List<Album> albums;
 	public List<Playlist> userPlaylists;
-	public String title = "Music Online v8.3.0";
+	public String title = "Music Online v8.3.1";
 	public String host, port, username, password, total = "1", page = "1", defaultMediaPlayer = title;
 	public boolean useProxy, systemProxy, albumStartup, topStartup, loadFirstPlaylist, sendStatus;
 	public List<String> mediaPlayers;
@@ -67,7 +74,7 @@ public class Configure implements Serializable{
 	}
 	
 	public void save(){
-		if (songs.size() > 0 && (songs.get(0).getLink().equals(""))){
+		if (songs.size() > 0 && (songs.get(0).getLink() == null)){
 			songs = new ArrayList<Song>();		
 		}
 		try {

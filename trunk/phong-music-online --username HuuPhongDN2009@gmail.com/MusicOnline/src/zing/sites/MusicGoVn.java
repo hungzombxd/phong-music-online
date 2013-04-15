@@ -1,4 +1,4 @@
-package zing;
+package zing.sites;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,11 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
+import zing.model.Album;
+import zing.model.ItemCombo;
+import zing.model.Song;
+import zing.utils.HtmlUtil;
 
 
 public class MusicGoVn extends MusicSite{
@@ -44,8 +49,8 @@ public class MusicGoVn extends MusicSite{
 					artist = str.substring(0, str.indexOf("<"));
 					song.title = title + " - " + artist;
 					str = str.substring(str.indexOf("<div class='song_info'>"));
-					song.lineTwo = htmlToText(str.substring(0, str.indexOf("</div>"))).replace("&nbsp;", "").trim();
-					song.quality = song.lineTwo.contains("320kb/s") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
+					song.songInfo = HtmlUtil.htmlToText(str.substring(0, str.indexOf("</div>"))).replace("&nbsp;", "").trim();
+					song.quality = song.songInfo.contains("320kb/s") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
 					songs.add(song);
 				}
 				break;
@@ -75,11 +80,11 @@ public class MusicGoVn extends MusicSite{
 				while ((from = str.indexOf("itemprop=\"album\"")) != -1){
 					str = str.substring(from) + 13;
 					Album album = new Album();
-					album.link = "http://music.go.vn" + getAttribute(str, "href=\"");
-					album.albumArt = getAttribute(str, "src=\"");
+					album.link = "http://music.go.vn" + HtmlUtil.getAttribute(str, "href=\"");
+					album.albumArt = HtmlUtil.getAttribute(str, "src=\"");
 					str = str.substring(str.indexOf("<div class=\"name_album\">"));
-					album.title = getAttribute(str, "title='", "'");
-					album.info = getAttribute(str, "itemprop=\"byArtist\">", "<");
+					album.title = HtmlUtil.getAttribute(str, "title='", "'");
+					album.info = HtmlUtil.getAttribute(str, "itemprop=\"byArtist\">", "<");
 					albums.add(album);
 				}
 				break;
@@ -112,8 +117,8 @@ public class MusicGoVn extends MusicSite{
 					artist = str.substring(0, str.indexOf("<"));
 					song.title = title + " - " + artist;
 					str = str.substring(str.indexOf("<div class='song_info'>"));
-					song.lineTwo = htmlToText(str.substring(0, str.indexOf("</div>"))).replace("&nbsp;", "").trim();
-					song.quality = song.lineTwo.contains("320kb/s") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
+					song.songInfo = HtmlUtil.htmlToText(str.substring(0, str.indexOf("</div>"))).replace("&nbsp;", "").trim();
+					song.quality = song.songInfo.contains("320kb/s") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
 					songs.add(song);
 				}
 				break;

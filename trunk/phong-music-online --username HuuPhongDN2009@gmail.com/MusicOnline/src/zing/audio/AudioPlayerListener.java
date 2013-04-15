@@ -1,4 +1,4 @@
-package zing;
+package zing.audio;
 
 public interface AudioPlayerListener {
 	

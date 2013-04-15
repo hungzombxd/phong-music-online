@@ -1,4 +1,4 @@
-package zing;
+package zing.audio;
 
 import java.io.IOException;
 import java.io.InputStream;

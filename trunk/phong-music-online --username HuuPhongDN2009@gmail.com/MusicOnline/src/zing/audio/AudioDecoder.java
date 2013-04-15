@@ -1,4 +1,4 @@
-package zing;
+package zing.audio;
 
 import javax.sound.sampled.AudioFormat;
 

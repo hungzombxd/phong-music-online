@@ -1,4 +1,4 @@
-package zing;
+package zing.model;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -10,20 +10,25 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.StringTokenizer;
 
+import zing.Configure;
+import zing.sites.ChiaSeNhac;
+import zing.sites.MusicGoVn;
+import zing.sites.NhacCuaTui;
+import zing.sites.Radio;
+import zing.sites.Zing;
+
 
 public class Song implements Serializable {
 	private static final long serialVersionUID = -1080772505347758185L;
 	public static final int MP3_128_KBPS = 0;
 	public static final int MP3_320_KBPS = 1;
 	public static final int LOSSLESS = 2;
-	public String link = "";
-	public String title = "";
-	public String directLink = "";
+	public String link = null;
+	public String title = null;
+	public String directLink = null;
 	public String host = "mp3.zing.vn";
 	public int quality = MP3_128_KBPS;
-	public String songInfo = "(^_^) Không tìm thấy thông tin (^_^)";
-	public String lineOne = "";
-	public String lineTwo = "";
+	public String songInfo = null;
 	long time = 0;
 	
 	public Song() {
@@ -61,11 +66,10 @@ public class Song implements Serializable {
 	}
 
 	public String getDirectLink() throws IOException {
-		if (link.equals("") || ((System.currentTimeMillis() - time) <= Configure.getInstance().timeLive && !directLink.equals(""))) return directLink;
+		if (link == null || ((System.currentTimeMillis() - time) <= Configure.getInstance().timeLive && !(directLink == null))) return directLink;
 		time = System.currentTimeMillis();
 		if (host.equals("mp3.zing.vn")) {
 			directLink = Zing.getInstance().getLink(link);
-			songInfo = Zing.getInstance().htmlSongInfo.replace("128kb/s | ", "");
 		}else if (host.equals("radio.vnmedia.vn")){
 			if (!directLink.equals("")) return directLink;
 			directLink = Radio.getIntance().getSong(link);
@@ -134,10 +138,10 @@ public class Song implements Serializable {
 	
 	public String toString(){
 		String ret = "";
-		if (lineTwo.equals("")){
+		if (songInfo == null){
 			ret = "<html><b>" + title + "</b><br/>Website: " + host + "</html>";
 		}else{
-			ret = "<html><b>" + title + "</b><br/>" + lineTwo + "<br/>Website: " + host + "<html>";
+			ret = "<html><b>" + title + "</b><br/>" + songInfo + "<br/>Website: " + host + "<html>";
 		}
 		return ret;
 	}

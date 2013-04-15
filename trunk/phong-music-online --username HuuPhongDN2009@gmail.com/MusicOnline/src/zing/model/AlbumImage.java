@@ -1,4 +1,4 @@
-package zing;
+package zing.model;
 
 import java.awt.Component;
 import java.awt.Graphics;

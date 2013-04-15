@@ -1,4 +1,4 @@
-package zing;
+package zing.sites;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,12 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
+import zing.Configure;
+import zing.model.Album;
+import zing.model.ItemCombo;
+import zing.model.Song;
+import zing.utils.HtmlUtil;
 
 
 public class ChiaSeNhac extends MusicSite{
@@ -40,15 +46,15 @@ public class ChiaSeNhac extends MusicSite{
 		String info = "";
 		while ((str = in.readLine()) != null) {
 			if (str.contains("class=\"musictitle\"")){
-				title = htmlToText(str).trim();
-				link = "http://chiasenhac.com/" + getAttribute(str, "href=\"");
-				artist = htmlToText(in.readLine()).trim();
+				title = HtmlUtil.htmlToText(str).trim();
+				link = "http://chiasenhac.com/" + HtmlUtil.getAttribute(str, "href=\"");
+				artist = HtmlUtil.htmlToText(in.readLine()).trim();
 				while (!(str = in.readLine()).contains("<span class=\"gen\">")){
 				}
-				info = htmlToText(str.replace("<br />", " | ")).trim();
+				info = HtmlUtil.htmlToText(str.replace("<br />", " | ")).trim();
 				Song song = new Song(title + " - " + artist, link, "chiasenhac.com");
 				song.quality = info.contains("Lossless") ? Song.LOSSLESS : info.contains("320kbps") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
-				song.lineTwo = info.replace("Lossless", "<b style='color: blue'>Lossless</b>");
+				song.songInfo = info.replace("Lossless", "<b style='color: blue'>Lossless</b>");
 				songs.add(song);
 				if (songs.size() == 25) break;
 			}
@@ -69,7 +75,7 @@ public class ChiaSeNhac extends MusicSite{
 			if (str.contains("<div id=\"downloadlink\"")){
 				while (!(str = in.readLine()).contains("</div>")){
 					if (str.contains("http://data.chiasenhac.com/downloads/")){
-						str = getAttribute(str, "href=\"").replace(" ", "+");
+						str = HtmlUtil.getAttribute(str, "href=\"").replace(" ", "+");
 						if (str.toLowerCase().endsWith(".mp3") || str.toLowerCase().endsWith(".flac")) links.add(str);
 					}
 				}

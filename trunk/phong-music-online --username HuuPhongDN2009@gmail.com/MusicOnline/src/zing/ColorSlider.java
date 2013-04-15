@@ -13,6 +13,8 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
+import zing.audio.AudioPlayer;
+
 public class ColorSlider extends JComponent{
 	private static final long serialVersionUID = 1495787053831058306L;
 	Color rangeColor = new Color(230, 230, 230);
