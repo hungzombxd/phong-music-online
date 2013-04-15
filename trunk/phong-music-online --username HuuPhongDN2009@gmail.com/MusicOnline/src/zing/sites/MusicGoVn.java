@@ -18,8 +18,8 @@ import zing.utils.HtmlUtil;
 public class MusicGoVn extends MusicSite{
 	private static MusicGoVn musicGoVn;
 	
-	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", ""), new ItemCombo("Artist", "&mode=artist"), new ItemCombo("Composer", "&mode=composer"), new ItemCombo("Album", "&mode=album"), new ItemCombo("Lyric", "&mode=lyric")};
-	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", "&cat=music")};
+	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", "")};
+	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", "")};
 	
 	public static MusicGoVn getInstance(){
 		if (musicGoVn == null) musicGoVn = new MusicGoVn();
