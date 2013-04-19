@@ -10,9 +10,10 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import zing.model.Song;
-
 
 public final class Utils{
 	
@@ -29,18 +30,7 @@ public final class Utils{
 					"í", "ì", "ị", "ỉ", "ĩ", "ú", "ù", "ụ", "ủ", "ũ", "ý", "ỳ", "ỵ",
 					"ỷ", "ỹ", "ô", "ê", "ơ", "ư", "ă", "â" };
 	
-	private static String[] ncrDecimal = new String[] { "&#225;", "&#224;", "&#7843;",
-			"&#7841;", "&#227;", "&#7855;", "&#7857;", "&#7863;", "&#7859;",
-			"&#7861;", "&#7845;", "&#7847;", "&#7849;", "&#7851;", "&#7853;",
-			"&#7899;", "&#7901;", "&#7907;", "&#7903;", "&#7905;", "&#243;",
-			"&#242;", "&#7885;", "&#7887;", "&#245;", "&#7889;", "&#7891;",
-			"&#7897;", "&#7893;", "&#7895;", "&#7913;", "&#7915;", "&#7921;",
-			"&#7917;", "&#7919;", "&#273;", "&#233;", "&#232;", "&#7865;",
-			"&#7867;", "&#7869;", "&#7871;", "&#7873;", "&#7879;", "&#7875;",
-			"&#7877;", "&#237;", "&#236;", "&#7883;", "&#7881;", "&#297;",
-			"&#250;", "&#249;", "&#7909;", "&#7911;", "&#361;", "&#253;",
-			"&#7923;", "&#7925;", "&#7927;", "&#7929;", "&#244;", "&#234;",
-			"&#417;", "&#432;", "&#259;", "&#226;" };
+	private static Pattern ncrDecimalPattern = Pattern.compile("&#(\\d+);");
 	
 	public static String toANSI(String str){
 		for (int i = 0; i < utf8.length; i++) {
@@ -51,11 +41,13 @@ public final class Utils{
 	}
 	
 	public static String toUTF8(String str){
-		for (int i = 0; i < utf8.length; i++) {
-			str = str.replaceAll(ncrDecimal[i], utf8[i]);
-			str = str.replaceAll(ncrDecimal[i], utf8[i].toUpperCase());
+		Matcher matcher = ncrDecimalPattern.matcher(str);
+		StringBuffer buffer = new StringBuffer();
+		while (matcher.find()){
+			matcher.appendReplacement(buffer, String.valueOf((char)Integer.parseInt(matcher.group(1))));
 		}
-		return str;
+		matcher.appendTail(buffer);
+		return buffer.toString();
 	}
 	
 	public static List<Song> m3uToSongs(String m3uFile) throws IOException{

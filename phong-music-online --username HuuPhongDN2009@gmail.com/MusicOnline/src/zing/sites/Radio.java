@@ -66,8 +66,7 @@ public class Radio {
 		List<Song> songs = new ArrayList<Song>();
 		try {
 			URL url = new URL(link);
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					url.openStream(), "UTF-8"));
+			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
 			String str, title, ln;
 			int i = 0, index;
 			while ((str = in.readLine()) != null && i < 10) {
