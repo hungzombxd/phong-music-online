@@ -40,7 +40,7 @@ public final class Utils{
 		return str;
 	}
 	
-	public static String toUTF8(String str){
+	public static String ncrToUnicode(String str){
 		Matcher matcher = ncrDecimalPattern.matcher(str);
 		StringBuffer buffer = new StringBuffer();
 		while (matcher.find()){
