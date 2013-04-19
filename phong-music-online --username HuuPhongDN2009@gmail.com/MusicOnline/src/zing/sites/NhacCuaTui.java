@@ -60,13 +60,17 @@ public class NhacCuaTui extends MusicSite {
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.indexOf("NCTNowPlaying.intFlashPlayer") != -1){
-				str = HtmlUtil.getAttribute(str, "\"song\", \"");
+				if (str.contains("playlist")){
+					str = "http://www.nhaccuatui.com/flash/xml?key2=" + HtmlUtil.getAttribute(str, "\"playlist\", \"");
+				}else{
+					str = "http://www.nhaccuatui.com/flash/xml?key1=" + HtmlUtil.getAttribute(str, "\"song\", \"");
+				}
 				break;
 			}
 		}
 		connection.disconnect();
 		in.close();
-		return "http://www.nhaccuatui.com/flash/xml?key1=" + str;
+		return str;
 	}
 	
 	public String getLink(String html) throws IOException{
@@ -136,27 +140,27 @@ public class NhacCuaTui extends MusicSite {
 		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
 		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 		String str;
-		String title = "";
-		String link = "";
 		while ((str = in.readLine()) != null) {
-			if (str.contains("<ul class=\"list_playlist\">")){
+			if (str.contains("<ul class=\"list-al-pl\"")){
 				while ((str = in.readLine()) != null && !str.contains("</ul>")){
-					if (str.contains("<li >")){
+					if (str.contains("<p class=\"name\">")){
+						Album album = new Album();
+						album.info = "Tạo bởi: " + HtmlUtil.htmlToText(str).trim() + " | Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim();
+						in.readLine(); in.readLine();
 						str = in.readLine();
-						link = "http://www.nhaccuatui.com" + HtmlUtil.getAttribute(str, "href=\"");
-						title = HtmlUtil.getAttribute(str, "title=\"");
-						Album album = new Album(title, link);
-						album.albumArt = HtmlUtil.getAttribute(str, "src=\"");
-						in.readLine();
-						str = "";
-						for (int i = 0; i < 5; i++){
-							str += in.readLine().trim();
-							if (i == 2 && str.contains("<br />")){
+						album.link = HtmlUtil.getAttribute(str, "href=\"");
+						album.title = HtmlUtil.getAttribute(str, "title=\"");
+						album.albumArt = HtmlUtil.getAttribute(in.readLine(), "src=\"");
+						str = in.readLine();
+						while ((str = in.readLine()) != null){
+							if (str.contains("<a href=\"http://www.nhaccuatui.com/tim-kiem")){
+								album.title += " - " + HtmlUtil.htmlToText(str);
+								album.info = "Trình bày: " + HtmlUtil.htmlToText(str) + "<br/>" + album.info;
 								break;
 							}
 						}
-						album.info = HtmlUtil.htmlToText(str) + "<br/>" + in.readLine().trim();
 						albums.add(album);
+						album = null;
 					}
 				}
 				break;
@@ -178,7 +182,7 @@ public class NhacCuaTui extends MusicSite {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		System.out.println(NhacCuaTui.getInstance().searchSong("pham truong", 1, ""));
+		System.out.println(NhacCuaTui.getInstance().searchAlbum("lam truong", 1, ""));
 	}
 
 	@Override

@@ -127,7 +127,7 @@ public class Zing extends MusicSite{
 				"http://mp3.zing.vn/xml/playlist/kGcHydmhuHldtZbJTFGLH",
 				"http://mp3.zing.vn/xml/playlist/ZGcGTdHNAJFQTLFJtFnLG" };
 		for (int i = 0; i < phong.length; i++) {
-			songs.addAll(XMLToSongs(phong[i]));
+			songs.addAll(xmlToSongs(phong[i]));
 		}
 		return songs;
 	}
@@ -167,7 +167,7 @@ public class Zing extends MusicSite{
 
 	// Get link to mp3 of HTML mp3 link
 	public String getLink(String mp3URL) throws IOException {
-		return XMLToSongs(getXML(mp3URL)).get(0).directLink;
+		return xmlToSongs(getXML(mp3URL)).get(0).directLink;
 	}
 
 	// Get XML file for song or album
@@ -195,7 +195,7 @@ public class Zing extends MusicSite{
 
 	// Get songs of album
 	public List<Song> getAlbum(String html) throws IOException {
-		return XMLToSongs(getXML(html));
+		return xmlToSongs(getXML(html));
 	}
 	
 	public List<Song> searchSong(String value, int page, String filter) throws UnsupportedEncodingException, IOException{
@@ -284,7 +284,7 @@ public class Zing extends MusicSite{
 		return lists;
 	}
 
-	public List<Song> XMLToSongs(String linkXML) throws IOException {
+	public List<Song> xmlToSongs(String linkXML) throws IOException {
 		List<Song> songs = new ArrayList<Song>();
 		URL url = new URL(linkXML);
 		BufferedReader in = new BufferedReader(new InputStreamReader(

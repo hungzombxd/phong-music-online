@@ -77,7 +77,7 @@ public class Radio {
 					ln = "http://radio.vnmedia.vn"
 							+ new StringTokenizer(ln, "\"").nextToken();
 					title = in.readLine().trim();
-					title = Utils.toUTF8(title);
+					title = Utils.ncrToUnicode(title);
 					i++;
 					Song song = new Song(title, ln, "radio.vnmedia.vn");
 					song.songInfo = "";

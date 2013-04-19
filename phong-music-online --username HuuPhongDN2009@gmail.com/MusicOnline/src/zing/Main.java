@@ -549,7 +549,7 @@ public class Main extends JFrame {
 				new Thread(){
 					public void run(){
 						try {
-							setSongs(zing.XMLToSongs(linkXML), true);
+							setSongs(zing.xmlToSongs(linkXML), true);
 						} catch (IOException e1) {
 							setTitle(e1.toString());
 							e1.printStackTrace();
