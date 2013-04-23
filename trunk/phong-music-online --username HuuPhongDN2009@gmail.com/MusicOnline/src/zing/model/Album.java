@@ -7,15 +7,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.ImageIcon;
-
 import zing.Configure;
-import zing.sites.MusicGoVn;
 import zing.sites.NhacCuaTui;
 import zing.sites.Zing;
-
-
 
 public class Album implements Serializable{
 	private static final long serialVersionUID = -2824232816762868663L;
@@ -72,8 +67,6 @@ public class Album implements Serializable{
 				songs = Zing.getInstance().getAlbum(link);
 			}else if (link.contains("nhaccuatui.com")){
 				songs = NhacCuaTui.getInstance().getAlbum(link);
-			}else if (link.contains("music.go.vn")){
-				songs = MusicGoVn.getInstance().getAlbum(link);
 			}
 			for (Song song : songs){
 				if (song.songInfo == null) song.songInfo = "Album: " + title;

@@ -2,9 +2,6 @@ package zing.sites;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +11,6 @@ import zing.model.Album;
 import zing.model.ItemCombo;
 import zing.model.Song;
 import zing.utils.HtmlUtil;
-
 
 public class ChiaSeNhac extends MusicSite{
 	
@@ -35,10 +31,7 @@ public class ChiaSeNhac extends MusicSite{
 			throws IOException {
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Song> songs = new ArrayList<Song>();
-		URL url = new URL("http://search.chiasenhac.com/search.php?mode=&order=quality&cat=music&s=" + value + "&page=" + page + filter);
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
-		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		BufferedReader in = getInputStream("http://search.chiasenhac.com/search.php?mode=&order=quality&cat=music&s=" + value + "&page=" + page + filter);
 		String str;
 		String title = "";
 		String artist = "";
@@ -66,10 +59,7 @@ public class ChiaSeNhac extends MusicSite{
 	@Override
 	public String getLink(String html) throws IOException {
 		List<String> links = new ArrayList<String>();
-		URL url = new URL(html.replace("http://", "http://download.").replace(".html", "_download.html"));
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
-		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		BufferedReader in = getInputStream(html.replace("http://", "http://download.").replace(".html", "_download.html"));
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<div id=\"downloadlink\"")){

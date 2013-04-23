@@ -1,9 +1,14 @@
 package zing.sites;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import zing.Configure;
 import zing.model.Album;
 import zing.model.ItemCombo;
 import zing.model.Song;
@@ -39,5 +44,13 @@ public abstract class MusicSite{
 	
 	public String getInformation(){
 		return information;
+	}
+	
+	public BufferedReader getInputStream(String link) throws IOException{
+		URL url = new URL(link);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
+		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		return in;
 	}
 }

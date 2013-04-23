@@ -28,7 +28,7 @@ public class Configure implements Serializable{
 	public List<Song> songs;
 	public List<Album> albums;
 	public List<Playlist> userPlaylists;
-	public String title = "Music Online v8.3.1";
+	public String title = "Music Online v8.3.2";
 	public String host, port, username, password, total = "1", page = "1", defaultMediaPlayer = title;
 	public boolean useProxy, systemProxy, albumStartup, topStartup, loadFirstPlaylist, sendStatus;
 	public List<String> mediaPlayers;
@@ -54,6 +54,7 @@ public class Configure implements Serializable{
 	public String site = "mp3.zing.vn";
 	public String lastValueAlbum = "";
 	public int lastPageAlbum = 1;
+	public String userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1";
 	
 	public static Configure getInstance(){
 		if (configure == null) configure = load();
