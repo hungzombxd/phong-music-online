@@ -2,6 +2,8 @@ package zing.audio;
 
 import javax.sound.sampled.AudioFormat;
 
+import zing.model.AudioInfo;
+
 import javazoom.jl.decoder.Bitstream;
 import javazoom.jl.decoder.BitstreamException;
 import javazoom.jl.decoder.Decoder;

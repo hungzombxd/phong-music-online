@@ -10,6 +10,7 @@ import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+import zing.model.AudioInfo;
 import zing.model.Song;
 import zing.utils.Utils;
 

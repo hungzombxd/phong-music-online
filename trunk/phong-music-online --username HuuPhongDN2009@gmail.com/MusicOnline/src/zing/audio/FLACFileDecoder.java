@@ -11,6 +11,8 @@ import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteData;
 
+import zing.model.AudioInfo;
+
 public class FLACFileDecoder implements AudioDecoder{
 	private FLACDecoder decoder;
 	private ByteData pcmData;
