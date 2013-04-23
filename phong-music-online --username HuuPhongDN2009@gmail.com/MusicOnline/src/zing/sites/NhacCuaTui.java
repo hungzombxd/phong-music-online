@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import zing.model.Album;
 import zing.model.ItemCombo;
 import zing.model.Song;
 import zing.utils.HtmlUtil;
-
 
 public class NhacCuaTui extends MusicSite {
 	private static NhacCuaTui nhacCuaTui;
@@ -53,10 +51,7 @@ public class NhacCuaTui extends MusicSite {
 	}
 	
 	public String htmlToXML(String html) throws IOException{
-		URL url = new URL(html);
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
-		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		BufferedReader in = getInputStream(html);
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.indexOf("NCTNowPlaying.intFlashPlayer") != -1){
@@ -68,16 +63,12 @@ public class NhacCuaTui extends MusicSite {
 				break;
 			}
 		}
-		connection.disconnect();
 		in.close();
 		return str;
 	}
 	
 	public String getLink(String html) throws IOException{
-		URL url = new URL("http://www.nhaccuatui.com/download/song/" + html.substring(html.length() - 15).substring(0, 10));
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
-		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		BufferedReader in = getInputStream("http://www.nhaccuatui.com/download/song/" + html.substring(html.length() - 15).substring(0, 10));
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("Success")){
@@ -93,10 +84,7 @@ public class NhacCuaTui extends MusicSite {
 	public List<Song> searchSong(String value, int page, String filter) throws IOException{
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Song> songs = new ArrayList<Song>();
-		URL url = new URL("http://www.nhaccuatui.com/tim-kiem/bai-hat?q=" + value + "&page=" + page);
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
-		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		BufferedReader in = getInputStream("http://www.nhaccuatui.com/tim-kiem/bai-hat?q=" + value + "&page=" + page);
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<ul class=\"list-song\">")){
@@ -135,10 +123,7 @@ public class NhacCuaTui extends MusicSite {
 	public List<Album> searchAlbum(String value, int page, String filter) throws IOException {
 		List<Album> albums = new ArrayList<Album>();
 		value = URLEncoder.encode(value, "UTF-8");
-		URL url = new URL("http://www.nhaccuatui.com/tim-kiem/playlist?q=" + value + "&page=" + page);
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1");
-		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		BufferedReader in = getInputStream("http://www.nhaccuatui.com/tim-kiem/playlist?q=" + value + "&page=" + page);
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<ul class=\"list-al-pl\"")){

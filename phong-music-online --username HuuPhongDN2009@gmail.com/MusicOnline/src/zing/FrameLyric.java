@@ -60,10 +60,6 @@ public class FrameLyric extends JFrame {
 						return; 
 					}
 					lyric.setText(getLyric(lyrics));
-//					System.out.println(lyrics);
-//					for (String str : lyrics){
-//						lyric.setText(str);
-//					}
 					lyric.setCaretPosition(0);
 				} catch (IOException e) {
 					lyric.setText("<h1 style='text-align:center; color: blue;'>Error connect to server<h1>");

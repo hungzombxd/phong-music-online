@@ -83,7 +83,6 @@ import zing.model.Playlist;
 import zing.model.Song;
 import zing.model.SongRenderer;
 import zing.sites.ChiaSeNhac;
-import zing.sites.MusicGoVn;
 import zing.sites.MusicSite;
 import zing.sites.NhacCuaTui;
 import zing.sites.Radio;
@@ -1603,7 +1602,7 @@ public class Main extends JFrame {
 			}
 		});
 		panelSearch.add(new JLabel("Site "));
-		panelSearch.add(sites = new JComboBox(new String[]{"mp3.zing.vn", "nhaccuatui.com", "music.go.vn", "chiasenhac.com"}));
+		panelSearch.add(sites = new JComboBox(new String[]{"mp3.zing.vn", "nhaccuatui.com", "chiasenhac.com"}));
 		sites.setFocusable(false);
 		sites.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -1614,8 +1613,6 @@ public class Main extends JFrame {
 					musicSite = Zing.getInstance();
 				}else if (configure.site.equals("nhaccuatui.com")){
 					musicSite = NhacCuaTui.getInstance();
-				}else if (configure.site.equals("music.go.vn")){
-					musicSite = MusicGoVn.getInstance();
 				}else if (configure.site.equals("chiasenhac.com")){
 					musicSite = ChiaSeNhac.getInstance();
 				}

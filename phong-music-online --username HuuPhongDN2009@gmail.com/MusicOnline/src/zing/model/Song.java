@@ -12,11 +12,9 @@ import java.util.StringTokenizer;
 
 import zing.Configure;
 import zing.sites.ChiaSeNhac;
-import zing.sites.MusicGoVn;
 import zing.sites.NhacCuaTui;
 import zing.sites.Radio;
 import zing.sites.Zing;
-
 
 public class Song implements Serializable {
 	private static final long serialVersionUID = -1080772505347758185L;
@@ -75,8 +73,6 @@ public class Song implements Serializable {
 			directLink = Radio.getIntance().getSong(link);
 		}else if (host.equals("nhaccuatui.com")){
 			directLink = NhacCuaTui.getInstance().getLink(link);
-		}else if (host.equals("music.go.vn")){
-			directLink = MusicGoVn.getInstance().getLink(link);
 		}else if (host.equals("chiasenhac.com")){
 			directLink = ChiaSeNhac.getInstance().getLink(link);
 		}
