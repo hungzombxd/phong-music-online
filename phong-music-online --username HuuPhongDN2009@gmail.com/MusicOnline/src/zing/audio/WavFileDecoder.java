@@ -6,6 +6,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
+import zing.model.AudioInfo;
+
 public class WavFileDecoder implements AudioDecoder {
 	
 	private AudioStream in;

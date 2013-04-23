@@ -1,4 +1,4 @@
-package zing.audio;
+package zing.model;
 
 public class AudioInfo {
 	private String type;

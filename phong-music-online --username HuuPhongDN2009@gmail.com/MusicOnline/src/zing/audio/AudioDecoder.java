@@ -2,6 +2,8 @@ package zing.audio;
 
 import javax.sound.sampled.AudioFormat;
 
+import zing.model.AudioInfo;
+
 public interface AudioDecoder {
 
 	AudioFormat getAudioFormat();
