@@ -50,7 +50,6 @@ public abstract class MusicSite{
 		URL url = new URL(link);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
-		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-		return in;
+		return new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 	}
 }
