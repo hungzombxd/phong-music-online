@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import zing.model.Format;
 import zing.model.Song;
 import zing.utils.HtmlUtil;
 import zing.utils.Utils;
@@ -79,7 +80,7 @@ public class Radio {
 					title = in.readLine().trim();
 					title = Utils.ncrToUnicode(title);
 					i++;
-					Song song = new Song(title, ln, "radio.vnmedia.vn");
+					Song song = new Song(title, ln, Site.RADIO_VNMEDIA_VN);
 					song.songInfo = "";
 					while ((str = in.readLine()) != null && !str.contains("</dl>")){
 						song.songInfo += str; 
@@ -95,8 +96,8 @@ public class Radio {
 		return songs;
 	}
 
-	public String getSong(String link) {
-		String ret = "";
+	public Map<Format, String> getSong(String link) {
+		Map<Format, String> links = new HashMap<Format, String>();
 		try {
 			URL url = new URL(link);
 			BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -106,8 +107,9 @@ public class Radio {
 			while ((str = in.readLine()) != null) {
 				if (str.contains("radio.playingTrack")) {
 					index = str.indexOf("http://");
-					ret = str.substring(index);
+					String ret = str.substring(index);
 					ret = new StringTokenizer(ret, "'").nextToken();
+					links.put(Format.MP3_128_KBPS, ret.replace(" ", "%20"));
 				}
 			}
 			in.close();
@@ -115,6 +117,6 @@ public class Radio {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return ret.replace(" ", "%20");
+		return links;
 	}
 }

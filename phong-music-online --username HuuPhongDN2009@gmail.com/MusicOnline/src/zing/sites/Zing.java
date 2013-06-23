@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import zing.model.Album;
+import zing.model.Format;
 import zing.model.ItemCombo;
 import zing.model.Song;
 import zing.utils.HtmlUtil;
@@ -160,8 +161,8 @@ public class Zing extends MusicSite{
 	}
 
 	// Get link to mp3 of HTML mp3 link
-	public String getLink(String mp3URL) throws IOException {
-		return xmlToSongs(getXML(mp3URL)).get(0).directLink;
+	public Map<Format, String> getLink(String mp3URL) throws IOException {
+		return xmlToSongs(getXML(mp3URL)).get(0).directLinks;
 	}
 
 	// Get XML file for song or album
@@ -202,7 +203,7 @@ public class Zing extends MusicSite{
 				Song song = new Song(title, link);
 				while ((str = in.readLine()) != null){
 					if (str.trim().equalsIgnoreCase("</h3>")) break;
-					if (str.contains("title=\"Bài hát chất lượng cao\"")) song.setQuality(Song.MP3_320_KBPS);
+					if (str.contains("title=\"Bài hát chất lượng cao\"")) song.setQuality(Format.MP3_320_KBPS);
 				}
 				in.readLine();
 				song.songInfo = HtmlUtil.htmlToText(in.readLine()).replace("Đăng bởi:  |", "");
@@ -264,7 +265,7 @@ public class Zing extends MusicSite{
 				artist = in.readLine();
 				link = in.readLine();
 				song = new Song();
-				song.setDirectLink(HtmlUtil.getContent(link));
+				song.setDirectLink(Format.MP3_128_KBPS, HtmlUtil.getContent(link));
 				song.setTitle(title + " - " + HtmlUtil.getContent(artist));
 				songs.add(song);
 			}

@@ -10,6 +10,7 @@ import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+import zing.Configure;
 import zing.model.AudioInfo;
 import zing.model.Song;
 import zing.utils.Utils;
@@ -152,7 +153,7 @@ public class AudioPlayer{
 		threads.add(new Thread(){
 			public void run(){
 				try {
-					prepare(song.getDirectLink());
+					prepare(song.getDirectLink(Configure.getInstance().format));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

@@ -11,6 +11,7 @@ import javax.swing.ImageIcon;
 import zing.Configure;
 import zing.sites.NhacCuaTui;
 import zing.sites.Zing;
+import zing.utils.Utils;
 
 public class Album implements Serializable{
 	private static final long serialVersionUID = -2824232816762868663L;
@@ -61,8 +62,7 @@ public class Album implements Serializable{
 	}
 	
 	public List<Song> getSongs() throws IOException{
-		if (System.currentTimeMillis() - time > Configure.getInstance().timeLive){
-			time = System.currentTimeMillis();
+		if (!songs.isEmpty() && !Utils.isURLAvailable(songs.get(0).getDirectLink(Configure.getInstance().format))){
 			if (link.contains("mp3.zing.vn")){
 				songs = Zing.getInstance().getAlbum(link);
 			}else if (link.contains("nhaccuatui.com")){
@@ -70,7 +70,7 @@ public class Album implements Serializable{
 			}
 			for (Song song : songs){
 				if (song.songInfo == null) song.songInfo = "Album: " + title;
-				if (highQuality) song.quality = Song.MP3_320_KBPS;
+				if (highQuality) song.quality = Format.MP3_320_KBPS;
 			}
 		}
 		return songs;

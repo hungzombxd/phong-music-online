@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import zing.Configure;
 import zing.model.Album;
+import zing.model.Format;
 import zing.model.ItemCombo;
 import zing.model.Song;
 import zing.utils.HtmlUtil;
@@ -45,8 +47,8 @@ public class ChiaSeNhac extends MusicSite{
 				while (!(str = in.readLine()).contains("<span class=\"gen\">")){
 				}
 				info = HtmlUtil.htmlToText(str.replace("<br />", " | ")).trim();
-				Song song = new Song(title + " - " + artist, link, "chiasenhac.com");
-				song.quality = info.contains("Lossless") ? Song.LOSSLESS : info.contains("320kbps") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
+				Song song = new Song(title + " - " + artist, link, Site.CHIA_SE_NHAC);
+				song.quality = info.contains("Lossless") ? Format.LOSSLESS : info.contains("320kbps") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS;
 				song.songInfo = info.replace("Lossless", "<b style='color: blue'>Lossless</b>");
 				songs.add(song);
 				if (songs.size() == 25) break;
@@ -57,8 +59,8 @@ public class ChiaSeNhac extends MusicSite{
 	}
 
 	@Override
-	public String getLink(String html) throws IOException {
-		List<String> links = new ArrayList<String>();
+	public Map<Format, String> getLink(String html) throws IOException {
+		Map<Format, String> links = new HashMap<Format, String>();
 		BufferedReader in = getInputStream(html.replace("http://", "http://download.").replace(".html", "_download.html"));
 		String str;
 		while ((str = in.readLine()) != null) {
@@ -66,14 +68,26 @@ public class ChiaSeNhac extends MusicSite{
 				while (!(str = in.readLine()).contains("</div>")){
 					if (str.contains("http://data.chiasenhac.com/downloads/")){
 						str = HtmlUtil.getAttribute(str, "href=\"").replace(" ", "+");
-						if (str.toLowerCase().endsWith(".mp3") || str.toLowerCase().endsWith(".flac")) links.add(str);
+						if (str.toLowerCase().endsWith(".mp3") || str.toLowerCase().endsWith(".flac")){
+							links.put(getFormat(str), str);
+						}
 					}
 				}
 			}
 		}
 		in.close();
-		str = Configure.getInstance().highQuality ? links.get(links.size() - 1) : links.get(0);
-		return str;
+		return links;
+	}
+	
+	private Format getFormat(String link){
+		if (link.contains("128kbps")){
+			return Format.MP3_128_KBPS;
+		}else if (link.contains("320kbps")){
+			return Format.MP3_320_KBPS;
+		}else if (link.contains("FLAC")){
+			return Format.LOSSLESS;
+		}
+		return null;
 	}
 
 	@Override
