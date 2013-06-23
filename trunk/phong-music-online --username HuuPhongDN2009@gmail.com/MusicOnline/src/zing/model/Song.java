@@ -8,26 +8,27 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import zing.Configure;
 import zing.sites.ChiaSeNhac;
 import zing.sites.NhacCuaTui;
 import zing.sites.Radio;
+import zing.sites.Site;
 import zing.sites.Zing;
+import zing.utils.Utils;
 
 public class Song implements Serializable {
 	private static final long serialVersionUID = -1080772505347758185L;
-	public static final int MP3_128_KBPS = 0;
-	public static final int MP3_320_KBPS = 1;
-	public static final int LOSSLESS = 2;
 	public String link = null;
 	public String title = null;
-	public String directLink = null;
-	public String host = "mp3.zing.vn";
-	public int quality = MP3_128_KBPS;
+	public Map<Format, String> directLinks = null;
+	public Site site = Site.MP3_ZING_VN;
+	public transient Format currentFormat;
+	public Format quality = Format.MP3_128_KBPS;
 	public String songInfo = null;
-	long time = 0;
 	
 	public Song() {
 	}
@@ -37,10 +38,10 @@ public class Song implements Serializable {
 		this.link = link;
 	}
 	
-	public Song(String title, String link, String host) {
+	public Song(String title, String link, Site site) {
 		this.title = title;
 		this.link = link;
-		this.host = host;
+		this.site = site;
 	}
 
 	public String getLink() {
@@ -58,33 +59,70 @@ public class Song implements Serializable {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-
-	public void setDirectLink(String directLink) {
-		this.directLink = directLink;
+	
+	public void setDirectLinks(Map<Format, String> directLinks){
+		this.directLinks = directLinks;
+	}
+	
+	public void setDirectLink(Format format, String directLink){
+		if (directLinks == null){
+			directLinks = new HashMap<Format, String>();
+		}
+		directLinks.put(format, directLink);
 	}
 
-	public String getDirectLink() throws IOException {
-		if (link == null || ((System.currentTimeMillis() - time) <= Configure.getInstance().timeLive && !(directLink == null))) return directLink;
-		time = System.currentTimeMillis();
-		if (host.equals("mp3.zing.vn")) {
-			directLink = Zing.getInstance().getLink(link);
-		}else if (host.equals("radio.vnmedia.vn")){
-			if (!directLink.equals("")) return directLink;
-			directLink = Radio.getIntance().getSong(link);
-		}else if (host.equals("nhaccuatui.com")){
-			directLink = NhacCuaTui.getInstance().getLink(link);
-		}else if (host.equals("chiasenhac.com")){
-			directLink = ChiaSeNhac.getInstance().getLink(link);
+	public String getDirectLink(Format format) throws IOException {
+		if (directLinks != null && Utils.isURLAvailable(getLink(format))) return getLink(format);
+		
+		switch (site) {
+		
+		case MP3_ZING_VN:
+			directLinks = Zing.getInstance().getLink(link);
+			break;
+		
+		case CHIA_SE_NHAC:
+			directLinks = ChiaSeNhac.getInstance().getLink(link);
+			break;
+			
+		case NHAC_CUA_TUI:
+			directLinks = NhacCuaTui.getInstance().getLink(link);
+			break;
+		
+		case RADIO_VNMEDIA_VN:
+			directLinks = Radio.getIntance().getSong(link);
+			break;
+			
+		default:
+			throw new RuntimeException("Site is empty");
 		}
-		return directLink;
+		
+		return getLink(format);
+	}
+	
+	private String getLink(Format format){
+		String link = null;
+		switch (format) {
+		case LOSSLESS:
+			link = directLinks.get(Format.LOSSLESS); if (link != null) break;
+		
+		case MP3_320_KBPS:
+			link = directLinks.get(Format.MP3_320_KBPS); if (link != null) break;
+			
+		case MP3_128_KBPS:
+			link = directLinks.get(Format.MP3_128_KBPS); if (link != null) break;
+			
+		default:
+			link = directLinks.get(null); break;
+		}
+		return link;
 	}
 	
 	public void saveToFile(String dir){
 		dir = (dir.endsWith(File.separator))? dir : dir + File.separator;
 		try {
-			URLConnection connection = new URL(getDirectLink()).openConnection();
+			URLConnection connection = new URL(getDirectLink(Configure.getInstance().format)).openConnection();
 			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dir + toTitle(title) + ".mp3"));
+			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dir + toTitle(title) + (Configure.getInstance().format == Format.LOSSLESS ? ".flac" : ".mp3")));
 			int readed = -1;
 			byte[] buffered = new byte[63888];
 			while ((readed = in.read(buffered)) != -1){
@@ -98,12 +136,12 @@ public class Song implements Serializable {
 		} 
 	}
 	
-	public String getHost() {
-		return host;
+	public Site getSite() {
+		return site;
 	}
 
-	public void setHost(String host) {
-		this.host = host;
+	public void setSite(Site site) {
+		this.site = site;
 	}
 
 	public String toTitle(String str){
@@ -124,20 +162,20 @@ public class Song implements Serializable {
 		return false;
 	}
 
-	public int getQuality() {
+	public Format getQuality() {
 		return quality;
 	}
 
-	public void setQuality(int quality) {
-		this.quality = quality;
+	public void setQuality(Format format) {
+		this.quality = format;
 	}
 	
 	public String toString(){
 		String ret = "";
 		if (songInfo == null){
-			ret = "<html><b>" + title + "</b><br/>Website: " + host + "</html>";
+			ret = "<html><b>" + title + "</b><br/>Website: " + site.getHost() + "</html>";
 		}else{
-			ret = "<html><b>" + title + "</b><br/>" + songInfo + "<br/>Website: " + host + "<html>";
+			ret = "<html><b>" + title + "</b><br/>" + songInfo + "<br/>Website: " + site.getHost() + "<html>";
 		}
 		return ret;
 	}

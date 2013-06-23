@@ -7,23 +7,25 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import zing.Configure;
 import zing.model.Album;
+import zing.model.Format;
 import zing.model.ItemCombo;
 import zing.model.Song;
 
 public abstract class MusicSite{
 	public static final int MP3_ZING_VN = 0;
-	public static final int NHACCUATUI_COM = 1;
-	public static final int MUSIC_GO_VN = 2;
+	public static final int NHAC_CUA_TUI = 1;
+	public static final int CHIA_SE_NHAC = 2;
 	
 	protected String error = null;
 	protected String information = null;
 	
 	public abstract List<Song> searchSong(String value, int page, String filter) throws IOException;
 	
-	public abstract String getLink(String html) throws IOException;
+	public abstract Map<Format, String> getLink(String html) throws IOException;
 	
 	public abstract List<Album> searchAlbum(String value, int page, String filter) throws IOException;
 	

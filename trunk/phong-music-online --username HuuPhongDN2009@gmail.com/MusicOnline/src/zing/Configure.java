@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 
 import zing.model.Album;
 import zing.model.AlbumRenderer;
+import zing.model.Format;
 import zing.model.ItemCombo;
 import zing.model.Playlist;
 import zing.model.Song;
@@ -32,9 +33,8 @@ public class Configure implements Serializable{
 	public String host, port, username, password, total = "1", page = "1", defaultMediaPlayer = title;
 	public boolean useProxy, systemProxy, albumStartup, topStartup, loadFirstPlaylist, sendStatus;
 	public List<String> mediaPlayers;
-	public int buffered = 5000;
 	public String type = "Song";
-	public boolean highQuality = false;
+//	public boolean highQuality = false;
 	public ItemCombo filter = new ItemCombo("Default", "");
 	public String repeat = "Default";
 	public String value = "";
@@ -46,7 +46,7 @@ public class Configure implements Serializable{
 	public String oldFolder = ".";
 	public int lastPageSong = 1;
 	public String lastValueSong = "";
-	public int timeLive = 7200000;
+//	public int timeLive = 7200000;
 	public ItemCombo by = new ItemCombo("Default", "");
 	public boolean update = true;
 	public int viewModeSong = SongRenderer.VIEW_MODE_DETAIL;
@@ -55,6 +55,7 @@ public class Configure implements Serializable{
 	public String lastValueAlbum = "";
 	public int lastPageAlbum = 1;
 	public String userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1";
+	public Format format = Format.MP3_128_KBPS;
 	
 	public static Configure getInstance(){
 		if (configure == null) configure = load();

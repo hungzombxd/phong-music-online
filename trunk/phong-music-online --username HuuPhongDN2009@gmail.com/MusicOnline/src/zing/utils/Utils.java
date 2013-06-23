@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -97,5 +99,19 @@ public final class Utils{
 		int min = position / 60000;
 		int sec = (position / 1000) % 60;
 		return numberToString(min) + ":" + numberToString(sec);
+	}
+	
+	public static boolean isURLAvailable(String link){
+		boolean ret = false;
+		try {
+			URL url = new URL(link);
+			URLConnection connection = url.openConnection();
+			connection.connect();
+			connection.getInputStream().close();
+			ret = true;
+		}catch (Exception e) {
+			ret = false;
+		}
+		return ret;
 	}
 }

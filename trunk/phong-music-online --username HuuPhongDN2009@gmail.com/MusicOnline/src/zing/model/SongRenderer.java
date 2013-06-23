@@ -23,7 +23,7 @@ public class SongRenderer implements ListCellRenderer{
 	Dimension dimension;
 	public static final int VIEW_MODE_CLASSIC = 1;
 	public static final int VIEW_MODE_DETAIL = 0;
-	public static final ImageIcon MP3_320_KBPS = new ImageIcon(Album.class.getResource("/images/mp3.png"));
+	public static final ImageIcon MP3_320_KBPS = new ImageIcon(Album.class.getResource("/images/320kbps.png"));
 	public static final ImageIcon LOSSLESS = new ImageIcon(Album.class.getResource("/images/lossless.png"));
 	
 	public SongRenderer(){
@@ -48,12 +48,12 @@ public class SongRenderer implements ListCellRenderer{
 		JLabel number = new JLabel(" " + numberToString(index + 1) + ".");
 		number.setForeground(Color.BLUE);
 		switch (song.getQuality()) {
-		case Song.LOSSLESS:
+		case LOSSLESS:
 			hq = new JLabel(LOSSLESS);
 			hq.setText(" ");
 			break;
 
-		case Song.MP3_320_KBPS:
+		case MP3_320_KBPS:
 			hq = new JLabel(MP3_320_KBPS);
 			hq.setText(" ");
 			break;
@@ -103,12 +103,12 @@ public class SongRenderer implements ListCellRenderer{
 		number.setIconTextGap(1);
 		number.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
 		switch (song.getQuality()) {
-		case Song.LOSSLESS:
+		case LOSSLESS:
 			hq = new JLabel(LOSSLESS);
 			hq.setText(" ");
 			break;
 
-		case Song.MP3_320_KBPS:
+		case MP3_320_KBPS:
 			hq = new JLabel(MP3_320_KBPS);
 			hq.setText(" ");
 			break;

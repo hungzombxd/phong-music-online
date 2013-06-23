@@ -77,6 +77,7 @@ import zing.audio.AudioPlayerListener;
 import zing.audio.Streaming;
 import zing.model.Album;
 import zing.model.AlbumRenderer;
+import zing.model.Format;
 import zing.model.History;
 import zing.model.ItemCombo;
 import zing.model.Playlist;
@@ -86,6 +87,7 @@ import zing.sites.ChiaSeNhac;
 import zing.sites.MusicSite;
 import zing.sites.NhacCuaTui;
 import zing.sites.Radio;
+import zing.sites.Site;
 import zing.sites.Zing;
 import zing.utils.Utils;
 
@@ -114,7 +116,7 @@ public class Main extends JFrame {
 	private boolean allowSaveFiles = false;
 	private Runtime runtime = Runtime.getRuntime();
 	private JMenuBar menuBar;
-	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemSaveCurrentSong, itemUndo, itemRedo, itemSetProxy, itemOpen, itemSave, itemExit, itemAlbumStartup, itemTopStartup, itemLoadFirstPlaylist, itemSendStatus, itemGetHighQuality, itemIcludeAlbum;
+	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemSaveCurrentSong, itemUndo, itemRedo, itemSetProxy, itemOpen, itemSave, itemExit, itemAlbumStartup, itemTopStartup, itemLoadFirstPlaylist, itemSendStatus, itemIcludeAlbum;
 	private JMenu menuFile, menuSetup, menuMedia, menuUserPlaylists, menuAddToPlaylist;
 	private JMenuItem mediaPlay, mediaNext, mediaPrevious, menuTopSong;
 	private ButtonGroup group;
@@ -124,7 +126,7 @@ public class Main extends JFrame {
 	private Class<?> object = this.getClass();
 	private ColorSlider slider;
 	private JLabel startDuration, endDuration, info, songInfo, labelSearch, iconStatus;
-	private JToggleButton highQuality;
+	private JLabel selectQuality;
 	private JPopupMenu popupMenu;
 	private History<List<Song>> history;
 	private Dimension dimension;
@@ -138,7 +140,7 @@ public class Main extends JFrame {
 	
 	public Main() {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(1000, 700);
+		setSize(1020, 700);
 //		setResizable(false);
 		setIconImage(toolkit.getImage((object.getResource("/images/zing.png"))));
 
@@ -219,8 +221,6 @@ public class Main extends JFrame {
 		});
 		menuSetup.add(itemSendStatus = new JCheckBoxMenuItem("Send song to Y!M"));
 		itemSendStatus.setAccelerator(KeyStroke.getKeyStroke('Y', KeyEvent.CTRL_DOWN_MASK));
-		menuSetup.add(itemGetHighQuality = new JCheckBoxMenuItem("Get high quality song"));
-		itemGetHighQuality.setAccelerator(KeyStroke.getKeyStroke('H', KeyEvent.CTRL_DOWN_MASK));
 		menuSetup.add(itemUpdate = new JCheckBoxMenuItem("Update song in mouse wheel"));
 		itemUpdate.setAccelerator(KeyStroke.getKeyStroke('U', KeyEvent.CTRL_DOWN_MASK));
 		itemUpdate.addActionListener(new ActionListener() {
@@ -282,14 +282,6 @@ public class Main extends JFrame {
 			}
 		});
 		
-		itemGetHighQuality.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent arg0) {
-				configure.highQuality = itemGetHighQuality.isSelected();
-				highQuality.setSelected(configure.highQuality);
-				highQuality.setToolTipText(configure.highQuality ? "High quality [ON] (Ctrl + H)" : "High quality [OFF] (Ctrl + H)");
-			}
-		});
 		itemSetProxy.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent arg0) {
@@ -567,7 +559,7 @@ public class Main extends JFrame {
 						setStatus("COPYING LINK: 0/" + save.length);
 						for (int i = 0; i < save.length; i++){
 							try {
-								saveString += configure.songs.get(save[i]).getDirectLink() + "\n";
+								saveString += configure.songs.get(save[i]).getDirectLink(Configure.getInstance().format) + "\n";
 							} catch (IOException e) {
 								setTitle(e.toString());
 								e.printStackTrace();
@@ -756,9 +748,8 @@ public class Main extends JFrame {
 								final Song song = new Song();
 								song.title = url.toString();
 								song.songInfo = song.title;
-//								song.songInfo = song.title;
-								song.directLink = song.title;
-								song.host = url.getAuthority();
+								song.setDirectLink(Format.MP3_128_KBPS, song.title);
+								song.site = Site.INTERNET_URL;
 								configure.songs.add(song);
 					            SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
@@ -781,8 +772,8 @@ public class Main extends JFrame {
 										song.title = file.getName();
 										song.songInfo = file.getAbsolutePath();
 //										song.songInfo = file.getAbsolutePath();
-										song.directLink = "file:" + file.getAbsolutePath();
-										song.host = "My Computer";
+										song.setDirectLink(Format.MP3_128_KBPS, "file:" + file.getAbsolutePath());
+										song.site = Site.MY_COMPUTER;
 					            		songs.add(song);
 									}
 								}
@@ -928,9 +919,7 @@ public class Main extends JFrame {
 		itemSendStatus.setSelected(configure.sendStatus);
 		itemTopStartup.setSelected(configure.topStartup);
 		itemIcludeAlbum.setSelected(configure.includeAlbum);
-		itemGetHighQuality.setSelected(configure.highQuality);
-		highQuality.setSelected(configure.highQuality);
-		highQuality.setToolTipText(configure.highQuality ? "High quality [ON] (Ctrl + H)" : "High quality [OFF] (Ctrl + H)");
+		selectQuality.setIcon(configure.format.getImage());
 		itemUpdate.setSelected(configure.update);
 		sites.setSelectedItem(configure.site);
 		types.setSelectedItem(configure.type);
@@ -958,7 +947,7 @@ public class Main extends JFrame {
 						Song song = listSongs.get(lists[i]);
 						out.write("#EXTINF:-1," + song.getTitle());
 						out.newLine();
-						out.write(song.getDirectLink());
+						out.write(song.getDirectLink(configure.format));
 						out.newLine();
 						setStatus("SAVING LINK: " + (i + 1) + "/" + lists.length);
 					}
@@ -986,7 +975,7 @@ public class Main extends JFrame {
 					setStatus("SAVING LINK: 0/" + lists.length);
 					for (int i = 0; i < lists.length; i++) {
 						Song song = listSongs.get(lists[i]);
-						out.write(song.getDirectLink());
+						out.write(song.getDirectLink(configure.format));
 						out.newLine();
 						setStatus("SAVING LINK: " + (i + 1) + "/" + lists.length);
 					}
@@ -1305,7 +1294,7 @@ public class Main extends JFrame {
 				player.play(song);
 			} else {
 				setTitle("Sending: '" + currentTitle + "'...");
-				runtime.exec(configure.defaultMediaPlayer + " " + song.getDirectLink());
+				runtime.exec(configure.defaultMediaPlayer + " " + song.getDirectLink(configure.format));
 				setTitle("Sended '" + song.getTitle() + "' - " + configure.title);
 			}
 		} catch (Exception e) {
@@ -1697,19 +1686,27 @@ public class Main extends JFrame {
 			}
 		});
 		panelSearch.add(Box.createGlue());
-		panelSearch.add(highQuality = new JToggleButton(getImage("hq-normal.png")));
-		highQuality.setSelectedIcon(getImage("hq-selected.png"));
-		highQuality.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		highQuality.setPreferredSize(new Dimension(26, 16));
-		highQuality.setFocusable(false);
-		highQuality.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent arg0) {
-				configure.highQuality = highQuality.isSelected();
-				itemGetHighQuality.setSelected(configure.highQuality);
-				highQuality.setToolTipText(configure.highQuality ? "High quality [ON] (Ctrl + H)" : "High quality [OFF] (Ctrl + H)");
+		panelSearch.add(selectQuality = new JLabel(configure.format.getImage()));
+		selectQuality.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//		selectQuality.setPreferredSize(new Dimension(26, 16));
+		selectQuality.setFocusable(false);
+		selectQuality.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				if (configure.format.equals(Format.LOSSLESS)){
+					configure.format = Format.MP3_128_KBPS;
+				} else {
+					for (Format format : Format.values()){
+						if (format.compareTo(configure.format) > 0){
+							configure.format = format;
+							break;
+						}
+					}
+				}
+				selectQuality.setIcon(configure.format.getImage());
 			}
 		});
+
 		panelSearch.add(Box.createRigidArea(new Dimension(0, 3)));
 		return panelSearch;
 	}
@@ -1952,5 +1949,4 @@ public class Main extends JFrame {
 			}
 		});
 	}
-
 }

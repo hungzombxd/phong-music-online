@@ -7,9 +7,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import zing.model.Album;
+import zing.model.Format;
 import zing.model.ItemCombo;
 import zing.model.Song;
 import zing.utils.HtmlUtil;
@@ -42,8 +45,8 @@ public class NhacCuaTui extends MusicSite {
 			link = HtmlUtil.getTag(str, "location");
 			Song song = new Song();
 			song.setTitle(title + " - " + artist);
-			song.setDirectLink(link);
-			song.setHost("nhaccuatui.com");
+			song.setDirectLink(Format.MP3_128_KBPS, link);
+			song.setSite(Site.NHAC_CUA_TUI);
 			songs.add(song);
 		}
 		in.close();
@@ -67,7 +70,7 @@ public class NhacCuaTui extends MusicSite {
 		return str;
 	}
 	
-	public String getLink(String html) throws IOException{
+	public Map<Format, String> getLink(String html) throws IOException{
 		BufferedReader in = getInputStream("http://www.nhaccuatui.com/download/song/" + html.substring(html.length() - 15).substring(0, 10));
 		String str;
 		while ((str = in.readLine()) != null) {
@@ -78,7 +81,13 @@ public class NhacCuaTui extends MusicSite {
 			}
 		}
 		in.close();
-		return str == null ? xmlToSongs(htmlToXML(html)).get(0).getDirectLink() : str.trim();
+		Map<Format, String> links = new HashMap<Format, String>();
+		if (str == null){
+			links.putAll(xmlToSongs(htmlToXML(html)).get(0).directLinks);
+		}else{
+			links.put(Format.MP3_128_KBPS, str.trim());
+		}
+		return links;
 	}
 	
 	public List<Song> searchSong(String value, int page, String filter) throws IOException{
@@ -95,7 +104,7 @@ public class NhacCuaTui extends MusicSite {
 						}
 						str = in.readLine();
 						Song song = new Song();
-						song.quality = str.contains("320kb") || str.contains("Official") ? Song.MP3_320_KBPS : Song.MP3_128_KBPS;
+						song.quality = str.contains("320kb") || str.contains("Official") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS;
 						str = in.readLine();
 						song.link = HtmlUtil.getAttribute(str, "href=\"");
 						if (!song.link.startsWith("http")) song.link = "http://www.nhaccuatui.com" + song.link;
@@ -108,7 +117,7 @@ public class NhacCuaTui extends MusicSite {
 							song.songInfo = "Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim() + " | Upload bởi: " + HtmlUtil.htmlToText(in.readLine()).trim();
 							break;
 						}
-						song.host = "nhaccuatui.com";
+						song.site = Site.NHAC_CUA_TUI;
 						songs.add(song);
 					}
 				}
