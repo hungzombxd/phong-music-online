@@ -147,7 +147,7 @@ public class Zing extends MusicSite{
 	private List<Song> getTopSongs(String urlTop)
 			throws UnsupportedEncodingException, IOException {
 		List<Song> lists = new ArrayList<Song>();
-		BufferedReader in = getInputStream(urlTop);
+		BufferedReader in = getReader(urlTop);
 		String str, title, link;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("href=\"/bai-hat/") && str.contains("<h3>")) {
@@ -168,7 +168,7 @@ public class Zing extends MusicSite{
 	// Get XML file for song or album
 	private String getXML(String link) throws IOException {
 		String ret = "";
-		BufferedReader in = getInputStream(link);
+		BufferedReader in = getReader(link);
 		String str;
 		int index = 0;
 		while ((str = in.readLine()) != null) {
@@ -194,7 +194,7 @@ public class Zing extends MusicSite{
 	public List<Song> searchSong(String value, int page, String filter) throws UnsupportedEncodingException, IOException{
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Song> lists = new ArrayList<Song>();
-		BufferedReader in = getInputStream("http://mp3.zing.vn/tim-kiem/bai-hat.html?q=" + value	+ "&p=" + page + filter);
+		BufferedReader in = getReader("http://mp3.zing.vn/tim-kiem/bai-hat.html?q=" + value	+ "&p=" + page + filter);
 		String str, title, link;
 		while ((str = in.readLine()) != null) {
 			if(str.contains("/bai-hat/")){
@@ -218,7 +218,7 @@ public class Zing extends MusicSite{
 	public List<Album> searchAlbum(String value, int page, String filter) throws IOException{
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Album> lists = new ArrayList<Album>();
-		BufferedReader in = getInputStream("http://mp3.zing.vn/tim-kiem/playlist.html?q=" + value + "&p=" + page);
+		BufferedReader in = getReader("http://mp3.zing.vn/tim-kiem/playlist.html?q=" + value + "&p=" + page);
 		String str, title, link, albumArt = "";
 		while ((str = in.readLine()) != null) {
 			if (str.contains("class=\"album-img\"")){
@@ -253,7 +253,7 @@ public class Zing extends MusicSite{
 
 	public List<Song> xmlToSongs(String linkXML) throws IOException {
 		List<Song> songs = new ArrayList<Song>();
-		BufferedReader in = getInputStream(linkXML);
+		BufferedReader in = getReader(linkXML);
 		String str;
 		String title = "";
 		String artist = "";
@@ -276,7 +276,7 @@ public class Zing extends MusicSite{
 
 	private List<Song> getSongsType(String linkType, int page) throws UnsupportedEncodingException, IOException {
 		List<Song> lists = new ArrayList<Song>();
-		BufferedReader in = getInputStream(linkType + "?p=" + page);
+		BufferedReader in = getReader(linkType + "?p=" + page);
 		String str, title, link;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<h2><a title=\"")
@@ -302,7 +302,7 @@ public class Zing extends MusicSite{
 	private List<Album> getPlayListBy(String typePlaylistLink, int page)
 			throws IOException {
 		List<Album> albums = new ArrayList<Album>();
-		BufferedReader in = getInputStream(typePlaylistLink + "?p=" + page);
+		BufferedReader in = getReader(typePlaylistLink + "?p=" + page);
 		String str;
 		int from = -1;
 		int to = -1;
@@ -332,7 +332,7 @@ public class Zing extends MusicSite{
 	
 	public List<String> getLyric(Song song) throws IOException{
 		List<String> lyrics = new ArrayList<String>();
-		BufferedReader in = getInputStream(song.getLink());
+		BufferedReader in = getReader(song.getLink());
 		String str, lyric;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<p class=\"_lyricContent")) {
@@ -358,5 +358,9 @@ public class Zing extends MusicSite{
 	@Override
 	public ItemCombo[] getFilters() {
 		return FILTERS;
+	}
+	
+	public static void main(String[] args) throws UnsupportedEncodingException, IOException {
+		System.out.println(getInstance().searchAlbum("Nhat Kim Anh", 1, "").get(0).getSongs());
 	}
 }

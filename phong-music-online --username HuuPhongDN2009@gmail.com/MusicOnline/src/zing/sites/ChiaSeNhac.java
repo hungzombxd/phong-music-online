@@ -33,7 +33,7 @@ public class ChiaSeNhac extends MusicSite{
 			throws IOException {
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Song> songs = new ArrayList<Song>();
-		BufferedReader in = getInputStream("http://search.chiasenhac.com/search.php?mode=&order=quality&cat=music&s=" + value + "&page=" + page + filter);
+		BufferedReader in = getReader("http://search.chiasenhac.com/search.php?mode=&order=quality&cat=music&s=" + value + "&page=" + page + filter);
 		String str;
 		String title = "";
 		String artist = "";
@@ -61,12 +61,14 @@ public class ChiaSeNhac extends MusicSite{
 	@Override
 	public Map<Format, String> getLink(String html) throws IOException {
 		Map<Format, String> links = new HashMap<Format, String>();
-		BufferedReader in = getInputStream(html.replace("http://", "http://download.").replace(".html", "_download.html"));
+		Map<String, String> properties = new HashMap<String, String>();
+		properties.put("Cookie", "csn_data=a%3A2%3A%7Bs%3A11%3A%22autologinid%22%3Bs%3A0%3A%22%22%3Bs%3A6%3A%22userid%22%3Bi%3A103497%3B%7D; csn_sid=51b467f7ea25cd8887b53fbb69458f9b");
+		BufferedReader in = getReader(html.replace("http://", "http://download.").replace(".html", "_download.html"), properties);
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<div id=\"downloadlink\"")){
 				while (!(str = in.readLine()).contains("</div>")){
-					if (str.contains("http://data.chiasenhac.com/downloads/")){
+					if (str.contains("chiasenhac.com/downloads/")){
 						str = HtmlUtil.getAttribute(str, "href=\"").replace(" ", "+");
 						if (str.toLowerCase().endsWith(".mp3") || str.toLowerCase().endsWith(".flac")){
 							links.put(getFormat(str), str);
@@ -104,7 +106,8 @@ public class ChiaSeNhac extends MusicSite{
 	}
 	
 	public static void main(String[] args) throws IOException {
-		new ChiaSeNhac().getLink("http://chiasenhac.com/mp3/vietnam/v-pop/no~pham-truong~1004374.html");
+		System.out.println(new ChiaSeNhac().getLink("http://chiasenhac.com/mp3/vietnam/v-pop/cung-dan-tinh-yeu~dan-truong-my-tam~1002882.html"));
+		
 	}
 
 	@Override

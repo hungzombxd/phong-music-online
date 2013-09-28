@@ -54,7 +54,7 @@ public class NhacCuaTui extends MusicSite {
 	}
 	
 	public String htmlToXML(String html) throws IOException{
-		BufferedReader in = getInputStream(html);
+		BufferedReader in = getReader(html);
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.indexOf("NCTNowPlaying.intFlashPlayer") != -1){
@@ -71,7 +71,7 @@ public class NhacCuaTui extends MusicSite {
 	}
 	
 	public Map<Format, String> getLink(String html) throws IOException{
-		BufferedReader in = getInputStream("http://www.nhaccuatui.com/download/song/" + html.substring(html.length() - 15).substring(0, 10));
+		BufferedReader in = getReader("http://www.nhaccuatui.com/download/song/" + html.substring(html.length() - 15).substring(0, 10));
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("Success")){
@@ -93,7 +93,7 @@ public class NhacCuaTui extends MusicSite {
 	public List<Song> searchSong(String value, int page, String filter) throws IOException{
 		value = URLEncoder.encode(value, "UTF-8");
 		List<Song> songs = new ArrayList<Song>();
-		BufferedReader in = getInputStream("http://www.nhaccuatui.com/tim-kiem/bai-hat?q=" + value + "&page=" + page);
+		BufferedReader in = getReader("http://www.nhaccuatui.com/tim-kiem/bai-hat?q=" + value + "&page=" + page);
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<ul class=\"list-song\">")){
@@ -132,7 +132,7 @@ public class NhacCuaTui extends MusicSite {
 	public List<Album> searchAlbum(String value, int page, String filter) throws IOException {
 		List<Album> albums = new ArrayList<Album>();
 		value = URLEncoder.encode(value, "UTF-8");
-		BufferedReader in = getInputStream("http://www.nhaccuatui.com/tim-kiem/playlist?q=" + value + "&page=" + page);
+		BufferedReader in = getReader("http://www.nhaccuatui.com/tim-kiem/playlist?q=" + value + "&page=" + page);
 		String str;
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<ul class=\"list-al-pl\"")){

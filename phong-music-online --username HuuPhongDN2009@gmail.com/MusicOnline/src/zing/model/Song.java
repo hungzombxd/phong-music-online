@@ -1,18 +1,11 @@
 package zing.model;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import zing.Configure;
 import zing.sites.ChiaSeNhac;
 import zing.sites.NhacCuaTui;
 import zing.sites.Radio;
@@ -117,24 +110,24 @@ public class Song implements Serializable {
 		return link;
 	}
 	
-	public void saveToFile(String dir){
-		dir = (dir.endsWith(File.separator))? dir : dir + File.separator;
-		try {
-			URLConnection connection = new URL(getDirectLink(Configure.getInstance().format)).openConnection();
-			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dir + toTitle(title) + (Configure.getInstance().format == Format.LOSSLESS ? ".flac" : ".mp3")));
-			int readed = -1;
-			byte[] buffered = new byte[63888];
-			while ((readed = in.read(buffered)) != -1){
-				out.write(buffered, 0, readed);
-			}
-			out.flush();
-			out.close();
-			in.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} 
-	}
+//	public void saveToFile(String dir){
+//		dir = (dir.endsWith(File.separator))? dir : dir + File.separator;
+//		try {
+//			URLConnection connection = new URL(getDirectLink(Configure.getInstance().format)).openConnection();
+//			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+//			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dir + toTitle(title) + (Configure.getInstance().format == Format.LOSSLESS ? ".flac" : ".mp3")));
+//			int readed = -1;
+//			byte[] buffered = new byte[63888];
+//			while ((readed = in.read(buffered)) != -1){
+//				out.write(buffered, 0, readed);
+//			}
+//			out.flush();
+//			out.close();
+//			in.close();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} 
+//	}
 	
 	public Site getSite() {
 		return site;
@@ -144,9 +137,9 @@ public class Song implements Serializable {
 		this.site = site;
 	}
 
-	public String toTitle(String str){
-		str = str.replace(":", "-");
-		StringTokenizer token = new StringTokenizer(str,"-");
+	public String toTitle(){
+		String str = title.replace(":", "-");
+		StringTokenizer token = new StringTokenizer(str, "-");
 		if (token.countTokens() == 2){
 			String titleSong = token.nextToken().trim();
 			String artistSong = token.nextToken().trim();

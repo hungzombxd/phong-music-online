@@ -98,7 +98,11 @@ public class AudioPlayer{
 	}
 	
 	private void prepare(String url){
-		in = new SmartSeekAudioStream(url, streaming);
+		if (url.startsWith(FileAudioStream.FILE_REGEX)){
+			in = new FileAudioStream(url);
+		} else {
+			in = new SmartSeekAudioStream(url, streaming);
+		}
 		switch (in.getType()) {
 		case AudioCodec.MP3_STREAM:
 			decoder = new MP3FileDecoder(in);
