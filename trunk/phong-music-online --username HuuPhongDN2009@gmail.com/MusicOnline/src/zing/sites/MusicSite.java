@@ -2,12 +2,16 @@ package zing.sites;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.zip.GZIPInputStream;
 
 import zing.Configure;
 import zing.model.Album;
@@ -48,10 +52,22 @@ public abstract class MusicSite{
 		return information;
 	}
 	
-	public BufferedReader getInputStream(String link) throws IOException{
+	public BufferedReader getReader(String link) throws IOException{
+		return getReader(link, null);
+	}
+	
+	public BufferedReader getReader(String link, Map<String, String> properties) throws IOException{
 		URL url = new URL(link);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
-		return new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+		if (properties != null){
+			Set<Entry<String, String>> pros = properties.entrySet();
+			for (Entry<String, String> pro : pros){
+				connection.addRequestProperty(pro.getKey(), pro.getValue());
+			}
+		}
+		InputStream in = connection.getInputStream();
+		if ("gzip".equalsIgnoreCase(connection.getContentEncoding())) in = new GZIPInputStream(in);
+		return new BufferedReader(new InputStreamReader(in, "UTF-8"));
 	}
 }

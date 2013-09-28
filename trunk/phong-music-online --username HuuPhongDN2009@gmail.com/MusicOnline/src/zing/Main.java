@@ -66,7 +66,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.JToolTip;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -89,6 +88,7 @@ import zing.sites.NhacCuaTui;
 import zing.sites.Radio;
 import zing.sites.Site;
 import zing.sites.Zing;
+import zing.utils.FileUtils;
 import zing.utils.Utils;
 
 public class Main extends JFrame {
@@ -173,6 +173,7 @@ public class Main extends JFrame {
 				slider.max = player.getLength();
 				endDuration.setText(Utils.toDuaration(player.getDuration()));
 				setTitle(player.getPlayingInfo());
+				if (player.isBuffered()) slider.setRange(player.getLength());
 			}
 		});
 		
@@ -1009,10 +1010,18 @@ public class Main extends JFrame {
 				try {
 					setStatus("SAVING FILE: 0/" + lists.length);
 					allowSaveFiles = true;
+					FileUtils.Streaming streaming = new FileUtils.Streaming() {
+						
+						@Override
+						public void progressing(int length, int offset) {
+							setStatus(offset * 100 / length + " %");
+						}
+					};
 					for (i = 0; i < lists.length; i++) {
 						Song song = listSongs.get(lists[i]);
-						info.setToolTipText("Saving file " + song.toTitle(song.getTitle()) + ".mp3 to " + dir);
-						song.saveToFile(dir);
+						info.setToolTipText("Saving file " + song.toTitle() + ".mp3 to " + dir);
+						String file = dir + File.separator + Utils.toANSI(song.toTitle()) + (song.getQuality().equals(Format.LOSSLESS) ? ".flac" : ".mp3");
+						FileUtils.copyURLToFile(new URL(song.getDirectLink(configure.format)), new File(file), streaming);
 						setStatus("SAVING FILE: " + (i + 1) + "/"
 								+ lists.length);
 						if (!allowSaveFiles) {
