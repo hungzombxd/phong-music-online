@@ -262,11 +262,12 @@ public class Zing extends MusicSite{
 		while ((str = in.readLine()) != null) {
 			if (str.contains("<item")) {
 				title = HtmlUtil.getContent(in.readLine());
-				artist = in.readLine();
+				artist = HtmlUtil.getContent(in.readLine());
+				in.readLine();
 				link = in.readLine();
 				song = new Song();
 				song.setDirectLink(Format.MP3_128_KBPS, HtmlUtil.getContent(link));
-				song.setTitle(title + " - " + HtmlUtil.getContent(artist));
+				song.setTitle(String.format("%1$s - %2$s", title, artist));
 				songs.add(song);
 			}
 		}
@@ -361,6 +362,6 @@ public class Zing extends MusicSite{
 	}
 	
 	public static void main(String[] args) throws UnsupportedEncodingException, IOException {
-		System.out.println(getInstance().searchAlbum("Nhat Kim Anh", 1, "").get(0).getSongs());
+		System.out.println(getInstance().searchSong("Pham truong", 1, "").get(0).getDirectLink(Format.MP3_128_KBPS));
 	}
 }
