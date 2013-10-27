@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.URL;
 
+import zing.Configure;
+
 
 public class SaveAudioStream extends AudioStream{
 	private static File audioFile;
@@ -39,7 +41,7 @@ public class SaveAudioStream extends AudioStream{
 		try {
 			url = new URL(link);
 			connection = url.openConnection();
-			connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.43 Safari/537.31");
+			connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
 			length = connection.getContentLength();
 			in.setLength(length);
 			remote = connection.getInputStream();
