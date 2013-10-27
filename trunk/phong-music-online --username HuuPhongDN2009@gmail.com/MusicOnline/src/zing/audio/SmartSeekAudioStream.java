@@ -12,6 +12,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
+import zing.Configure;
+
 
 public class SmartSeekAudioStream extends AudioStream{
 	private static File audioFile;
@@ -46,7 +48,7 @@ public class SmartSeekAudioStream extends AudioStream{
 		try {
 			url = new URL(link);
 			connection = url.openConnection();
-			connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.43 Safari/537.31");
+			connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
 			length = connection.getContentLength();
 			in.setLength(length);
 			allPoints.add(new Point(0, length - 1));
@@ -131,7 +133,7 @@ public class SmartSeekAudioStream extends AudioStream{
 	
 	private InputStream prepareStream(Point point) throws IOException{
 		connection = url.openConnection();
-		connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.43 Safari/537.31");
+		connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
     	connection.setRequestProperty("Accept-Ranges", "bytes");
 		connection.setRequestProperty("Range", "bytes=" + point.x + "-" + point.y);
 		connection.connect();
