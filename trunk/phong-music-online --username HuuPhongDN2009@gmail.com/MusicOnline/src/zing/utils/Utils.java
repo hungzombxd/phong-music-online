@@ -19,6 +19,8 @@ import zing.model.Song;
 
 public final class Utils{
 	
+	public static int[] ERROR_CODE = {403};
+	
 	private static String[] ansi = new String[]{"a", "a", "a", "a", "a", "a", "a",
 			"a", "a", "a", "a", "a", "a", "a", "a", "o", "o", "o", "o", "o",
 			"o", "o", "o", "o", "o", "o", "o", "o", "o", "o", "u", "u", "u",
@@ -103,19 +105,33 @@ public final class Utils{
 	
 	public static boolean isURLAvailable(String link){
 		boolean ret = false;
-		if (link.startsWith("file:")) {
-			ret = true;
-		} else {
-			try {
-				URL url = new URL(link);
-				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-				connection.connect();
-				connection.disconnect();
-				ret = true;
-			} catch (Exception e) {
+		try {
+			URL url = new URL(link);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.connect();
+			if (connection.getContentLength() == -1){
 				ret = false;
+			} else if (isErrorCode(connection.getResponseCode())) {
+				ret = false;
+			} else {
+				ret = true;
+			}
+			connection.disconnect();
+		} catch (Exception e) {
+			ret = false;
+		}
+		return ret;
+	}
+	
+	private static boolean isErrorCode(int code){
+		boolean ret = false;
+		for (int i = 0; i < ERROR_CODE.length; i++) {
+			if (code == ERROR_CODE[i]) {
+				ret = true;
+				break;
 			}
 		}
+		if (code >= 300) ret = true;
 		return ret;
 	}
 }
