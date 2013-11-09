@@ -21,11 +21,8 @@ public class FrameLyric extends JFrame {
 	private static final long serialVersionUID = -2675197512423718784L;
 	JTextPane lyric;
 	JScrollPane scrollPane;
-	MusicSite musicSite;
 	
-	public FrameLyric(MusicSite musicSite) {
-		this.musicSite = musicSite;
-		
+	public FrameLyric() {
 		setSize(400, 500);
 		setVisible(true);
 		setDefaultCloseOperation(HIDE_ON_CLOSE);
@@ -54,7 +51,7 @@ public class FrameLyric extends JFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					List<String> lyrics = musicSite.getLyric(song);
+					List<String> lyrics = MusicSite.getInstanceBy(song.site).getLyric(song);
 					if (lyrics.isEmpty()){
 						lyric.setText("<h1 style='text-align:center; color: blue;'>Not found lyric<h1>");
 						return; 

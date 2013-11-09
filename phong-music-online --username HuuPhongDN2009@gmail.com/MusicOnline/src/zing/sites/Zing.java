@@ -360,8 +360,4 @@ public class Zing extends MusicSite{
 	public ItemCombo[] getFilters() {
 		return FILTERS;
 	}
-	
-	public static void main(String[] args) throws UnsupportedEncodingException, IOException {
-		System.out.println(getInstance().searchSong("Pham truong", 1, "").get(0).getDirectLink(Format.MP3_128_KBPS));
-	}
 }

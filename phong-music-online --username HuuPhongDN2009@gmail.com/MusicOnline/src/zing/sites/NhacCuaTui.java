@@ -2,7 +2,6 @@ package zing.sites;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -31,13 +30,12 @@ public class NhacCuaTui extends MusicSite {
 	public List<Song> xmlToSongs(String xml) throws UnsupportedEncodingException, IOException{
 		List<Song> songs = new ArrayList<Song>();
 		URL url = new URL(xml);
-		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
 		String str;
 		int from = -1;
 		String title = "";
 		String link = "";
 		String artist = "";
-		str = HtmlUtil.readJoinLines(in);
+		str = HtmlUtil.streamToString(url.openStream());
 		while ((from = str.indexOf("<track>")) != -1){
 			str = str.substring(from + 7);
 			title = HtmlUtil.getTag(str, "title");
@@ -49,7 +47,6 @@ public class NhacCuaTui extends MusicSite {
 			song.setSite(Site.NHAC_CUA_TUI);
 			songs.add(song);
 		}
-		in.close();
 		return songs;
 	}
 	
@@ -173,10 +170,6 @@ public class NhacCuaTui extends MusicSite {
 	public List<String> getLyric(String html) throws IOException {
 		List<String> lyrics = new ArrayList<String>();
 		return lyrics;
-	}
-	
-	public static void main(String[] args) throws IOException {
-		System.out.println(NhacCuaTui.getInstance().searchAlbum("lam truong", 1, ""));
 	}
 
 	@Override

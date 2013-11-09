@@ -20,12 +20,24 @@ import zing.model.ItemCombo;
 import zing.model.Song;
 
 public abstract class MusicSite{
-	public static final int MP3_ZING_VN = 0;
-	public static final int NHAC_CUA_TUI = 1;
-	public static final int CHIA_SE_NHAC = 2;
-	
 	protected String error = null;
 	protected String information = null;
+	
+	public static MusicSite getInstanceBy(Site site){
+		switch (site) {
+		case MP3_ZING_VN:
+			return Zing.getInstance();
+			
+		case CHIA_SE_NHAC:
+			return ChiaSeNhac.getInstance();
+			
+		case NHAC_CUA_TUI:
+			return NhacCuaTui.getInstance();
+
+		default:
+			throw new RuntimeException(String.format("Unknow site %1$s", site));
+		}
+	}
 	
 	public abstract List<Song> searchSong(String value, int page, String filter) throws IOException;
 	
