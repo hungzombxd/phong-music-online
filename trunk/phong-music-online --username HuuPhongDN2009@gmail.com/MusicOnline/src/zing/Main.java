@@ -632,7 +632,7 @@ public class Main extends JFrame {
 		itemShowLyric.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent arg0) {
-				if (frameLyric == null) frameLyric = new FrameLyric(musicSite);
+				if (frameLyric == null) frameLyric = new FrameLyric();
 				new Thread(){
 					public void run(){
 						Song song = configure.songs.get(songs.getSelectedIndex());
