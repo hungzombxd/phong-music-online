@@ -62,7 +62,7 @@ public class Album implements Serializable{
 	}
 	
 	public List<Song> getSongs() throws IOException{
-		if (songs.isEmpty() || !Utils.isURLAvailable(songs.get(0).getDirectLink(Configure.getInstance().format))){
+		if (songs.isEmpty() || !Utils.isURLAvailable(songs.get(0).getDirectLinkWithoutRefresh(Configure.getInstance().format))){
 			if (link.contains("mp3.zing.vn")){
 				songs = Zing.getInstance().getAlbum(link);
 			}else if (link.contains("nhaccuatui.com")){

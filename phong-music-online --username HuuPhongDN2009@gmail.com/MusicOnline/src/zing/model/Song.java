@@ -65,7 +65,7 @@ public class Song implements Serializable {
 	}
 
 	public String getDirectLink(Format format) throws IOException {
-		if (directLinks != null && Utils.isURLAvailable(getLink(format))) return getLink(format);
+		if (directLinks != null && Utils.isURLAvailable(getDirectLinkWithoutRefresh(format))) return getDirectLinkWithoutRefresh(format);
 		
 		switch (site) {
 		
@@ -89,10 +89,10 @@ public class Song implements Serializable {
 			throw new RuntimeException("Site is empty");
 		}
 		
-		return getLink(format);
+		return getDirectLinkWithoutRefresh(format);
 	}
 	
-	private String getLink(Format format){
+	public String getDirectLinkWithoutRefresh(Format format){
 		String link = null;
 		switch (format) {
 		case LOSSLESS:
