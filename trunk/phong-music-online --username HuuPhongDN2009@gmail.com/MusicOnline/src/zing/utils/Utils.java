@@ -108,7 +108,7 @@ public final class Utils{
 		try {
 			URL url = new URL(link);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setInstanceFollowRedirects(false);
+//			connection.setInstanceFollowRedirects(false);
 			connection.setRequestMethod("HEAD");
 			connection.connect();
 			if (connection.getContentLength() == -1){
@@ -122,7 +122,7 @@ public final class Utils{
 		} catch (Exception e) {
 			ret = false;
 		}
-		return ret;
+		return true;
 	}
 	
 	private static boolean isErrorCode(int code){
