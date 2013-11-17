@@ -122,7 +122,7 @@ public final class Utils{
 		} catch (Exception e) {
 			ret = false;
 		}
-		return true;
+		return ret;
 	}
 	
 	private static boolean isErrorCode(int code){
