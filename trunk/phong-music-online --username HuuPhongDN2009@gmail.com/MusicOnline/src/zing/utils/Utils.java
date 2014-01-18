@@ -109,7 +109,7 @@ public final class Utils{
 			URL url = new URL(link);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 //			connection.setInstanceFollowRedirects(false);
-			connection.setRequestMethod("HEAD");
+//			connection.setRequestMethod("HEAD");
 			connection.connect();
 			if (connection.getContentLength() == -1){
 				ret = false;

@@ -63,9 +63,9 @@ public class AudioPlayer{
 				while (true){
 					while (!threads.isEmpty()){
 						Thread thread = threads.lastElement();
-						thread.start();
 						if (thread.equals(threads.lastElement())){
 							threads.clear();
+							thread.start();
 						} else {
 							AudioPlayer.this.stop();
 							continue;
