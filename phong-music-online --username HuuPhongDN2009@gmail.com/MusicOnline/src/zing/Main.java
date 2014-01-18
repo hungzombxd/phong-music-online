@@ -41,8 +41,10 @@ import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -116,7 +118,7 @@ public class Main extends JFrame {
 	private boolean allowSaveFiles = false;
 	private Runtime runtime = Runtime.getRuntime();
 	private JMenuBar menuBar;
-	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemSaveCurrentSong, itemUndo, itemRedo, itemSetProxy, itemOpen, itemSave, itemExit, itemAlbumStartup, itemTopStartup, itemLoadFirstPlaylist, itemSendStatus, itemIcludeAlbum;
+	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemSaveCurrentSong, itemUndo, itemRedo, itemSetProxy, itemOpen, itemSave, itemExit, itemIcludeAlbum;
 	private JMenu menuFile, menuSetup, menuMedia, menuUserPlaylists, menuAddToPlaylist;
 	private JMenuItem mediaPlay, mediaNext, mediaPrevious, menuTopSong;
 	private ButtonGroup group;
@@ -209,9 +211,6 @@ public class Main extends JFrame {
 		menuFile.add(itemExit = new JMenuItem("Exit"));
 		itemExit.setAccelerator(KeyStroke.getKeyStroke('X', KeyEvent.ALT_DOWN_MASK));
 		itemExit.setIcon(getImage("exit.png"));
-		menuSetup.add(itemTopStartup = new JCheckBoxMenuItem("Load top song at startup"));
-		menuSetup.add(itemAlbumStartup = new JCheckBoxMenuItem("Load album at startup"));
-		menuSetup.add(itemLoadFirstPlaylist = new JCheckBoxMenuItem("Load first album in search album"));
 		menuSetup.add(itemIcludeAlbum = new JCheckBoxMenuItem("Search album in search song"));
 		itemIcludeAlbum.setAccelerator(KeyStroke.getKeyStroke('I', KeyEvent.CTRL_DOWN_MASK));
 		itemIcludeAlbum.addActionListener(new ActionListener() {
@@ -220,8 +219,6 @@ public class Main extends JFrame {
 				configure.includeAlbum = itemIcludeAlbum.isSelected();
 			}
 		});
-		menuSetup.add(itemSendStatus = new JCheckBoxMenuItem("Send song to Y!M"));
-		itemSendStatus.setAccelerator(KeyStroke.getKeyStroke('Y', KeyEvent.CTRL_DOWN_MASK));
 		menuSetup.add(itemUpdate = new JCheckBoxMenuItem("Update song in mouse wheel"));
 		itemUpdate.setAccelerator(KeyStroke.getKeyStroke('U', KeyEvent.CTRL_DOWN_MASK));
 		itemUpdate.addActionListener(new ActionListener() {
@@ -258,31 +255,6 @@ public class Main extends JFrame {
 				}
 			}
 		});
-		itemLoadFirstPlaylist.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				configure.loadFirstPlaylist = itemLoadFirstPlaylist.isSelected();
-			}
-		});
-		itemSendStatus.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				configure.sendStatus = itemSendStatus.isSelected();
-			}
-		});
-		itemAlbumStartup.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				configure.albumStartup = itemAlbumStartup.isSelected();
-			}
-		});
-		itemTopStartup.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				configure.topStartup = itemTopStartup.isSelected();
-			}
-		});
-		
 		itemSetProxy.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent arg0) {
@@ -915,10 +887,6 @@ public class Main extends JFrame {
 		page.setText(configure.page);
 		setSongs(configure.songs, true);
 		setAlbum(configure.albums, true);
-		itemAlbumStartup.setSelected(configure.albumStartup);
-		itemLoadFirstPlaylist.setSelected(configure.loadFirstPlaylist);
-		itemSendStatus.setSelected(configure.sendStatus);
-		itemTopStartup.setSelected(configure.topStartup);
 		itemIcludeAlbum.setSelected(configure.includeAlbum);
 		selectQuality.setIcon(configure.format.getImage());
 		itemUpdate.setSelected(configure.update);
@@ -928,7 +896,6 @@ public class Main extends JFrame {
 		bys.setSelectedItem(configure.by);
 		repeats.setSelectedItem(configure.repeat);
 		value.setText(configure.value);
-		startup();
 		setProxy();
 	}
 
@@ -1051,15 +1018,28 @@ public class Main extends JFrame {
 			configure.lastValueSong = "";
 			configure.lastPageSong = 1;
 		}
-		SwingUtilities.invokeLater(new Runnable() {
+		new Thread(){
 			public void run(){
-				for (Song song : lists) {
-					modelSongs.addElement(song);
+				Queue<Thread> threads = getThreadLoaders(lists, modelSongs);
+				while(!threads.isEmpty()){
+					Thread thread = threads.poll();
+					thread.start();
+					try {
+						thread.join();
+					} catch (Exception e) {
+					}
 				}
-				songs.setSelectedIndex(0);
-				songs.requestFocus();
 			}
-		});
+		}.start();		
+//		SwingUtilities.invokeLater(new Runnable() {
+//			public void run(){
+//				for (Song song : lists) {
+//					modelSongs.addElement(song);
+//				}
+//				songs.setSelectedIndex(0);
+//				songs.requestFocus();
+//			}
+//		});
 		if (history.undo > 0){
 			itemUndo.setEnabled(true);
 		}else{
@@ -1072,6 +1052,31 @@ public class Main extends JFrame {
 		}
 	}
 	
+	private Queue<Thread> getThreadLoaders(final List<?> lists, final DefaultListModel model) {
+		Queue<Thread> threads = new ArrayDeque<Thread>();
+		int number = lists.size() / 20;
+		if ((lists.size() % 20) != 0) number ++;
+		for (int i = 0; i < number; i++){
+			int index = i * 20;
+			int end = index + 20;
+			end = end > lists.size()? lists.size() : end;
+			final List<?> songs = lists.subList(index, end);
+			threads.add(new Thread(){
+				public void run(){
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							for (Object song : songs) {
+								model.addElement(song);
+							}
+						}
+					});
+				}
+			});
+		}
+		return threads;
+	}	
+	
 	private void setAlbum(final List<Album> lists, boolean clear){
 		if (!clear){
 			configure.albums.addAll(lists);
@@ -1081,26 +1086,40 @@ public class Main extends JFrame {
 			configure.lastValueAlbum = "";
 			configure.lastPageAlbum = 1;
 		}
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				for (Album album : lists) {
-					modelAlbums.addElement(album);
-				}
-				albums.setSelectedIndex(0);
-				if (!configure.albums.isEmpty() && itemLoadFirstPlaylist.isSelected() && types.getSelectedItem().toString().equals("Album")) {
-					new Thread(){
-						public void run(){
-							try {
-								setSongs(configure.albums.get(0).getSongs(), true);
-							} catch (IOException e) {
-								setTitle(e.toString());
-								e.printStackTrace();
-							}
-						}
-					}.start();
+		
+		new Thread(){
+			public void run(){
+				Queue<Thread> threads = getThreadLoaders(lists, modelAlbums);
+				while(!threads.isEmpty()){
+					Thread thread = threads.poll();
+					thread.start();
+					try {
+						thread.join();
+					} catch (Exception e) {
+					}
 				}
 			}
-		});
+		}.start();	
+//		SwingUtilities.invokeLater(new Runnable() {
+//			public void run() {
+//				for (Album album : lists) {
+//					modelAlbums.addElement(album);
+//				}
+//				albums.setSelectedIndex(0);
+//				if (!configure.albums.isEmpty() && itemLoadFirstPlaylist.isSelected() && types.getSelectedItem().toString().equals("Album")) {
+//					new Thread(){
+//						public void run(){
+//							try {
+//								setSongs(configure.albums.get(0).getSongs(), true);
+//							} catch (IOException e) {
+//								setTitle(e.toString());
+//								e.printStackTrace();
+//							}
+//						}
+//					}.start();
+//				}
+//			}
+//		});
 	}
 
 	public void addSongsToLinks(){
@@ -1348,30 +1367,6 @@ public class Main extends JFrame {
 				}
 			}.start();
 		}
-	}
-	
-	private void startup(){
-		new Thread(){
-			public void run(){
-				try {
-					if (itemAlbumStartup.isSelected()){
-						setTitle("Loading...");
-						setAlbum(zing.getDefaultAlbum(), true);
-					}
-					if (itemTopStartup.isSelected()){
-						setTitle("Loading...");
-						setSongs(zing.getTopVietnamese(), true);
-					}
-				} catch (UnsupportedEncodingException e) {
-					setTitle(e.toString());
-					e.printStackTrace();
-				} catch (IOException e) {
-					setTitle(e.toString());
-					e.printStackTrace();
-				}
-				setTitle(configure.title);
-			}
-		}.start();
 	}
 	
 	//Set proxy for application. Note restart application

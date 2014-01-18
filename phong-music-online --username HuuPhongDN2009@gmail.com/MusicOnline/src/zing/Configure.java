@@ -29,9 +29,9 @@ public class Configure implements Serializable{
 	public List<Song> songs;
 	public List<Album> albums;
 	public List<Playlist> userPlaylists;
-	public String title = "Music Online v8.3.2";
+	public String title = "Music Online v8.3.3";
 	public String host, port, username, password, total = "1", page = "1", defaultMediaPlayer = title;
-	public boolean useProxy, systemProxy, albumStartup, topStartup, loadFirstPlaylist, sendStatus;
+	public boolean useProxy, systemProxy;
 	public List<String> mediaPlayers;
 	public String type = "Song";
 //	public boolean highQuality = false;
@@ -42,11 +42,10 @@ public class Configure implements Serializable{
 	public int numberReconnect = 5;
 	public boolean includeAlbum = true;
 	public List<String> valueRecently = new ArrayList<String>();
-	public String status = title + " | huuphongdn2009@yahoo.com | www.mericury.com";
+	public String status = title + " | huuphongdn2009@gmail.com";
 	public String oldFolder = ".";
 	public int lastPageSong = 1;
 	public String lastValueSong = "";
-//	public int timeLive = 7200000;
 	public ItemCombo by = new ItemCombo("Default", "");
 	public boolean update = true;
 	public int viewModeSong = SongRenderer.VIEW_MODE_DETAIL;
