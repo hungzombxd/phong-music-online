@@ -877,6 +877,7 @@ public class MusicOnline extends JFrame {
 		}else{
 			setLocation(configure.location);
 		}
+		setTitle(configure.title);
 		setVisible(true);
 		//Load configure;
 		loadConfigure();
