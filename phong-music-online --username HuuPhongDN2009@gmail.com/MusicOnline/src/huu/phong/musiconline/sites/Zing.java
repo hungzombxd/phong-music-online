@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,13 +21,19 @@ import java.util.StringTokenizer;
 public class Zing extends MusicSite{
 	
 	private static final String DOMAIN_API = "http://api.mp3.zing.vn";
+	
 	public static final String DOMAIN_MP3 = "http://mp3.zing.vn";
+	
 	public static final String DOMAIN_IMAGE = "http://image.mp3.zdn.vn";
+	
 	public static final String KEY = "keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
 	
 	private static final String URL_SEARCH_SONG = DOMAIN_API + "/api/mobile/search/song?requestdata={\"length\":%1$d,\"start\":%2$d,\"q\":\"%3$s\",\"sort\":\"%4$s\"}&" + KEY;
+	
 	public static final String URL_SEARCH_ALBUM = DOMAIN_API + "/api/mobile/search/playlist?requestdata={\"length\":15,\"start\":0,\"q\":\"dan%20truong\",\"sort\":\"hot\"}&" + KEY;
+	
 	public static final String URL_LOG = DOMAIN_API + "/api/mobile/log/loglisten?requestdata={\"type\":\"song\",\"id\":\"1073835968\",\"device_id\":\"d33f3e748d4a5e41\"}&" + KEY;
+	
 	public static final String URL_SEARCH_ARTIST = DOMAIN_API + "/api/mobile/artist/getvideoofartist?requestdata={\"length\":15,\"id\":\"100\",\"start\":0}&" + KEY;
 	
 	public static final String URL_ARTIST_INFO = DOMAIN_API + "/api/mobile/artist/getartistinfo?requestdata={\"id\":\"100\"}&" + KEY;
@@ -38,23 +43,24 @@ public class Zing extends MusicSite{
 	
 	public static final String ALL_TOP_SONG = DOMAIN_API + "/api/mobile/charts/getchartslist?" + KEY;
 	
-//	public static final String ALL_ARTIST = DOMAIN_API + "/api/mobile/artist/getartistbygenre?requestdata={\"length\":15,\"id\":0,\"start\":0}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
-	
 	public static final String URL_LYRIC = DOMAIN_API + "/api/mobile/song/getlyrics?requestdata={\"id\":\"1074584968\"}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
 	
 	public static final String ALL_ARTIST = DOMAIN_API + "/api/mobile/artist/getartistbygenre?requestdata={\"length\":15,\"id\":0,\"start\":0}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
 	
-	
 	public static final String DEFAULT_USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.2.2; sdk Build/JB_MR1.1)";
+	
 	public static final String SONG_USER_AGENT = "stagefright/1.2 (Linux;Android 4.2.2)";
 	
 	private static Map<String, String> songByType = new HashMap<String, String>();
+	
 	private static Map<String, String> songByAlbum = new HashMap<String, String>();
 	
 	public static String[] titlesSongType;
+	
 	public static String[] titlesAlbumType;
 	
 	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", ""), new ItemCombo("Title", "&t=title"), new ItemCombo("Artist", "&t=artist"), new ItemCombo("Composer", "&t=composer"), new ItemCombo("Lyric", "&t=lyrics")};
+	
 	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", ""),new ItemCombo("HQ", "&filter=2"),new ItemCombo("Hit", "&filter=1"),new ItemCombo("Official", "&filter=3"), new ItemCombo("Lyric", "&filter=4")};
 	
 	private static Zing zing;
