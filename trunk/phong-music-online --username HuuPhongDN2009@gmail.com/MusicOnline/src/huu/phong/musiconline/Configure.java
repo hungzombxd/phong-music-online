@@ -54,8 +54,10 @@ public class Configure implements Serializable{
 	public String site = "mp3.zing.vn";
 	public String lastValueAlbum = "";
 	public int lastPageAlbum = 1;
+//	public String userAgent = "stagefright/1.2 (Linux;Android 4.2.2)";
 	public String userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1";
-	public Format format = Format.MP3_128_KBPS;
+	public Format format = Format.MP3_320_KBPS;
+	public int numberResult = 15;
 	
 	public static Configure getInstance(){
 		if (configure == null) configure = load();

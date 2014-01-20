@@ -27,6 +27,7 @@ import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -55,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
@@ -116,10 +118,9 @@ public class MusicOnline extends JFrame {
 	private Radio radio = Radio.getIntance();
 	private Toolkit toolkit = Toolkit.getDefaultToolkit();
 	private Clipboard clipboard = toolkit.getSystemClipboard();
-	private boolean allowSaveFiles = false;
 	private Runtime runtime = Runtime.getRuntime();
 	private JMenuBar menuBar;
-	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemSaveCurrentSong, itemUndo, itemRedo, itemSetProxy, itemOpen, itemSave, itemExit, itemIcludeAlbum;
+	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemUndo, itemRedo, itemSetProxy, itemExit, itemIcludeAlbum;
 	private JMenu menuFile, menuSetup, menuMedia, menuUserPlaylists, menuAddToPlaylist;
 	private JMenuItem mediaPlay, mediaNext, mediaPrevious, menuTopSong;
 	private ButtonGroup group;
@@ -140,6 +141,7 @@ public class MusicOnline extends JFrame {
 	private AudioPlayer player;
 	private String currentTitle;
 	private int currentIndex = -1;
+	private PrintStream out = System.out;
 	
 	public MusicOnline() {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -202,13 +204,6 @@ public class MusicOnline extends JFrame {
 		menuBar = new JMenuBar();
 		menuFile = new JMenu("File");
 		menuSetup = new JMenu("Setup");
-		menuFile.add(itemOpen = new JMenuItem("Open playlist..."));
-		itemOpen.setAccelerator(KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
-		itemOpen.setIcon(getImage("open.png"));
-		menuFile.add(itemSave = new JMenuItem("Save playlist..."));
-		itemSave.setAccelerator(KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK));
-		itemSave.setIcon(getImage("save.png"));
-		menuFile.addSeparator();
 		menuFile.add(itemExit = new JMenuItem("Exit"));
 		itemExit.setAccelerator(KeyStroke.getKeyStroke('X', KeyEvent.ALT_DOWN_MASK));
 		itemExit.setIcon(getImage("exit.png"));
@@ -230,32 +225,6 @@ public class MusicOnline extends JFrame {
 		});
 		menuSetup.addSeparator();
 		menuSetup.add(itemSetProxy = new JMenuItem("Set proxy..."));
-		itemOpen.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				String file = showOpen("Open playlist", new File(configure.oldFolder), "Links.m3u");
-				if(file == null) return;
-				try {
-					setSongs(Utils.m3uToSongs(file), true);
-				} catch (IOException e1) {
-					setTitle(e1.toString());
-					e1.printStackTrace();
-				}
-			}
-		});
-		itemSave.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent arg0) {
-				String file = showSave("Save playlist (*.m3u)", new File(configure.oldFolder), "Links.m3u");
-				if (file == null) return;
-				try {
-					Utils.songsToM3UFile(configure.songs, file);
-				} catch (IOException e) {
-					setTitle(e.toString());
-					e.printStackTrace();
-				}
-			}
-		});
 		itemSetProxy.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent arg0) {
@@ -296,10 +265,8 @@ public class MusicOnline extends JFrame {
 						try {
 							setSongs(zing.getTopVietnamese(), true);
 							setTitle(configure.title);
-						} catch (UnsupportedEncodingException e) {
-							e.printStackTrace();
 						} catch (IOException e) {
-							e.printStackTrace();
+							out.println("Can not load Top Vietnamese");
 						}
 					}
 				}.start();
@@ -527,21 +494,23 @@ public class MusicOnline extends JFrame {
 			
 			public void actionPerformed(ActionEvent arg0) {
 				new Thread(){
+					@Override
 					public void run(){
 						int[] save = songs.getSelectedIndices();
-						String saveString = "";
-						setStatus("COPYING LINK: 0/" + save.length);
+						StringBuilder saveString = new StringBuilder();
+						setStatus("COPYING");
 						for (int i = 0; i < save.length; i++){
 							try {
-								saveString += configure.songs.get(save[i]).getDirectLink(Configure.getInstance().format) + "\n";
+								saveString.append(configure.songs.get(save[i]).getDirectLink());
+								if (i == save.length - 1) break;
+								saveString.append("\r\n");
 							} catch (IOException e) {
-								setTitle(e.toString());
-								e.printStackTrace();
+								out.println(String.format("Can not copy link of %s", configure.songs.get(save[i])));
 							}
-							setStatus("COPYING LINK: " + (i + 1) + "/" + save.length);
+							setStatus("COPYING: " + (i + 1) + "/" + save.length);
 						}
-						clipboard.setContents(new StringSelection(saveString), null);
-						setStatus("COMPLETE COPY: " + save.length + "/" + save.length);
+						clipboard.setContents(new StringSelection(saveString.toString()), null);
+						setStatus("COPIED: " + save.length + "/" + save.length);
 					}
 				}.start();
 			}
@@ -568,14 +537,16 @@ public class MusicOnline extends JFrame {
 				new Thread(){
 					public void run(){
 						int[] save = songs.getSelectedIndices();
-						String saveString = "";
-						setStatus("COPYING LINK: 0/" + save.length);
+						StringBuilder saveString = new StringBuilder();
+						setStatus("COPYING");
 						for (int i = 0; i < save.length; i++){
-							saveString += configure.songs.get(save[i]).getLink() + "\n";
-							setStatus("COPYING LINK: " + (i + 1) + "/" + save.length);
+							saveString.append(configure.songs.get(save[i]).getLink());
+							if (i == save.length - 1) break;
+							saveString.append("\r\n");
+							setStatus("COPYING: " + (i + 1) + "/" + save.length);
 						}
-						clipboard.setContents(new StringSelection(saveString), null);
-						setStatus("COMPLETE COPY: " + save.length + "/" + save.length);
+						clipboard.setContents(new StringSelection(saveString.toString()), null);
+						setStatus("COPIED: " + save.length + "/" + save.length);
 					}
 				}.start();
 			}
@@ -720,10 +691,10 @@ public class MusicOnline extends JFrame {
 						new Thread(){
 							public void run(){
 								final Song song = new Song();
-								song.title = url.toString();
-								song.songInfo = song.title;
-								song.setDirectLink(Format.MP3_128_KBPS, song.title);
-								song.site = Site.INTERNET_URL;
+								song.setTitle(url.toString());
+								song.setSongInfo(song.getTitle());
+								song.setDirectLink(Format.MP3_128_KBPS, song.getTitle());
+								song.setSite(Site.INTERNET_URL);
 								configure.songs.add(song);
 					            SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
@@ -743,11 +714,11 @@ public class MusicOnline extends JFrame {
 										File file = (File) object;
 										if (!file.getName().toLowerCase().endsWith(".mp3") && !file.getName().toLowerCase().endsWith(".wav") && !file.getName().toLowerCase().endsWith(".flac")) continue;
 										Song song = new Song();
-										song.title = file.getName();
-										song.songInfo = file.getAbsolutePath();
+										song.setTitle(file.getName());
+										song.setSongInfo(file.getAbsolutePath());
 //										song.songInfo = file.getAbsolutePath();
 										song.setDirectLink(Format.MP3_128_KBPS, "file:" + file.getAbsolutePath());
-										song.site = Site.MY_COMPUTER;
+										song.setSite(Site.MY_COMPUTER);
 					            		songs.add(song);
 									}
 								}
@@ -866,6 +837,8 @@ public class MusicOnline extends JFrame {
 		panelActive.setPreferredSize(new Dimension(200, 25));
 		panelActive.add(info = new JLabel("[" + configure.title + "]", JLabel.CENTER));
 		info.setPreferredSize(new Dimension(155, 14));
+		info.setFont(info.getFont().deriveFont(Font.BOLD, 13.0f));
+		info.setForeground(Color.BLUE);
 		panelActive.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(204, 204, 204)));
 		panelActive.setOpaque(false);
 		status.add(panelActive, BorderLayout.EAST);
@@ -910,7 +883,7 @@ public class MusicOnline extends JFrame {
 					List<Song> listSongs = configure.songs;
 					BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(str),"UTF-8"));
 					int[] lists = songs.getSelectedIndices();
-					setStatus("SAVING LINK: 0/" + lists.length);
+					setStatus("SAVING");
 					out.write("#EXTM3U");
 					out.newLine();
 					for (int i = 0; i < lists.length; i++) {
@@ -919,11 +892,11 @@ public class MusicOnline extends JFrame {
 						out.newLine();
 						out.write(song.getDirectLink(configure.format));
 						out.newLine();
-						setStatus("SAVING LINK: " + (i + 1) + "/" + lists.length);
+						setStatus("SAVING: " + (i + 1) + "/" + lists.length);
 					}
 					out.flush();
 					out.close();
-					setStatus("COMPLETE LINK: " + lists.length + "/" + lists.length);
+					setStatus("SAVED: " + lists.length + "/" + lists.length);
 					JOptionPane.showMessageDialog(MusicOnline.this, "All done");
 				} catch (Exception e1) {
 					setTitle(e1.toString());
@@ -942,16 +915,16 @@ public class MusicOnline extends JFrame {
 					List<Song> listSongs = configure.songs;
 					BufferedWriter out = new BufferedWriter(new FileWriter(str));
 					int[] lists = songs.getSelectedIndices();
-					setStatus("SAVING LINK: 0/" + lists.length);
+					setStatus("SAVING");
 					for (int i = 0; i < lists.length; i++) {
 						Song song = listSongs.get(lists[i]);
-						out.write(song.getDirectLink(configure.format));
+						out.write(song.getDirectLink());
 						out.newLine();
-						setStatus("SAVING LINK: " + (i + 1) + "/" + lists.length);
+						setStatus("SAVING: " + (i + 1) + "/" + lists.length);
 					}
 					out.flush();
 					out.close();
-					setStatus("COMPLETE LINK: " + lists.length + "/" + lists.length);
+					setStatus("SAVED: " + lists.length + "/" + lists.length);
 					JOptionPane.showMessageDialog(MusicOnline.this, "All done");
 				} catch (Exception e1) {
 					setTitle(e1.toString());
@@ -970,42 +943,37 @@ public class MusicOnline extends JFrame {
 		}
 		final String dir = chooser.getSelectedFile().getAbsolutePath();
 		configure.oldFolder = dir;
-		itemSaveMP3.setEnabled(false);
 		new Thread() {
 			public void run() {
 				List<Song> listSongs = configure.songs;
 				int i = 0;
 				int[] lists = songs.getSelectedIndices();
-				try {
-					setStatus("SAVING FILE: 0/" + lists.length);
-					allowSaveFiles = true;
-					FileUtils.Streaming streaming = new FileUtils.Streaming() {
-						
-						@Override
-						public void progressing(int length, int offset) {
-							setStatus(offset * 100 / length + " %");
-						}
-					};
-					for (i = 0; i < lists.length; i++) {
-						Song song = listSongs.get(lists[i]);
-						info.setToolTipText("Saving file " + song.toTitle() + ".mp3 to " + dir);
-						String file = dir + File.separator + Utils.toANSI(song.toTitle()) + (song.getQuality().equals(Format.LOSSLESS) ? ".flac" : ".mp3");
-						FileUtils.copyURLToFile(new URL(song.getDirectLink(configure.format)), new File(file), streaming);
-						setStatus("SAVING FILE: " + (i + 1) + "/"
-								+ lists.length);
-						if (!allowSaveFiles) {
-							i++;
-							break;
-						}
+				setStatus("START SAVING");
+				final StringBuilder builder = new StringBuilder(String.format("%d / %d", 0, lists.length));
+				FileUtils.Streaming streaming = new FileUtils.Streaming() {
+					@Override
+					public void progressing(int length, int offset) {
+						setStatus(offset * 100 / length + " % | " + builder.toString());
 					}
-					setStatus("COMPLETE SAVE: " + i + "/" + lists.length);
-					info.setToolTipText("");
-					JOptionPane.showMessageDialog(MusicOnline.this, "All done");
-					itemSaveMP3.setEnabled(true);
-				} catch (Exception e) {
-					setTitle(e.toString());
-					e.printStackTrace();
+				};
+				for (i = 0; i < lists.length; i++) {
+					Song song = listSongs.get(lists[i]);
+					String extension = configure.format.equals(Format.LOSSLESS) ? ".flac" : ".mp3";
+					String file = dir + File.separator + Utils.toANSI(song.getSongName()) + extension;
+					info.setToolTipText(String.format("<html><b>Saving file %s</b></html>", file));
+					if(new File(file).exists() || song.getDirectLinks() == null) continue;
+					try {
+						FileUtils.copyURLToFile(new URL(song.getDirectLink()), new File(file), streaming);
+					} catch (IOException e) {
+						out.println(String.format("Can not save link %s", song.getDirectLinks()));
+					}
+					builder.delete(0, builder.length());
+					builder.append(String.format("%d / %d", i + 1, lists.length));
 				}
+				setStatus(String.format("SAVED: %d / %d", i, lists.length));
+				info.setToolTipText("");
+				JOptionPane.showMessageDialog(MusicOnline.this, "All done");
+
 			}
 		}.start();
 	}
@@ -1032,16 +1000,7 @@ public class MusicOnline extends JFrame {
 					}
 				}
 			}
-		}.start();		
-//		SwingUtilities.invokeLater(new Runnable() {
-//			public void run(){
-//				for (Song song : lists) {
-//					modelSongs.addElement(song);
-//				}
-//				songs.setSelectedIndex(0);
-//				songs.requestFocus();
-//			}
-//		});
+		}.start();
 		if (history.undo > 0){
 			itemUndo.setEnabled(true);
 		}else{
@@ -1101,34 +1060,14 @@ public class MusicOnline extends JFrame {
 					}
 				}
 			}
-		}.start();	
-//		SwingUtilities.invokeLater(new Runnable() {
-//			public void run() {
-//				for (Album album : lists) {
-//					modelAlbums.addElement(album);
-//				}
-//				albums.setSelectedIndex(0);
-//				if (!configure.albums.isEmpty() && itemLoadFirstPlaylist.isSelected() && types.getSelectedItem().toString().equals("Album")) {
-//					new Thread(){
-//						public void run(){
-//							try {
-//								setSongs(configure.albums.get(0).getSongs(), true);
-//							} catch (IOException e) {
-//								setTitle(e.toString());
-//								e.printStackTrace();
-//							}
-//						}
-//					}.start();
-//				}
-//			}
-//		});
+		}.start();
 	}
 
 	public void addSongsToLinks(){
 		int index = albums.getSelectedIndex();
 		if (configure.albums.isEmpty() || index >= configure.albums.size()) return;
 		final Album currentPlaylist = configure.albums.get(index);
-		setTitle("Loading '" + currentPlaylist.title + "'...");
+		setTitle("Loading '" + currentPlaylist.getTitle() + "'...");
 		new Thread(){
 			public void run(){
 				try {
@@ -1447,25 +1386,6 @@ public class MusicOnline extends JFrame {
 		itemRedo.setIcon(getImage("redo.png"));
 		menuAction.add(itemRedo);
 		menuAction.addSeparator();
-		menuAction.add(itemSaveCurrentSong = new JMenuItem("Save current song", getImage("save.png")));
-		itemSaveCurrentSong.setEnabled(false);
-		itemSaveCurrentSong.setToolTipText("Current song can saved when completed buffer");
-		itemSaveCurrentSong.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent arg0) {
-//				new Thread(){
-//					public void run(){
-//						String file = showSave("Save current song", new File(configure.oldFolder), mediaPlayer.currentSong.toTitle(mediaPlayer.currentSong.getTitle()) + ".mp3");
-//						if (file == null) return;
-//						if (mediaPlayer.bufferringFlag){
-//							JOptionPane.showInternalMessageDialog(Main.this, "New song is buffering. Can't save now, wait to completed buffer", "Save current song", JOptionPane.INFORMATION_MESSAGE);
-//							return;
-//						}
-//						mediaPlayer.saveFile(file);
-//					}
-//				}.start();
-			}
-		});
 		menuAction.add(itemSaveMP3 = new JMenuItem("Save selected songs", getImage("save.png")));
 		itemSaveMP3.addActionListener(new ActionListener() {
 			

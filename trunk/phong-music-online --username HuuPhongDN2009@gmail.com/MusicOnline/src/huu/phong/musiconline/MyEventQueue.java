@@ -27,6 +27,9 @@ public class MyEventQueue extends EventQueue {
 			super.dispatchEvent(event);
 		}catch (ArrayIndexOutOfBoundsException e) {
 			e.printStackTrace();
+			System.out.println(event);
+			System.out.println(event.getSource());
+			System.out.println(event.getClass());
 		}
 
 		// interested only in mouseevents

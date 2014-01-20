@@ -1,19 +1,10 @@
 package huu.phong.musiconline.utils;
 
-import huu.phong.musiconline.model.Song;
+import huu.phong.musiconline.Configure;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +28,8 @@ public final class Utils{
 	
 	private static Pattern ncrDecimalPattern = Pattern.compile("&#(\\d+);");
 	
+	private static DecimalFormat formatter = new DecimalFormat("#,###,###");
+	
 	public static String toANSI(String str){
 		for (int i = 0; i < utf8.length; i++) {
 			str = str.replaceAll(utf8[i], ansi[i]);
@@ -55,41 +48,6 @@ public final class Utils{
 		return buffer.toString();
 	}
 	
-	public static List<Song> m3uToSongs(String m3uFile) throws IOException{
-		List<Song> songs = new ArrayList<Song>();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(m3uFile), "UTF-8"));
-		String line = null;
-		while ((line = reader.readLine()) != null){
-			if (line.startsWith("#EXTINF")){
-				StringTokenizer token = new StringTokenizer(line, ",");
-				String title = token.nextToken();
-				title = token.nextToken();
-				String link = reader.readLine();
-				Song song = new Song();
-				song.setTitle(title);
-				song.setLink(link);
-				songs.add(song);
-			}
-		}
-		reader.close();
-		return songs;
-	}
-	
-	public static void songsToM3UFile(List<Song> songs, String file) throws IOException{
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
-		writer.write("#EXTM3U");
-		writer.newLine();
-		for (int i = 0; i < songs.size(); i++){
-			Song song = songs.get(i);
-			writer.write("#EXTINF:-1," + song.getTitle());
-			writer.newLine();
-			writer.write(song.getLink());
-			writer.newLine();
-		}
-		writer.flush();
-		writer.close();
-	}
-	
 	public static String numberToString(int number){
 		String ret = String.valueOf(number);
 		while (ret.length() < 2){
@@ -105,23 +63,22 @@ public final class Utils{
 	}
 	
 	public static boolean isURLAvailable(String link){
+		return isURLAvailable(link, null);
+	}
+	
+	public static boolean isURLAvailable(String link, String userAgent){
 		boolean ret = false;
 		try {
 			URL url = new URL(link);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//			connection.setInstanceFollowRedirects(false);
-//			connection.setRequestMethod("HEAD");
+			if(userAgent == null) userAgent = Configure.getInstance().userAgent;
+			connection.setRequestProperty("User-Agent", userAgent);
 			connection.connect();
-			if (connection.getContentLength() == -1){
-				ret = false;
-			} else if (isErrorCode(connection.getResponseCode())) {
-				ret = false;
-			} else {
+			if (!isErrorCode(connection.getResponseCode())) {
 				ret = true;
 			}
 			connection.disconnect();
 		} catch (Exception e) {
-			ret = false;
 		}
 		return ret;
 	}
@@ -136,5 +93,9 @@ public final class Utils{
 		}
 		if (code >= 300) ret = true;
 		return ret;
+	}
+	
+	public static String formatNumber(long number){
+		return formatter.format(number);
 	}
 }

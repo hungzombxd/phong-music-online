@@ -2,6 +2,7 @@ package huu.phong.musiconline.model;
 
 import huu.phong.musiconline.Configure;
 import huu.phong.musiconline.sites.NhacCuaTui;
+import huu.phong.musiconline.sites.Site;
 import huu.phong.musiconline.sites.Zing;
 import huu.phong.musiconline.utils.Utils;
 
@@ -16,14 +17,15 @@ import javax.swing.ImageIcon;
 
 public class Album implements Serializable{
 	private static final long serialVersionUID = -2824232816762868663L;
-	public String title = null;
-	public String info = null;
-	public List<Song> songs = new ArrayList<Song>();
-	public long time = 0;
-	public String link = null;
-	public boolean highQuality = false;
-	public String albumArt = null;
-	public transient ImageIcon icon;
+	private String title;
+	private String info;
+	private List<Song> songs = new ArrayList<Song>();
+	private long time;
+	private String link;
+	private boolean highQuality;
+	private String albumArt;
+	private transient ImageIcon icon;
+	private Site site = Site.MP3_ZING_VN;
 	
 	public Album(){
 		
@@ -40,6 +42,75 @@ public class Album implements Serializable{
 		this.info = info;
 	}
 	
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getInfo() {
+		return info;
+	}
+
+	public void setInfo(String info) {
+		this.info = info;
+	}
+
+	public long getTime() {
+		return time;
+	}
+
+	public void setTime(long time) {
+		this.time = time;
+	}
+
+	public String getLink() {
+		if (link == null) return link;
+		return link.contains("http") ? link : String.format("%s%s", site.getFullHost(), link);
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public boolean isHighQuality() {
+		return highQuality;
+	}
+
+	public void setHighQuality(boolean highQuality) {
+		this.highQuality = highQuality;
+	}
+
+	public String getAlbumArt() {
+		return albumArt;
+	}
+
+	public void setAlbumArt(String albumArt) {
+		this.albumArt = albumArt;
+	}
+
+	public ImageIcon getIcon() {
+		return icon;
+	}
+
+	public void setIcon(ImageIcon icon) {
+		this.icon = icon;
+	}
+
+	public Site getSite() {
+		return site;
+	}
+
+	public void setSite(Site site) {
+		this.site = site;
+	}
+
+	public void setSongs(List<Song> songs) {
+		this.songs = songs;
+	}
+
 	public int hashCode(){
 		return title.hashCode();
 	}
@@ -70,8 +141,8 @@ public class Album implements Serializable{
 				songs = NhacCuaTui.getInstance().getAlbum(link);
 			}
 			for (Song song : songs){
-				if (song.songInfo == null) song.songInfo = "Album: " + title;
-				if (highQuality) song.quality = Format.MP3_320_KBPS;
+				if (song.getSongInfo() == null) song.setSongInfo("Album: " + title);
+				if (highQuality) song.setQuality(Format.MP3_320_KBPS);
 			}
 		}
 		return songs;

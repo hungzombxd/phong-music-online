@@ -49,8 +49,8 @@ public class ChiaSeNhac extends MusicSite{
 				}
 				info = HtmlUtil.htmlToText(str.replace("<br />", " | ")).trim();
 				Song song = new Song(title + " - " + artist, link, Site.CHIA_SE_NHAC);
-				song.quality = info.contains("Lossless") ? Format.LOSSLESS : info.contains("320kbps") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS;
-				song.songInfo = info.replace("Lossless", "<b style='color: blue'>Lossless</b>");
+				song.setQuality(info.contains("Lossless") ? Format.LOSSLESS : info.contains("320kbps") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS);
+				song.setSongInfo(info.replace("Lossless", "<b style='color: blue'>Lossless</b>"));
 				songs.add(song);
 				if (songs.size() == 25) break;
 			}

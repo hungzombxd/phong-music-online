@@ -1,6 +1,7 @@
 package huu.phong.musiconline.audio;
 
-import huu.phong.musiconline.Configure;
+import huu.phong.musiconline.model.Song;
+import huu.phong.musiconline.sites.Site;
 
 import java.awt.Point;
 import java.io.File;
@@ -14,8 +15,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
-
-
 public class SmartSeekAudioStream extends AudioStream{
 	private static File audioFile;
 	private RandomAccessFile in;
@@ -23,6 +22,7 @@ public class SmartSeekAudioStream extends AudioStream{
 	private static final Comparator<Point> comparator;
 	private BufferThread buffer = null;
 	private Object wait = new Object();
+	private String userAgent;
 	
 	static {
 		try {
@@ -39,7 +39,7 @@ public class SmartSeekAudioStream extends AudioStream{
 		};
 	}
 		
-	public SmartSeekAudioStream(String link, Streaming listener) {
+	public SmartSeekAudioStream(Song song, Streaming listener) {
 		streaming = listener;
 		try {
 			in = new RandomAccessFile(audioFile, "rw");
@@ -47,9 +47,10 @@ public class SmartSeekAudioStream extends AudioStream{
 			e.printStackTrace();
 		}
 		try {
-			url = new URL(link);
+			url = new URL(song.getDirectLink());
 			connection = url.openConnection();
-			connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
+			userAgent = Site.getUserAgent(song.getSite(), true);
+			connection.addRequestProperty("User-Agent", userAgent);
 			length = connection.getContentLength();
 			in.setLength(length);
 			allPoints.add(new Point(0, length - 1));
@@ -134,7 +135,7 @@ public class SmartSeekAudioStream extends AudioStream{
 	
 	private InputStream prepareStream(Point point) throws IOException{
 		connection = url.openConnection();
-		connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
+		connection.addRequestProperty("User-Agent", userAgent);
     	connection.setRequestProperty("Accept-Ranges", "bytes");
 		connection.setRequestProperty("Range", "bytes=" + point.x + "-" + point.y);
 		connection.connect();

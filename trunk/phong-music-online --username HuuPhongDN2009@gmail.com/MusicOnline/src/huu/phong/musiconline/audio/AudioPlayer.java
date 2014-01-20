@@ -1,11 +1,10 @@
 package huu.phong.musiconline.audio;
 
-import huu.phong.musiconline.Configure;
 import huu.phong.musiconline.model.AudioInfo;
 import huu.phong.musiconline.model.Song;
+import huu.phong.musiconline.sites.Site;
 import huu.phong.musiconline.utils.Utils;
 
-import java.io.IOException;
 import java.util.Stack;
 
 import javax.sound.sampled.AudioFormat;
@@ -98,11 +97,11 @@ public class AudioPlayer{
 		this.streaming = streaming;
 	}
 	
-	private void prepare(String url){
-		if (url.startsWith(FileAudioStream.FILE_REGEX)){
-			in = new FileAudioStream(url);
+	private void prepare(Song song){
+		if (song.getSite().equals(Site.MY_COMPUTER)){
+			in = new FileAudioStream(song);
 		} else {
-			in = new SmartSeekAudioStream(url, streaming);
+			in = new SmartSeekAudioStream(song, streaming);
 		}
 		switch (in.getType()) {
 		case AudioCodec.MP3_STREAM:
@@ -157,11 +156,7 @@ public class AudioPlayer{
 		stop();
 		threads.add(new Thread(){
 			public void run(){
-				try {
-					prepare(song.getDirectLink(Configure.getInstance().format));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				prepare(song);
 				play();
 			}
 		});

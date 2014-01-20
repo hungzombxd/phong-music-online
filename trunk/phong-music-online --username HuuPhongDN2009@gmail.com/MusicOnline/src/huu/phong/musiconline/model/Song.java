@@ -1,5 +1,6 @@
 package huu.phong.musiconline.model;
 
+import huu.phong.musiconline.Configure;
 import huu.phong.musiconline.sites.ChiaSeNhac;
 import huu.phong.musiconline.sites.NhacCuaTui;
 import huu.phong.musiconline.sites.Radio;
@@ -11,18 +12,37 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
+import com.google.gson.annotations.SerializedName;
 
 public class Song implements Serializable {
 	private static final long serialVersionUID = -1080772505347758185L;
-	public String link = null;
-	public String title = null;
-	public Map<Format, String> directLinks = null;
-	public Site site = Site.MP3_ZING_VN;
-	public transient Format currentFormat;
-	public Format quality = Format.MP3_128_KBPS;
-	public String songInfo = null;
+	private static final String DESCRIPTIONS[] = {"Thời lượng: %s", "Lượt nghe: %s", "Thể loại: %s", "%s"};
+	private String link;
+	private String title;
+	@SerializedName("source")
+	private Map<Format, String> directLinks;
+	private Site site = Site.MP3_ZING_VN;
+	private transient Format currentFormat;
+	private Format quality = Format.MP3_128_KBPS;
+	private String songInfo;
+	
+	@SerializedName("song_id")
+	private String id;
+	private String artist;
+	private String genre;
+	private String username;
+	private String bitrate;
+	private int duration;
+	@SerializedName("have_rbt")
+	private boolean rbt;
+	@SerializedName("download_status")
+	private int status;
+	private String copyright;
+	@SerializedName("link_download")
+	private Map<String, String> downloadLinks;
+	@SerializedName("total_play")
+	private long count;
 	
 	public Song() {
 	}
@@ -39,7 +59,8 @@ public class Song implements Serializable {
 	}
 
 	public String getLink() {
-		return link;
+		if (link == null) return link;
+		return link.contains("http") ? link : String.format("%s%s", site.getFullHost(), link);
 	}
 
 	public void setLink(String link) {
@@ -58,15 +79,118 @@ public class Song implements Serializable {
 		this.directLinks = directLinks;
 	}
 	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getArtist() {
+		return artist;
+	}
+
+	public void setArtist(String artist) {
+		this.artist = artist;
+	}
+
+	public String getGenre() {
+		return genre;
+	}
+
+	public void setGenre(String genre) {
+		this.genre = genre;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getBitrate() {
+		return bitrate;
+	}
+
+	public void setBitrate(String bitrate) {
+		this.bitrate = bitrate;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	public boolean isRbt() {
+		return rbt;
+	}
+
+	public void setRbt(boolean rbt) {
+		this.rbt = rbt;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public String getCopyright() {
+		return copyright;
+	}
+
+	public void setCopyright(String copyright) {
+		this.copyright = copyright;
+	}
+
+	public Map<String, String> getDownloadLinks() {
+		return downloadLinks;
+	}
+
+	public void setDownloadLinks(Map<String, String> downloadLinks) {
+		this.downloadLinks = downloadLinks;
+	}
+
+	public long getCount() {
+		return count;
+	}
+
+	public void setCount(long count) {
+		this.count = count;
+	}
+
+	public Map<Format, String> getDirectLinks() {
+		return directLinks;
+	}
+
 	public void setDirectLink(Format format, String directLink){
 		if (directLinks == null){
 			directLinks = new HashMap<Format, String>();
 		}
 		directLinks.put(format, directLink);
 	}
+	
+	public String getDirectLink() throws IOException {
+		return getDirectLink(Configure.getInstance().format);
+	}
 
 	public String getDirectLink(Format format) throws IOException {
-		if (directLinks != null && Utils.isURLAvailable(getDirectLinkWithoutRefresh(format))) return getDirectLinkWithoutRefresh(format);
+		if (directLinks != null) {
+			String userAgent = Site.getUserAgent(site, true);
+			if (Utils.isURLAvailable(getDirectLinkWithoutRefresh(format), userAgent)){
+				return getDirectLinkWithoutRefresh(format);
+			}
+		}
+		
+		if (!Utils.isURLAvailable(link)) throw new IOException(String.format("Link %s is not availble", link));
 		
 		switch (site) {
 		
@@ -108,27 +232,9 @@ public class Song implements Serializable {
 		default:
 			link = directLinks.get(null); break;
 		}
+		
 		return link;
 	}
-	
-//	public void saveToFile(String dir){
-//		dir = (dir.endsWith(File.separator))? dir : dir + File.separator;
-//		try {
-//			URLConnection connection = new URL(getDirectLink(Configure.getInstance().format)).openConnection();
-//			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-//			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dir + toTitle(title) + (Configure.getInstance().format == Format.LOSSLESS ? ".flac" : ".mp3")));
-//			int readed = -1;
-//			byte[] buffered = new byte[63888];
-//			while ((readed = in.read(buffered)) != -1){
-//				out.write(buffered, 0, readed);
-//			}
-//			out.flush();
-//			out.close();
-//			in.close();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} 
-//	}
 	
 	public Site getSite() {
 		return site;
@@ -138,16 +244,6 @@ public class Song implements Serializable {
 		this.site = site;
 	}
 
-	public String toTitle(){
-		String str = title.replace(":", "-");
-		StringTokenizer token = new StringTokenizer(str, "-");
-		if (token.countTokens() == 2){
-			String titleSong = token.nextToken().trim();
-			String artistSong = token.nextToken().trim();
-			return artistSong + " - " + titleSong;
-		}
-		return str;
-	}
 	public boolean equals(Object obj){
 		if (obj instanceof Song){
 			Song song = (Song) obj;
@@ -157,6 +253,12 @@ public class Song implements Serializable {
 	}
 
 	public Format getQuality() {
+		if (directLinks == null) return quality;
+		if (directLinks.containsKey(Format.LOSSLESS)) {
+			quality = Format.LOSSLESS;
+		}else if (directLinks.containsKey(Format.MP3_320_KBPS)) {
+			quality = Format.MP3_320_KBPS;
+		}
 		return quality;
 	}
 
@@ -164,13 +266,41 @@ public class Song implements Serializable {
 		this.quality = format;
 	}
 	
+	public void setSongInfo(String songInfo) {
+		this.songInfo = songInfo;
+	}
+
+	public String getSongInfo(){
+		return songInfo;
+	}
+	
+	public Format getCurrentFormat() {
+		return currentFormat;
+	}
+
+	public void setCurrentFormat(Format currentFormat) {
+		this.currentFormat = currentFormat;
+	}
+
 	public String toString(){
-		String ret = "";
-		if (songInfo == null){
-			ret = "<html><b>" + title + "</b><br/>Website: " + site.getHost() + "</html>";
-		}else{
-			ret = "<html><b>" + title + "</b><br/>" + songInfo + "<br/>Website: " + site.getHost() + "<html>";
+		if (buildSongInfo() == null) setSongInfo(buildSongInfo());
+		return String.format("<html><b>%s</b><br/>%s<br/>Website: %s<html>", getSongName() , buildSongInfo(), site.getHost());
+	}
+	
+	private String buildSongInfo(){
+		String[] values = {Utils.toDuaration(duration * 1000), Utils.formatNumber(count), genre, songInfo};
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < DESCRIPTIONS.length; i++){
+			if (values[i] != null && !values[i].equals("")){
+				builder.append(String.format(DESCRIPTIONS[i], values[i]));
+				builder.append(" | ");
+			}
 		}
-		return ret;
+		if (builder.length() > 0) builder.delete(builder.length() - 3, builder.length());
+		return builder.toString();
+	}
+	
+	public String getSongName(){
+		return title + (artist == null ? "" : String.format(" - %s", artist));
 	}
 }

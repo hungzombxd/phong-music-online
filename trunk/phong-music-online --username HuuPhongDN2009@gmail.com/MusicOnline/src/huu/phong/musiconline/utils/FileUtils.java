@@ -1,5 +1,7 @@
 package huu.phong.musiconline.utils;
 
+import huu.phong.musiconline.sites.Zing;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -13,6 +15,7 @@ public class FileUtils {
     public static void copyURLToFile(URL url, File file, FileUtils.Streaming streaming){
         try {
             URLConnection connection = url.openConnection();
+            connection.setRequestProperty("User-Agent", Zing.SONG_USER_AGENT);
             int length = connection.getContentLength();
             byte[] buffer = new byte[4096];
             int reading = -1;

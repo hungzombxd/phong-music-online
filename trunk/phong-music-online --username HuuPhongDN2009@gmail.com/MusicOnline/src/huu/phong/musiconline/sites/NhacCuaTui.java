@@ -81,7 +81,7 @@ public class NhacCuaTui extends MusicSite {
 		in.close();
 		Map<Format, String> links = new HashMap<Format, String>();
 		if (str == null){
-			links.putAll(xmlToSongs(htmlToXML(html)).get(0).directLinks);
+			links.putAll(xmlToSongs(htmlToXML(html)).get(0).getDirectLinks());
 		}else{
 			links.put(Format.MP3_128_KBPS, str.trim());
 		}
@@ -102,20 +102,19 @@ public class NhacCuaTui extends MusicSite {
 						}
 						str = in.readLine();
 						Song song = new Song();
-						song.quality = str.contains("320kb") || str.contains("Official") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS;
+						song.setQuality(str.contains("320kb") || str.contains("Official") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS);
 						str = in.readLine();
-						song.link = HtmlUtil.getAttribute(str, "href=\"");
-						if (!song.link.startsWith("http")) song.link = "http://www.nhaccuatui.com" + song.link;
-						song.title = HtmlUtil.getAttribute(str, "title=\"");
+						song.setLink(HtmlUtil.getAttribute(str, "href=\""));
+						song.setTitle(HtmlUtil.getAttribute(str, "title=\""));
 						while ((str = in.readLine()) != null){
 							if (!str.contains("class=\"singer\"")) continue;
 							str = in.readLine();
-							song.title = song.title + " - " + HtmlUtil.htmlToText(str).trim();
+							song.setTitle(song.getTitle() + " - " + HtmlUtil.htmlToText(str).trim());
 							str = in.readLine();
-							song.songInfo = "Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim() + " | Upload bởi: " + HtmlUtil.htmlToText(in.readLine()).trim();
+							song.setSongInfo("Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim() + " | Upload bởi: " + HtmlUtil.htmlToText(in.readLine()).trim());
 							break;
 						}
-						song.site = Site.NHAC_CUA_TUI;
+						song.setSite(Site.NHAC_CUA_TUI);
 						songs.add(song);
 					}
 				}
@@ -137,20 +136,21 @@ public class NhacCuaTui extends MusicSite {
 				while ((str = in.readLine()) != null && !str.contains("</ul>")){
 					if (str.contains("<p class=\"name\">")){
 						Album album = new Album();
-						album.info = "Tạo bởi: " + HtmlUtil.htmlToText(str).trim() + " | Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim();
+						album.setInfo("Tạo bởi: " + HtmlUtil.htmlToText(str).trim() + " | Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim());
 						in.readLine(); in.readLine();
 						str = in.readLine();
-						album.link = HtmlUtil.getAttribute(str, "href=\"");
-						album.title = HtmlUtil.getAttribute(str, "title=\"");
-						album.albumArt = HtmlUtil.getAttribute(in.readLine(), "src=\"");
+						album.setLink(HtmlUtil.getAttribute(str, "href=\""));
+						album.setTitle(HtmlUtil.getAttribute(str, "title=\""));
+						album.setAlbumArt(HtmlUtil.getAttribute(in.readLine(), "src=\""));
 						str = in.readLine();
 						while ((str = in.readLine()) != null){
 							if (str.contains("<a href=\"http://www.nhaccuatui.com/tim-kiem")){
-								album.title += " - " + HtmlUtil.htmlToText(str);
-								album.info = "Trình bày: " + HtmlUtil.htmlToText(str) + "<br/>" + album.info;
+								album.setTitle(album.getTitle() + " - " + HtmlUtil.htmlToText(str));
+								album.setInfo("Trình bày: " + HtmlUtil.htmlToText(str) + "<br/>" + album.getInfo());
 								break;
 							}
 						}
+						album.setSite(Site.NHAC_CUA_TUI);
 						albums.add(album);
 						album = null;
 					}
