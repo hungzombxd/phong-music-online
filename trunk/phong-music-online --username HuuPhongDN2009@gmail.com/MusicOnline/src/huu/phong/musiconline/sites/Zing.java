@@ -28,13 +28,13 @@ public class Zing extends MusicSite{
 	public static final String URL_SEARCH_SONG = DOMAIN_API + "/api/mobile/search/song?requestdata={\"length\":%1$d,\"start\":%2$d,\"q\":\"%3$s\",\"sort\":\"%4$s\"}&" + KEY;
 	public static final String URL_SONG_INFO = DOMAIN_API + "/api/mobile/song/getsonginfo?requestdata={\"id\":\"1073752416\"}&" + KEY;
 	public static final String URL_SONG_OF_ALBUM = DOMAIN_API + "/api/mobile/playlist/getsonglist?requestdata={\"length\":%1$d,\"id\":\"%2$s\",\"start\":%3$d}&" + KEY;
+	public static final String URL_SONG_OF_ARTIST = DOMAIN_API + "/api/mobile/artist/getvideoofartist?requestdata={\"length\":%1$d,\"id\":\"%2$s\",\"start\":%3$d}&" + KEY;
 	
 	public static final String URL_SEARCH_ALBUM = DOMAIN_API + "/api/mobile/search/playlist?requestdata={\"length\":%1$d,\"start\":%2$d,\"q\":\"%3$s\",\"sort\":\"%4$s\"}&" + KEY;
 	public static final String URL_ALBUM_INFO = DOMAIN_API + "/api/mobile/playlist/getalbuminfo?requestdata={\"id\":\"%1$s\"}&" + KEY;
 	public static final String URL_ALBUM_OF_ARTIST = DOMAIN_API + "/api/mobile/artist/getalbumofartist?requestdata={\"length\":%1$d,\"id\":\"%2$s\",\"start\":%3$d}&" + KEY;
 	
 	public static final String URL_ARTIST_BY_GENRE = DOMAIN_API + "/api/mobile/artist/getartistbygenre?requestdata={\"length\":%1$d,\"id\":%2$d,\"start\":%3$d}&" + KEY;
-	public static final String URL_SEARCH_ARTIST = DOMAIN_API + "/api/mobile/artist/getvideoofartist?requestdata={\"length\":%1$d,\"id\":\"%2$s\",\"start\":%3$d}&" + KEY;
 	public static final String URL_ARTIST_INFO = DOMAIN_API + "/api/mobile/artist/getartistinfo?requestdata={\"id\":\"%1$s\"}&" + KEY;
 	
 	public static final String TOP_SONG_VN = DOMAIN_API + "/api/mobile/charts/getchartsinfo?requestdata={\"length\":%1$d,\"id\":1,\"start\":%2$d}&" + KEY;

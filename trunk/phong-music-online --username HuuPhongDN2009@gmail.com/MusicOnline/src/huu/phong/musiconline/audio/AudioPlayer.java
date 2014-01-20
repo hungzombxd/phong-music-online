@@ -51,6 +51,11 @@ public class AudioPlayer{
 			@Override
 			public void finished(AudioPlayer player) {
 			}
+
+			@Override
+			public void error(String error) {
+				
+			}
 		};
 		streaming = new Streaming() {
 			
@@ -98,10 +103,14 @@ public class AudioPlayer{
 	}
 	
 	private void prepare(Song song){
-		if (song.getSite().equals(Site.MY_COMPUTER)){
-			in = new FileAudioStream(song);
-		} else {
-			in = new SmartSeekAudioStream(song, streaming);
+		try {
+			if (song.getSite().equals(Site.MY_COMPUTER)){
+				in = new FileAudioStream(song);
+			} else {
+				in = new SmartSeekAudioStream(song, streaming);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 		switch (in.getType()) {
 		case AudioCodec.MP3_STREAM:
@@ -156,7 +165,14 @@ public class AudioPlayer{
 		stop();
 		threads.add(new Thread(){
 			public void run(){
-				prepare(song);
+				try {
+					prepare(song);
+				} catch (Exception e) {
+					AudioPlayer.this.stop();
+					listener.finished(AudioPlayer.this);
+					listener.error(e.getMessage());
+					return;
+				}
 				play();
 			}
 		});

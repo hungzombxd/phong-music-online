@@ -9,4 +9,6 @@ public interface AudioPlayerListener {
 	public void paused(AudioPlayer player);
 	
 	public void init(AudioPlayer player);
+	
+	public void error(String error);
 }

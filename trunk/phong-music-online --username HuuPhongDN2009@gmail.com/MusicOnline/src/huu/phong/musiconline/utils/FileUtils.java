@@ -28,6 +28,7 @@ public class FileUtils {
 				} catch (Exception e) {
                     if (in != null) in.close();
                     connection = url.openConnection();
+                    connection.setRequestProperty("User-Agent", Zing.SONG_USER_AGENT);
                     connection.setRequestProperty("Accept-Ranges", "bytes");
                     connection.setRequestProperty("Range", "bytes=" + offset + "-");
                     connection.connect();
