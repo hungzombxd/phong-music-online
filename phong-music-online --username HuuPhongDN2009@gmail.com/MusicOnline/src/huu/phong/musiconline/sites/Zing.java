@@ -27,20 +27,20 @@ public class Zing extends MusicSite{
 	
 	public static final String URL_SEARCH_SONG = DOMAIN_API + "/api/mobile/search/song?requestdata={\"length\":%1$d,\"start\":%2$d,\"q\":\"%3$s\",\"sort\":\"%4$s\"}&" + KEY;
 	public static final String URL_SONG_INFO = DOMAIN_API + "/api/mobile/song/getsonginfo?requestdata={\"id\":\"1073752416\"}&" + KEY;
-	public static final String URL_SONG_OF_ALBUM = DOMAIN_API + "/api/mobile/playlist/getsonglist?requestdata={\"length\":200,\"id\":\"1073742922\",\"start\":0}&" + KEY;
+	public static final String URL_SONG_OF_ALBUM = DOMAIN_API + "/api/mobile/playlist/getsonglist?requestdata={\"length\":%1$d,\"id\":\"%2$s\",\"start\":%3$d}&" + KEY;
 	
-	public static final String URL_SEARCH_ALBUM = DOMAIN_API + "/api/mobile/search/playlist?requestdata={\"length\":15,\"start\":0,\"q\":\"dan%20truong\",\"sort\":\"hot\"}&" + KEY;
-	public static final String URL_ALBUM_INFO = DOMAIN_API + "/api/mobile/playlist/getalbuminfo?requestdata={\"id\":\"1073742922\"}&" + KEY;
-	public static final String URL_ALBUM_OF_ARTIST = DOMAIN_API + "/api/mobile/artist/getalbumofartist?requestdata={\"length\":15,\"id\":\"100\",\"start\":0}&" + KEY;
+	public static final String URL_SEARCH_ALBUM = DOMAIN_API + "/api/mobile/search/playlist?requestdata={\"length\":%1$d,\"start\":%2$d,\"q\":\"%3$s\",\"sort\":\"%4$s\"}&" + KEY;
+	public static final String URL_ALBUM_INFO = DOMAIN_API + "/api/mobile/playlist/getalbuminfo?requestdata={\"id\":\"%1$s\"}&" + KEY;
+	public static final String URL_ALBUM_OF_ARTIST = DOMAIN_API + "/api/mobile/artist/getalbumofartist?requestdata={\"length\":%1$d,\"id\":\"%2$s\",\"start\":%3$d}&" + KEY;
 	
-	public static final String ALL_ARTIST = DOMAIN_API + "/api/mobile/artist/getartistbygenre?requestdata={\"length\":15,\"id\":0,\"start\":0}&" + KEY;
-	public static final String URL_SEARCH_ARTIST = DOMAIN_API + "/api/mobile/artist/getvideoofartist?requestdata={\"length\":15,\"id\":\"100\",\"start\":0}&" + KEY;
-	public static final String URL_ARTIST_INFO = DOMAIN_API + "/api/mobile/artist/getartistinfo?requestdata={\"id\":\"100\"}&" + KEY;
+	public static final String URL_ARTIST_BY_GENRE = DOMAIN_API + "/api/mobile/artist/getartistbygenre?requestdata={\"length\":%1$d,\"id\":%2$d,\"start\":%3$d}&" + KEY;
+	public static final String URL_SEARCH_ARTIST = DOMAIN_API + "/api/mobile/artist/getvideoofartist?requestdata={\"length\":%1$d,\"id\":\"%2$s\",\"start\":%3$d}&" + KEY;
+	public static final String URL_ARTIST_INFO = DOMAIN_API + "/api/mobile/artist/getartistinfo?requestdata={\"id\":\"%1$s\"}&" + KEY;
 	
-	public static final String TOP_SONG_VN = DOMAIN_API + "/api/mobile/charts/getchartsinfo?requestdata={\"length\":40,\"id\":1,\"start\":0}&" + KEY;
-	public static final String URL_LOG = DOMAIN_API + "/api/mobile/log/loglisten?requestdata={\"type\":\"song\",\"id\":\"1073835968\",\"device_id\":\"d33f3e748d4a5e41\"}&" + KEY;
+	public static final String TOP_SONG_VN = DOMAIN_API + "/api/mobile/charts/getchartsinfo?requestdata={\"length\":%1$d,\"id\":1,\"start\":%2$d}&" + KEY;
+	public static final String URL_LOG = DOMAIN_API + "/api/mobile/log/loglisten?requestdata={\"type\":\"song\",\"id\":\"%1$s\",\"device_id\":\"d33f3e748d4a5e41\"}&" + KEY;
 	public static final String ALL_TOP_SONG = DOMAIN_API + "/api/mobile/charts/getchartslist?" + KEY;
-	public static final String URL_LYRIC = DOMAIN_API + "/api/mobile/song/getlyrics?requestdata={\"id\":\"1074584968\"}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	public static final String URL_LYRIC = DOMAIN_API + "/api/mobile/song/getlyrics?requestdata={\"id\":\"%1$s\"}&" + KEY;
 	
 	public static final String DEFAULT_USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.2.2; sdk Build/JB_MR1.1)";
 	public static final String SONG_USER_AGENT = "stagefright/1.2 (Linux;Android 4.2.2)";
