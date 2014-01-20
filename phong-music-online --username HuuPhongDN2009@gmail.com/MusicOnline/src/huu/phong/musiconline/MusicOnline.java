@@ -179,6 +179,14 @@ public class MusicOnline extends JFrame {
 				endDuration.setText(Utils.toDuaration(player.getDuration()));
 				setTitle(player.getPlayingInfo());
 				if (player.isBuffered()) slider.setRange(player.getLength());
+				setStatus(null);
+			}
+
+			@Override
+			public void error(String error) {
+				out.println(error);
+				setTitle(error);
+				setStatus("ERROR");
 			}
 		});
 		
@@ -1291,7 +1299,7 @@ public class MusicOnline extends JFrame {
 	}
 
 	public void setStatus(String str) {
-		info.setText("[" + str + "]");
+		info.setText(str != null ? String.format("[%s]", str) : "");
 	}
 	
 	public void setCurrentSong(final int index){

@@ -218,16 +218,17 @@ public class Song implements Serializable {
 	}
 	
 	public String getDirectLinkWithoutRefresh(Format format){
+		String userAgent = Site.getUserAgent(site, true);
 		String link = null;
 		switch (format) {
 		case LOSSLESS:
-			link = directLinks.get(Format.LOSSLESS); if (link != null) break;
+			link = directLinks.get(Format.LOSSLESS); if (Utils.isURLAvailable(link, userAgent)) break;
 		
 		case MP3_320_KBPS:
-			link = directLinks.get(Format.MP3_320_KBPS); if (link != null) break;
+			link = directLinks.get(Format.MP3_320_KBPS); if (Utils.isURLAvailable(link, userAgent)) break;
 			
 		case MP3_128_KBPS:
-			link = directLinks.get(Format.MP3_128_KBPS); if (link != null) break;
+			link = directLinks.get(Format.MP3_128_KBPS); if (Utils.isURLAvailable(link, userAgent)) break;
 			
 		default:
 			link = directLinks.get(null); break;

@@ -74,7 +74,7 @@ public final class Utils{
 			if(userAgent == null) userAgent = Configure.getInstance().userAgent;
 			connection.setRequestProperty("User-Agent", userAgent);
 			connection.connect();
-			if (!isErrorCode(connection.getResponseCode())) {
+			if (!isErrorCode(connection.getResponseCode()) && connection.getContentLength() != 0) {
 				ret = true;
 			}
 			connection.disconnect();

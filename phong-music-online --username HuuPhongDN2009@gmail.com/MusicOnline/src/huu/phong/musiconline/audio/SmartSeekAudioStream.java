@@ -52,13 +52,16 @@ public class SmartSeekAudioStream extends AudioStream{
 			userAgent = Site.getUserAgent(song.getSite(), true);
 			connection.addRequestProperty("User-Agent", userAgent);
 			length = connection.getContentLength();
+//			if (length <= 0){
+//				throw new RuntimeException(String.format("Can not play link %s", song.getDirectLink()));
+//			}
 			in.setLength(length);
 			allPoints.add(new Point(0, length - 1));
 			Vector<Point> currentPoints = new Vector<Point>();
 			currentPoints.addAll(allPoints);
 			startBuffer(currentPoints, connection.getInputStream());
 		} catch (Exception e) {
-			throw new RuntimeException("Can not get stream audio");
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 	

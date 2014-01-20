@@ -17,7 +17,7 @@ public class FileAudioStream extends AudioStream {
 			length = (int) in.length();
 			offset = length;
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
