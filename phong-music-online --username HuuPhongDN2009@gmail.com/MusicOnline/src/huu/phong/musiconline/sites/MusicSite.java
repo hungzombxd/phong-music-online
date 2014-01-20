@@ -3,6 +3,7 @@ package huu.phong.musiconline.sites;
 import huu.phong.musiconline.Configure;
 import huu.phong.musiconline.model.Album;
 import huu.phong.musiconline.model.Format;
+import huu.phong.musiconline.model.FormatAdaptor;
 import huu.phong.musiconline.model.ItemCombo;
 import huu.phong.musiconline.model.Song;
 
@@ -19,10 +20,25 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-public abstract class MusicSite{
+
+public abstract class MusicSite {
+	
 	protected String error = null;
+	
 	protected String information = null;
+	
+	public int numberResult = 15;
+	
+	protected static Gson gson = new Gson();
+	
+	static {
+		GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(Map.class, new FormatAdaptor());
+		gson = builder.create();
+	}
 	
 	public static MusicSite getInstanceBy(Site site){
 		switch (site) {
@@ -69,9 +85,14 @@ public abstract class MusicSite{
 		return getReader(link, null);
 	}
 	
-	public BufferedReader getReader(String link, Map<String, String> properties) throws IOException{
+	public InputStream getInputStream(String link, Map<String, String> properties) throws IOException{
+		return getInputStream(link, properties, null);
+	}
+	
+	public InputStream getInputStream(String link, Map<String, String> properties, String userAgent) throws IOException{
 		URL url = new URL(link);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		if(userAgent == null) userAgent = Configure.getInstance().userAgent;
 		connection.addRequestProperty("User-Agent", Configure.getInstance().userAgent);
 		if (properties != null){
 			Set<Entry<String, String>> pros = properties.entrySet();
@@ -81,6 +102,10 @@ public abstract class MusicSite{
 		}
 		InputStream in = connection.getInputStream();
 		if ("gzip".equalsIgnoreCase(connection.getContentEncoding())) in = new GZIPInputStream(in);
-		return new BufferedReader(new InputStreamReader(in, "UTF-8"));
+		return in;
+	}
+	
+	public BufferedReader getReader(String link, Map<String, String> properties) throws IOException{
+		return new BufferedReader(new InputStreamReader(getInputStream(link, properties), "UTF-8"));
 	}
 }

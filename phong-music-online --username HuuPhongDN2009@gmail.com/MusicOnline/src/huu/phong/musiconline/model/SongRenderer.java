@@ -44,7 +44,7 @@ public class SongRenderer implements ListCellRenderer{
 		JLabel both = new JLabel();
 		both.setOpaque(true);
 		both.setLayout(new BoxLayout(both, BoxLayout.X_AXIS));
-		JLabel label = new JLabel(song.title);
+		JLabel label = new JLabel(song.getSongName());
 		JLabel hq = null;
 		JLabel number = new JLabel(" " + numberToString(index + 1) + ".");
 		number.setForeground(Color.BLUE);

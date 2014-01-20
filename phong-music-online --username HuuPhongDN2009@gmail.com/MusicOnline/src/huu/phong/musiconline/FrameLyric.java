@@ -44,7 +44,7 @@ public class FrameLyric extends JFrame {
 	}
 	
 	public void setLyric(final Song song){
-		if (song.link.equals("")){
+		if (song.getLink().equals("")){
 			lyric.setText("<h1 style='color: blue; text-align:center;'>Not found lyric<h1>");
 			return;
 		}
@@ -52,7 +52,7 @@ public class FrameLyric extends JFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					List<String> lyrics = MusicSite.getInstanceBy(song.site).getLyric(song);
+					List<String> lyrics = MusicSite.getInstanceBy(song.getSite()).getLyric(song);
 					if (lyrics.isEmpty()){
 						lyric.setText("<h1 style='text-align:center; color: blue;'>Not found lyric<h1>");
 						return; 

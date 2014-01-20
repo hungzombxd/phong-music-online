@@ -15,9 +15,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-import javax.swing.border.EtchedBorder;
-
-
 
 public class AlbumRenderer implements ListCellRenderer{
 	public static final ImageIcon DEFAULT_DETAIL_ALBUM_ART = new ImageIcon(Album.class.getResource("/images/default_albumart.jpg"));
@@ -29,7 +26,7 @@ public class AlbumRenderer implements ListCellRenderer{
 	public static final int VIEW_MODE_CLASSIC = 1;
 	public static final int VIEW_MODE_DETAIL = 0;
 	Dimension dimension;
-	Dimension imageSize = new Dimension(96, 96);
+	Dimension imageSize = new Dimension(94, 94);
 	Thread loadImages;
 	Queue<Thread> process = new ArrayDeque<Thread>();
 	
@@ -46,11 +43,6 @@ public class AlbumRenderer implements ListCellRenderer{
 							e.printStackTrace();
 						}
 					}
-//					try {
-//						Thread.sleep(1000);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
 					synchronized (loadImages) {
 						try {
 							loadImages.wait();
@@ -86,11 +78,11 @@ public class AlbumRenderer implements ListCellRenderer{
 		icon.setMinimumSize(imageSize);
 		icon.setMaximumSize(imageSize);
 		icon.setHorizontalAlignment(JLabel.CENTER);
-		icon.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+//		icon.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 //		icon.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, line));
-		if (!album.albumArt.equals("")){
-			if (album.icon != null){
-				icon.setIcon(album.icon);
+		if (!album.getAlbumArt().equals("")){
+			if (album.getIcon() != null){
+				icon.setIcon(album.getIcon());
 			}else{
 				icon.setIcon(DEFAULT_DETAIL_ALBUM_ART);
 				process.add(new Thread(){
@@ -109,7 +101,7 @@ public class AlbumRenderer implements ListCellRenderer{
 		label.setVerticalTextPosition(JLabel.CENTER);
 		both.add(icon, BorderLayout.WEST);
 		both.add(label, BorderLayout.CENTER);
-		if (album.highQuality){
+		if (album.isHighQuality()){
 			both.add(new JLabel(" ", SongRenderer.MP3_320_KBPS, JLabel.LEADING), BorderLayout.EAST);
 		}
 		if (isSelected) {
@@ -127,11 +119,11 @@ public class AlbumRenderer implements ListCellRenderer{
 		JLabel both = new JLabel();
 		both.setOpaque(true);
 		both.setLayout(new BoxLayout(both, BoxLayout.X_AXIS));
-		JLabel label = new JLabel(album.title);
+		JLabel label = new JLabel(album.getTitle());
 		JLabel hq = null;
 		JLabel number = new JLabel(" " + numberToString(index + 1) + ".");
 		number.setForeground(Color.BLUE);
-		if (album.highQuality){
+		if (album.isHighQuality()){
 			hq = new JLabel(SongRenderer.MP3_320_KBPS);
 			hq.setText(" ");
 		}

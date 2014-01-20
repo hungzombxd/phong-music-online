@@ -76,17 +76,16 @@ public class Radio {
 						&& str.trim().startsWith("<a href")) {
 					index = str.indexOf("/Listen.aspx?");
 					ln = str.substring(index);
-					ln = "http://radio.vnmedia.vn"
-							+ new StringTokenizer(ln, "\"").nextToken();
+					ln = new StringTokenizer(ln, "\"").nextToken();
 					title = in.readLine().trim();
 					title = Utils.ncrToUnicode(title);
 					i++;
 					Song song = new Song(title, ln, Site.RADIO_VNMEDIA_VN);
-					song.songInfo = "";
+					song.setSongInfo("");
 					while ((str = in.readLine()) != null && !str.contains("</dl>")){
-						song.songInfo += str; 
+						song.setSongInfo(song.getSongInfo() + str); 
 					}
-					song.songInfo = HtmlUtil.htmlToText(song.songInfo);
+					song.setSongInfo(HtmlUtil.htmlToText(song.getSongInfo()));
 					songs.add(song);
 				}
 			}

@@ -4,11 +4,14 @@ import huu.phong.musiconline.model.Album;
 import huu.phong.musiconline.model.Format;
 import huu.phong.musiconline.model.ItemCombo;
 import huu.phong.musiconline.model.Song;
+import huu.phong.musiconline.model.ZingSong;
 import huu.phong.musiconline.utils.HtmlUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,9 +19,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-
-
 public class Zing extends MusicSite{
+	
+	private static final String DOMAIN_API = "http://api.mp3.zing.vn";
+	public static final String DOMAIN_MP3 = "http://mp3.zing.vn";
+	public static final String DOMAIN_IMAGE = "http://image.mp3.zdn.vn";
+	
+	private static final String URL_SEARCH_SONG = DOMAIN_API + "/api/mobile/search/song?requestdata={\"length\":%1$d,\"start\":%2$d,\"q\":\"%3$s\",\"sort\":\"%4$s\",\"by:\":\"artist\"}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	public static final String URL_SEARCH_ALBUM = DOMAIN_API + "/api/mobile/search/playlist?requestdata={\"length\":15,\"start\":0,\"q\":\"dan%20truong\",\"sort\":\"hot\"}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	public static final String URL_LOG = DOMAIN_API + "/api/mobile/log/loglisten?requestdata={\"type\":\"song\",\"id\":\"1073835968\",\"device_id\":\"d33f3e748d4a5e41\"}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	public static final String URL_SEARCH_ARTIST = DOMAIN_API + "/api/mobile/artist/getvideoofartist?requestdata={\"length\":15,\"id\":\"100\",\"start\":0}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	
+	public static final String URL_ARTIST_INFO = DOMAIN_API + "/api/mobile/artist/getartistinfo?requestdata={\"id\":\"100\"}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	public static final String URL_ALBUM_OF_ARTIST = DOMAIN_API + "/api/mobile/artist/getalbumofartist?requestdata={\"length\":15,\"id\":\"100\",\"start\":0}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	
+	public static final String TOP_SONG_VN = DOMAIN_API + "/api/mobile/charts/getchartsinfo?requestdata={\"length\":40,\"id\":1,\"start\":0}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	
+	public static final String ALL_TOP_SONG = DOMAIN_API + "/api/mobile/charts/getchartslist?keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	
+//	public static final String ALL_ARTIST = DOMAIN_API + "/api/mobile/artist/getartistbygenre?requestdata={\"length\":15,\"id\":0,\"start\":0}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	
+	public static final String URL_LYRIC = DOMAIN_API + "/api/mobile/song/getlyrics?requestdata={\"id\":\"1074584968\"}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	
+	public static final String ALL_ARTIST = DOMAIN_API + "/api/mobile/artist/getartistbygenre?requestdata={\"length\":15,\"id\":0,\"start\":0}&keycode=dce4479e25d509f546f92857b5816060&fromvn=true";
+	
+	
+	public static final String DEFAULT_USER_AGENT = "Dalvik/1.6.0 (Linux; U; Android 4.2.2; sdk Build/JB_MR1.1)";
+	public static final String SONG_USER_AGENT = "stagefright/1.2 (Linux;Android 4.2.2)";
+	
 	private static Map<String, String> songByType = new HashMap<String, String>();
 	private static Map<String, String> songByAlbum = new HashMap<String, String>();
 	
@@ -153,7 +181,7 @@ public class Zing extends MusicSite{
 		while ((str = in.readLine()) != null) {
 			if (str.contains("href=\"/bai-hat/") && str.contains("<h3>")) {
 				title = HtmlUtil.getAttribute(str, "title=\"");
-				link = "http://mp3.zing.vn" + HtmlUtil.getAttribute(str, "href=\"");
+				link = HtmlUtil.getAttribute(str, "href=\"");
 				lists.add(new Song(title, link));
 			}
 		}
@@ -163,7 +191,7 @@ public class Zing extends MusicSite{
 
 	// Get link to mp3 of HTML mp3 link
 	public Map<Format, String> getLink(String mp3URL) throws IOException {
-		return xmlToSongs(getXML(mp3URL)).get(0).directLinks;
+		return xmlToSongs(getXML(mp3URL)).get(0).getDirectLinks();
 	}
 
 	// Get XML file for song or album
@@ -194,26 +222,10 @@ public class Zing extends MusicSite{
 	
 	public List<Song> searchSong(String value, int page, String filter) throws UnsupportedEncodingException, IOException{
 		value = URLEncoder.encode(value, "UTF-8");
-		List<Song> lists = new ArrayList<Song>();
-		BufferedReader in = getReader("http://mp3.zing.vn/tim-kiem/bai-hat.html?q=" + value	+ "&p=" + page + filter);
-		String str, title, link;
-		while ((str = in.readLine()) != null) {
-			if(str.contains("/bai-hat/")){
-				title = HtmlUtil.getAttribute(str, "title=\"");
-				link = "http://mp3.zing.vn" + HtmlUtil.getAttribute(str, "href=\"");
-				Song song = new Song(title, link);
-				while ((str = in.readLine()) != null){
-					if (str.trim().equalsIgnoreCase("</h3>")) break;
-					if (str.contains("title=\"Bài hát chất lượng cao\"")) song.setQuality(Format.MP3_320_KBPS);
-				}
-				in.readLine();
-				song.songInfo = HtmlUtil.htmlToText(in.readLine()).replace("Đăng bởi:  |", "");
-				lists.add(song);
-				if (lists.size() >= 20) break;
-			}
-		}
-		in.close();
-		return lists;
+		InputStream in = getInputStream(String.format(URL_SEARCH_SONG, numberResult, (page - 1) * numberResult, value, "hot"), null, DEFAULT_USER_AGENT);
+		String response = HtmlUtil.streamToString(in);
+		ZingSong result = gson.fromJson(response, ZingSong.class);
+		return result.getSongs();
 	}
 	
 	public List<Album> searchAlbum(String value, int page, String filter) throws IOException{
@@ -239,10 +251,10 @@ public class Zing extends MusicSite{
 					Album album = new Album(title, link);
 					while ((str = in.readLine()) != null){
 						if (str.trim().equalsIgnoreCase("</h3>")) break;
-						if (str.contains("title=\"Album chất lượng cao\"")) album.highQuality = true;
+						if (str.contains("title=\"Album chất lượng cao\"")) album.setHighQuality(true);
 					}
-					album.info = HtmlUtil.htmlToText(in.readLine()) + "<br/>" + HtmlUtil.htmlToText(in.readLine());
-					album.albumArt = albumArt;
+					album.setInfo(HtmlUtil.htmlToText(in.readLine()) + "<br/>" + HtmlUtil.htmlToText(in.readLine()));
+					album.setAlbumArt(albumArt);
 					lists.add(album);
 					if(lists.size() >= 20) break;
 				}
@@ -287,9 +299,9 @@ public class Zing extends MusicSite{
 				token.nextElement();
 				title = token.nextToken();
 				token.nextElement();
-				link = "http://mp3.zing.vn" + token.nextToken();
+				link = token.nextToken();
 				Song song = new Song(title, link);
-				song.songInfo = HtmlUtil.htmlToText(in.readLine());
+				song.setSongInfo(HtmlUtil.htmlToText(in.readLine()));
 				lists.add(song);
 			}
 		}
@@ -319,12 +331,13 @@ public class Zing extends MusicSite{
 				from = str.indexOf("title=\"");
 				to = str.indexOf("\" href=\"");
 				title = str.substring(from + 7, to);
-				link = "http://mp3.zing.vn"	+ str.substring(to + 8).split("\"")[0];
+				link = str.substring(to + 8).split("\"")[0];
 				in.readLine();
 				in.readLine();
 				Album album = new Album(title, link);
-				album.info = "Năm phát hành : " + HtmlUtil.htmlToText(in.readLine().trim()) + " | " + "Lượt nghe trong tuần: " + HtmlUtil.htmlToText(in.readLine().trim());
-				album.albumArt = img;
+				album.setInfo("Năm phát hành : " + HtmlUtil.htmlToText(in.readLine().trim()) + " | " + "Lượt nghe trong tuần: " + HtmlUtil.htmlToText(in.readLine().trim()));
+				album.setAlbumArt(img);
+				album.setSite(Site.MP3_ZING_VN);
 				albums.add(album);
 			}
 		}
@@ -360,5 +373,17 @@ public class Zing extends MusicSite{
 	@Override
 	public ItemCombo[] getFilters() {
 		return FILTERS;
+	}
+	
+	public static void main(String[] args) throws UnsupportedEncodingException {
+		System.out.println(URLDecoder.decode("secretkey=nct@mobile_service&action=suggest-search&deviceinfo=%7B%22DeviceID%22%3A%225284047f4ffb4e04824a2fd1d1f0cd62%22%2C%22OsName%22%3A%22ANDROID%22%2C%22OsVersion%22%3A%2210%22%2C%22AppName%22%3A%22NhacCuaTui%22%2C%22AppVersion%22%3A%225.0.1%22%2C%22UserInfo%22%3A%22%22%2C%22LocationInfo%22%3A%22%22%7D&keyword=anh&time=1390121272210", "utf-8"));
+//		try {
+//			getInstance().searchSong("dan truong", 1, "");
+//		} catch (UnsupportedEncodingException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 }
