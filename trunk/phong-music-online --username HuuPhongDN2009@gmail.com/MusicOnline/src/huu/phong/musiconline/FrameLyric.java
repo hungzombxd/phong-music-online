@@ -1,6 +1,6 @@
 package huu.phong.musiconline;
 
-import huu.phong.musiconline.model.Song;
+import huu.phong.musiconline.model.ISong;
 import huu.phong.musiconline.sites.MusicSite;
 
 import java.awt.BorderLayout;
@@ -15,8 +15,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
-
-
 
 public class FrameLyric extends JFrame {
 	private static final long serialVersionUID = -2675197512423718784L;
@@ -43,7 +41,7 @@ public class FrameLyric extends JFrame {
 		container.add(Box.createRigidArea(new Dimension(0, 5)), BorderLayout.SOUTH);
 	}
 	
-	public void setLyric(final Song song){
+	public void setLyric(final ISong song){
 		if (song.getLink().equals("")){
 			lyric.setText("<h1 style='color: blue; text-align:center;'>Not found lyric<h1>");
 			return;

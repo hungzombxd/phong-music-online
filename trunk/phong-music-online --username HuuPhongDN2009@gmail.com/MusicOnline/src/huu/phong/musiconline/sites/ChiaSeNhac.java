@@ -1,9 +1,10 @@
 package huu.phong.musiconline.sites;
 
-import huu.phong.musiconline.model.Album;
+import huu.phong.musiconline.model.ChiaSeNhacSong;
 import huu.phong.musiconline.model.Format;
+import huu.phong.musiconline.model.IAlbum;
+import huu.phong.musiconline.model.ISong;
 import huu.phong.musiconline.model.ItemCombo;
-import huu.phong.musiconline.model.Song;
 import huu.phong.musiconline.utils.HtmlUtil;
 
 import java.io.BufferedReader;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 public class ChiaSeNhac extends MusicSite{
 	
@@ -26,14 +26,14 @@ public class ChiaSeNhac extends MusicSite{
 		return chiaSeNhac;
 	}
 	
-	private ChiaSeNhac(){
+	private ChiaSeNhac() {
+		
 	}
 
 	@Override
-	public List<Song> searchSong(String value, int page, String filter)
-			throws IOException {
+	public List<ISong> searchSong(String value, int page, String filter) throws IOException {
 		value = URLEncoder.encode(value, "UTF-8");
-		List<Song> songs = new ArrayList<Song>();
+		List<ISong> songs = new ArrayList<ISong>();
 		BufferedReader in = getReader("http://search.chiasenhac.com/search.php?mode=&order=quality&cat=music&s=" + value + "&page=" + page + filter);
 		String str;
 		String title = "";
@@ -48,9 +48,13 @@ public class ChiaSeNhac extends MusicSite{
 				while (!(str = in.readLine()).contains("<span class=\"gen\">")){
 				}
 				info = HtmlUtil.htmlToText(str.replace("<br />", " | ")).trim();
-				Song song = new Song(title + " - " + artist, link, Site.CHIA_SE_NHAC);
+				ChiaSeNhacSong song = new ChiaSeNhacSong();
+				song.setTitle(title);
+				song.setArtist(artist);
+				song.setLink(link);
+				song.setSite(Site.CHIA_SE_NHAC);
 				song.setQuality(info.contains("Lossless") ? Format.LOSSLESS : info.contains("320kbps") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS);
-				song.setSongInfo(info.replace("Lossless", "<b style='color: blue'>Lossless</b>"));
+//				song.setSongInfo(info.replace("Lossless", "<b style='color: blue'>Lossless</b>"));
 				songs.add(song);
 				if (songs.size() == 25) break;
 			}
@@ -94,21 +98,16 @@ public class ChiaSeNhac extends MusicSite{
 	}
 
 	@Override
-	public List<Album> searchAlbum(String value, int page, String filter)
+	public List<IAlbum> searchAlbum(String value, int page, String filter)
 			throws IOException {
-		List<Album> albums = new ArrayList<Album>();
+		List<IAlbum> albums = new ArrayList<IAlbum>();
 		return albums;
 	}
 
 	@Override
-	public List<Song> getAlbum(String html) throws IOException {
-		List<Song> songs = new ArrayList<Song>();
+	public List<ISong> getAlbum(String html) throws IOException {
+		List<ISong> songs = new ArrayList<ISong>();
 		return songs;
-	}
-	
-	public static void main(String[] args) throws IOException {
-		System.out.println(new ChiaSeNhac().getLink("http://chiasenhac.com/mp3/vietnam/v-pop/cung-dan-tinh-yeu~dan-truong-my-tam~1002882.html"));
-		
 	}
 
 	@Override
@@ -119,5 +118,9 @@ public class ChiaSeNhac extends MusicSite{
 	@Override
 	public ItemCombo[] getFilters() {
 		return FILTERS;
+	}
+	
+	public static void main(String[] args) {
+		getInstance();
 	}
 }

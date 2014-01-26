@@ -1,6 +1,6 @@
 package huu.phong.musiconline.audio;
 
-import huu.phong.musiconline.model.Song;
+import huu.phong.musiconline.model.ISong;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -11,7 +11,7 @@ public class FileAudioStream extends AudioStream {
 	
 	private RandomAccessFile in;
 	
-	public FileAudioStream(Song song) {
+	public FileAudioStream(ISong song) {
 		try {
 			in = new RandomAccessFile(song.getDirectLink().substring(FILE_REGEX.length()), "r");
 			length = (int) in.length();

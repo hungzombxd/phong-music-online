@@ -1,25 +1,16 @@
-package huu.phong.musiconline.model;
+package huu.phong.musiconline.model.zing;
+
+import huu.phong.musiconline.model.IAlbum;
 
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ZingSong {
+public class ZingAlbumList{
 	private int numFound;
 	private int start;
 	@SerializedName("docs")
-	private List<Song> songs;
-	
-	public ZingSong(){
-		
-	}
-
-	public ZingSong(int numFound, int start, List<Song> docs) {
-		super();
-		this.numFound = numFound;
-		this.start = start;
-		this.songs = docs;
-	}
+	private List<ZingAlbum> albums;
 
 	public int getNumFound() {
 		return numFound;
@@ -37,11 +28,7 @@ public class ZingSong {
 		this.start = start;
 	}
 
-	public List<Song> getSongs() {
-		return songs;
-	}
-
-	public void setDocs(List<Song> songs) {
-		this.songs = songs;
+	public List<? extends IAlbum> getAlbums() {
+		return albums;
 	}
 }

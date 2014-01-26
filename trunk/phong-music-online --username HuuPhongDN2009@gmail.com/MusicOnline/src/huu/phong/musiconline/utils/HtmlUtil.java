@@ -2,48 +2,10 @@ package huu.phong.musiconline.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class HtmlUtil {
-	
-	public static String streamToString(InputStream in) throws IOException{
-		Scanner scanner = new Scanner(in, "UTF-8").useDelimiter("\\A");
-		String ret = scanner.hasNext() ? scanner.next(): "";
-		in.close();
-		return ret;
-	}
-	
-	public static String getHtmlTag(String line, String tag){
-		int from = line.indexOf("<" + tag + ">") + tag.length() + 2;
-		int to = line.indexOf("</" + tag + ">");
-		line = line.substring(from, to);
-		return line;
-	}
-	
-	public static String getTag(String line, String tab){
-		int from = line.indexOf("<" + tab + ">") + tab.length() + 2;
-		int to = line.indexOf("</" + tab + ">");
-		line = line.substring(from, to);
-		from = line.lastIndexOf("[");
-		if (from != -1){
-			to = line.indexOf("]");
-			line = line.substring(from + 1, to);
-		}
-		return line;
-	}
-	
-	public static String getContent(String str) {
-		int from = str.lastIndexOf("[");
-		int to = str.indexOf("]");
-		if (from == -1) {
-			from = str.indexOf(">");
-			to = str.lastIndexOf("<");
-		}
-		return str.substring(from + 1, to).trim();
-	}
 	
 	public static String getAttribute(String content, String condition){
 		return getAttribute(content, condition, "\"");

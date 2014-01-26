@@ -1,8 +1,8 @@
 package huu.phong.musiconline.sites;
 
 import huu.phong.musiconline.model.Format;
-import huu.phong.musiconline.model.Song;
-import huu.phong.musiconline.utils.HtmlUtil;
+import huu.phong.musiconline.model.ISong;
+import huu.phong.musiconline.model.zing.ZingSong;
 import huu.phong.musiconline.utils.Utils;
 
 import java.io.BufferedReader;
@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
 
 public class Radio {
 	public String[] radioTypes = new String[]{
@@ -44,12 +43,9 @@ public class Radio {
 	
 	private Map<String, String> mapRadio;
 	
-	private static Radio radio;
+	private static Radio radio = new Radio();
 	
 	public static Radio getIntance(){
-		if (radio == null){
-			radio = new Radio();
-		}
 		return radio;
 	}
 	
@@ -60,12 +56,12 @@ public class Radio {
 		}
 	}
 	
-	public List<Song> getRadio(int page, String radioType) {
+	public List<ISong> getRadio(int page, String radioType) {
 		return getSongs(mapRadio.get(radioType) + "&page=" + page);
 	}
 
-	public List<Song> getSongs(String link) {
-		List<Song> songs = new ArrayList<Song>();
+	public List<ISong> getSongs(String link) {
+		List<ISong> songs = new ArrayList<ISong>();
 		try {
 			URL url = new URL(link);
 			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
@@ -80,12 +76,15 @@ public class Radio {
 					title = in.readLine().trim();
 					title = Utils.ncrToUnicode(title);
 					i++;
-					Song song = new Song(title, ln, Site.RADIO_VNMEDIA_VN);
-					song.setSongInfo("");
+					ZingSong song = new ZingSong();
+					song.setTitle(title);
+					song.setLink(link);
+					song.setSite(Site.RADIO_VNMEDIA_VN);
+//					song.setSongInfo("");
 					while ((str = in.readLine()) != null && !str.contains("</dl>")){
-						song.setSongInfo(song.getSongInfo() + str); 
+//						song.setSongInfo(song.getSongInfo() + str); 
 					}
-					song.setSongInfo(HtmlUtil.htmlToText(song.getSongInfo()));
+//					song.setSongInfo(HtmlUtil.htmlToText(song.getSongInfo()));
 					songs.add(song);
 				}
 			}

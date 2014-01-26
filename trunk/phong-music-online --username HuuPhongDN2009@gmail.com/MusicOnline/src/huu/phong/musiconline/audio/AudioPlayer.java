@@ -1,7 +1,7 @@
 package huu.phong.musiconline.audio;
 
 import huu.phong.musiconline.model.AudioInfo;
-import huu.phong.musiconline.model.Song;
+import huu.phong.musiconline.model.ISong;
 import huu.phong.musiconline.sites.Site;
 import huu.phong.musiconline.utils.Utils;
 
@@ -14,8 +14,7 @@ import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-
-public class AudioPlayer{
+public class AudioPlayer {
 	private AudioStream in;
 	private byte[] buffer = new byte[32768];
 	private boolean stoped = false;
@@ -102,7 +101,7 @@ public class AudioPlayer{
 		this.streaming = streaming;
 	}
 	
-	private void prepare(Song song){
+	private void prepare(ISong song){
 		try {
 			if (song.getSite().equals(Site.MY_COMPUTER)){
 				in = new FileAudioStream(song);
@@ -161,7 +160,7 @@ public class AudioPlayer{
 		source.start();
 	}
 	
-	public void play(final Song song){
+	public void play(final ISong song){
 		stop();
 		threads.add(new Thread(){
 			public void run(){

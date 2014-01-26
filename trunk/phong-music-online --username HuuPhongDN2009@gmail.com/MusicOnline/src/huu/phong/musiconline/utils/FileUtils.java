@@ -1,6 +1,6 @@
 package huu.phong.musiconline.utils;
 
-import huu.phong.musiconline.sites.Zing;
+import huu.phong.musiconline.model.ISong;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
-
 public class FileUtils {
-    public static void copyURLToFile(URL url, File file, FileUtils.Streaming streaming){
+    public static void songToFile(ISong song, File file, FileUtils.Streaming streaming){
         try {
+        	URL url = new URL(song.getDirectLink());
             URLConnection connection = url.openConnection();
-            connection.setRequestProperty("User-Agent", Zing.SONG_USER_AGENT);
+            connection.setRequestProperty("User-Agent", song.getSite().getSongAgent());
             int length = connection.getContentLength();
             byte[] buffer = new byte[4096];
             int reading = -1;
@@ -28,7 +28,7 @@ public class FileUtils {
 				} catch (Exception e) {
                     if (in != null) in.close();
                     connection = url.openConnection();
-                    connection.setRequestProperty("User-Agent", Zing.SONG_USER_AGENT);
+                    connection.setRequestProperty("User-Agent", song.getSite().getSongAgent());
                     connection.setRequestProperty("Accept-Ranges", "bytes");
                     connection.setRequestProperty("Range", "bytes=" + offset + "-");
                     connection.connect();
@@ -42,7 +42,7 @@ public class FileUtils {
             in.close();
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
     }
     

@@ -1,176 +1,81 @@
 package huu.phong.musiconline.sites;
 
-import huu.phong.musiconline.model.Album;
 import huu.phong.musiconline.model.Format;
+import huu.phong.musiconline.model.IAlbum;
+import huu.phong.musiconline.model.ISong;
 import huu.phong.musiconline.model.ItemCombo;
-import huu.phong.musiconline.model.Song;
-import huu.phong.musiconline.utils.HtmlUtil;
+import huu.phong.musiconline.model.nhaccuatui.NhacCuaTuiAlbumDetail;
+import huu.phong.musiconline.model.nhaccuatui.NhacCuaTuiAlbumList;
+import huu.phong.musiconline.model.nhaccuatui.NhacCuaTuiLyricList;
+import huu.phong.musiconline.model.nhaccuatui.NhacCuaTuiSongList;
+import huu.phong.musiconline.utils.Utils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.nct.constants.Constants;
+import com.nct.dataloader.URLProvider;
 
 public class NhacCuaTui extends MusicSite {
-	private static NhacCuaTui nhacCuaTui;
+	
+	private static final String deviceInfo = "{\"DeviceID\":\"5284047f4ffb4e04824a2fd1d1f0cd62\",\"OsName\":\"ANDROID\",\"OsVersion\":\"17\",\"AppName\":\"NhacCuaTui\",\"AppVersion\":\"5.0.1\",\"UserInfo\":\"\",\"LocationInfo\":\"\"}";
+	
+	private static final int SONG_PER_PAGE = 15;
+	
+	public static final String NHACCUATUI_USER_AGENT = "android-async-http/1.4.3 (http://loopj.com/android-async-http)";
+	
+	private static NhacCuaTui nhacCuaTui = new NhacCuaTui();
 	
 	public static ItemCombo[] BYS = new ItemCombo[]{new ItemCombo("Default", "")};
 	public static ItemCombo[] FILTERS = new ItemCombo[]{new ItemCombo("Default", "")};
 	
 	public static NhacCuaTui getInstance(){
-		if (nhacCuaTui == null) nhacCuaTui = new NhacCuaTui();
 		return nhacCuaTui;
 	}
 	
-	public List<Song> xmlToSongs(String xml) throws UnsupportedEncodingException, IOException{
-		List<Song> songs = new ArrayList<Song>();
-		URL url = new URL(xml);
-		String str;
-		int from = -1;
-		String title = "";
-		String link = "";
-		String artist = "";
-		str = HtmlUtil.streamToString(url.openStream());
-		while ((from = str.indexOf("<track>")) != -1){
-			str = str.substring(from + 7);
-			title = HtmlUtil.getTag(str, "title");
-			artist = HtmlUtil.getTag(str, "creator");
-			link = HtmlUtil.getTag(str, "location");
-			Song song = new Song();
-			song.setTitle(title + " - " + artist);
-			song.setDirectLink(Format.MP3_128_KBPS, link);
-			song.setSite(Site.NHAC_CUA_TUI);
-			songs.add(song);
-		}
-		return songs;
-	}
-	
-	public String htmlToXML(String html) throws IOException{
-		BufferedReader in = getReader(html);
-		String str;
-		while ((str = in.readLine()) != null) {
-			if (str.indexOf("NCTNowPlaying.intFlashPlayer") != -1){
-				if (str.contains("playlist")){
-					str = "http://www.nhaccuatui.com/flash/xml?key2=" + HtmlUtil.getAttribute(str, "\"playlist\", \"");
-				}else{
-					str = "http://www.nhaccuatui.com/flash/xml?key1=" + HtmlUtil.getAttribute(str, "\"song\", \"");
-				}
-				break;
-			}
-		}
-		in.close();
-		return str;
+	private NhacCuaTui() {
+		Constants.DEVICE_INFOR = deviceInfo;
+		properties.put("User-Agent", NHACCUATUI_USER_AGENT);
 	}
 	
 	public Map<Format, String> getLink(String html) throws IOException{
-		BufferedReader in = getReader("http://www.nhaccuatui.com/download/song/" + html.substring(html.length() - 15).substring(0, 10));
-		String str;
-		while ((str = in.readLine()) != null) {
-			if (str.contains("Success")){
-				str = str.substring(str.indexOf("http:\\/\\/"));
-				str = str.substring(0, str.indexOf("\"")).replace("\\", "").trim();
-				break;
-			}
-		}
-		in.close();
-		Map<Format, String> links = new HashMap<Format, String>();
-		if (str == null){
-			links.putAll(xmlToSongs(htmlToXML(html)).get(0).getDirectLinks());
-		}else{
-			links.put(Format.MP3_128_KBPS, str.trim());
-		}
-		return links;
+		return null;
 	}
 	
-	public List<Song> searchSong(String value, int page, String filter) throws IOException{
-		value = URLEncoder.encode(value, "UTF-8");
-		List<Song> songs = new ArrayList<Song>();
-		BufferedReader in = getReader("http://www.nhaccuatui.com/tim-kiem/bai-hat?q=" + value + "&page=" + page);
-		String str;
-		while ((str = in.readLine()) != null) {
-			if (str.contains("<ul class=\"list-song\">")){
-				while ((str = in.readLine()) != null && !str.contains("</ul>")){
-					if (str.contains("<li class=\"clearfix song-item\"")){
-						for (int i = 0; i < 3; i++){
-							in.readLine();
-						}
-						str = in.readLine();
-						Song song = new Song();
-						song.setQuality(str.contains("320kb") || str.contains("Official") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS);
-						str = in.readLine();
-						song.setLink(HtmlUtil.getAttribute(str, "href=\""));
-						song.setTitle(HtmlUtil.getAttribute(str, "title=\""));
-						while ((str = in.readLine()) != null){
-							if (!str.contains("class=\"singer\"")) continue;
-							str = in.readLine();
-							song.setTitle(song.getTitle() + " - " + HtmlUtil.htmlToText(str).trim());
-							str = in.readLine();
-							song.setSongInfo("Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim() + " | Upload bởi: " + HtmlUtil.htmlToText(in.readLine()).trim());
-							break;
-						}
-						song.setSite(Site.NHAC_CUA_TUI);
-						songs.add(song);
-					}
-				}
-				break;
-			}
-		}
-		in.close();
-		return songs;
+	public List<? extends ISong> searchSong(String value, int page, String filter) throws IOException {
+		InputStream in = getInputStream(URLProvider.getSearchSong(value, page, SONG_PER_PAGE));
+		String response = Utils.streamToString(in);
+		NhacCuaTuiSongList songList = gson.fromJson(response, NhacCuaTuiSongList.class);
+		return songList.getSongs();
 	}
 
 	@Override
-	public List<Album> searchAlbum(String value, int page, String filter) throws IOException {
-		List<Album> albums = new ArrayList<Album>();
-		value = URLEncoder.encode(value, "UTF-8");
-		BufferedReader in = getReader("http://www.nhaccuatui.com/tim-kiem/playlist?q=" + value + "&page=" + page);
-		String str;
-		while ((str = in.readLine()) != null) {
-			if (str.contains("<ul class=\"list-al-pl\"")){
-				while ((str = in.readLine()) != null && !str.contains("</ul>")){
-					if (str.contains("<p class=\"name\">")){
-						Album album = new Album();
-						album.setInfo("Tạo bởi: " + HtmlUtil.htmlToText(str).trim() + " | Lượt nghe: " + HtmlUtil.htmlToText(in.readLine()).trim());
-						in.readLine(); in.readLine();
-						str = in.readLine();
-						album.setLink(HtmlUtil.getAttribute(str, "href=\""));
-						album.setTitle(HtmlUtil.getAttribute(str, "title=\""));
-						album.setAlbumArt(HtmlUtil.getAttribute(in.readLine(), "src=\""));
-						str = in.readLine();
-						while ((str = in.readLine()) != null){
-							if (str.contains("<a href=\"http://www.nhaccuatui.com/tim-kiem")){
-								album.setTitle(album.getTitle() + " - " + HtmlUtil.htmlToText(str));
-								album.setInfo("Trình bày: " + HtmlUtil.htmlToText(str) + "<br/>" + album.getInfo());
-								break;
-							}
-						}
-						album.setSite(Site.NHAC_CUA_TUI);
-						albums.add(album);
-						album = null;
-					}
-				}
-				break;
-			}
-		}
-		in.close();
-		
-		return albums;
+	public List<? extends IAlbum> searchAlbum(String value, int page, String filter) throws IOException {
+		InputStream in = getInputStream(URLProvider.getSearchPlaylist(value, page, SONG_PER_PAGE));
+		String response = Utils.streamToString(in);
+		NhacCuaTuiAlbumList albumList = gson.fromJson(response, NhacCuaTuiAlbumList.class);
+		return albumList.getAlbums();
 	}
 
 	@Override
-	public List<Song> getAlbum(String html) throws IOException {
-		return xmlToSongs(htmlToXML(html));
+	public List<? extends ISong> getAlbum(String id) throws IOException {
+		String[] data = id.split("|");
+		InputStream in = getInputStream(URLProvider.getPlaylistInfo(data[0], data[1]));
+		String response = Utils.streamToString(in);
+		NhacCuaTuiAlbumDetail albumDetail = gson.fromJson(response, NhacCuaTuiAlbumDetail.class);
+		return albumDetail.getSongs();
 	}
 
-	public List<String> getLyric(String html) throws IOException {
-		List<String> lyrics = new ArrayList<String>();
-		return lyrics;
+	public List<String> getLyric(ISong song) throws IOException {
+		InputStream in = getInputStream(URLProvider.getLyris(song.getId()));
+		String response = Utils.streamToString(in);
+		NhacCuaTuiLyricList lyricList = gson.fromJson(response, NhacCuaTuiLyricList.class);
+		return Arrays.asList(lyricList.lyric.lyric);
 	}
 
 	@Override
@@ -181,5 +86,11 @@ public class NhacCuaTui extends MusicSite {
 	@Override
 	public ItemCombo[] getFilters() {
 		return FILTERS;
+	}
+	
+	public static void main(String[] args) throws UnsupportedEncodingException {
+		Constants.DEVICE_INFOR = deviceInfo;
+		System.out.println(URLDecoder.decode("&deviceinfo=%7B%22DeviceID%22%3A%225284047f4ffb4e04824a2fd1d1f0cd62%22%2C%22OsName%22%3A%22ANDROID%22%2C%22OsVersion%22%3A%2217%22%2C%22AppName%22%3A%22NhacCuaTui%22%2C%22AppVersion%22%3A%225.0.1%22%2C%22UserInfo%22%3A%22%22%2C%22LocationInfo%22%3A%22%22%7D&time=1390117048985&token=d5cf791a2712361e8144e564cdeee0bb", "utf-8"));
+		System.out.println(URLProvider.getSearchSong("quang le", 1, 20));
 	}
 }
