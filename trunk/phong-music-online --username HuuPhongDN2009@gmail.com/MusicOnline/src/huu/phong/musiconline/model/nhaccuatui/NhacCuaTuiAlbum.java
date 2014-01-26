@@ -98,7 +98,8 @@ public class NhacCuaTuiAlbum extends Album{
 	
 	@Override
 	public ImageIcon getThumbnail() {
-		return getThumbnail(thumbnail);
+		if (icon == null) icon = getThumbnail(thumbnail);
+		return icon;
 	}
 	
 	@Override
