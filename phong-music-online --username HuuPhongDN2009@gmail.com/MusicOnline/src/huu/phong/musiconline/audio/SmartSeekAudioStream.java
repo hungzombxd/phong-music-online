@@ -1,7 +1,6 @@
 package huu.phong.musiconline.audio;
 
-import huu.phong.musiconline.model.Song;
-import huu.phong.musiconline.sites.Site;
+import huu.phong.musiconline.model.ISong;
 
 import java.awt.Point;
 import java.io.File;
@@ -39,7 +38,7 @@ public class SmartSeekAudioStream extends AudioStream{
 		};
 	}
 		
-	public SmartSeekAudioStream(Song song, Streaming listener) {
+	public SmartSeekAudioStream(ISong song, Streaming listener) {
 		streaming = listener;
 		try {
 			in = new RandomAccessFile(audioFile, "rw");
@@ -49,7 +48,7 @@ public class SmartSeekAudioStream extends AudioStream{
 		try {
 			url = new URL(song.getDirectLink());
 			connection = url.openConnection();
-			userAgent = Site.getUserAgent(song.getSite(), true);
+			userAgent = song.getSite().getSongAgent();
 			connection.addRequestProperty("User-Agent", userAgent);
 			length = connection.getContentLength();
 //			if (length <= 0){

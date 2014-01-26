@@ -1,6 +1,7 @@
 package huu.phong.musiconline.model;
 
 import huu.phong.musiconline.Configure;
+import huu.phong.musiconline.model.zing.ZingAlbum;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -17,8 +18,8 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
 public class AlbumRenderer implements ListCellRenderer{
-	public static final ImageIcon DEFAULT_DETAIL_ALBUM_ART = new ImageIcon(Album.class.getResource("/images/default_albumart.jpg"));
-	public static final ImageIcon DEFAULT_CLASSIC_ALBUM_ART = new ImageIcon(Album.class.getResource("/images/album.png"));
+	public static final ImageIcon DEFAULT_DETAIL_ALBUM_ART = new ImageIcon(ZingAlbum.class.getResource("/images/default_albumart.jpg"));
+	public static final ImageIcon DEFAULT_CLASSIC_ALBUM_ART = new ImageIcon(ZingAlbum.class.getResource("/images/album.png"));
 	Color odd = new Color(238, 238, 238);
 	Color even = Color.WHITE;
 	Color selected = new Color(51, 153, 255);
@@ -65,7 +66,7 @@ public class AlbumRenderer implements ListCellRenderer{
 	}
 	
 	private Component viewDetail(final JList list, Object value, int index, boolean isSelected, boolean cellHasFocus){
-		final Album album = (Album) value;
+		final IAlbum album = (IAlbum) value;
 		JLabel both = new JLabel();
 		both.setLayout(new BoxLayout(both, BoxLayout.X_AXIS));
 		both.setOpaque(true);
@@ -80,14 +81,14 @@ public class AlbumRenderer implements ListCellRenderer{
 		icon.setHorizontalAlignment(JLabel.CENTER);
 //		icon.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 //		icon.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, line));
-		if (!album.getAlbumArt().equals("")){
-			if (album.getIcon() != null){
-				icon.setIcon(album.getIcon());
+		if (album.hasThumbnail()){
+			if (album.isThumbnailLoaded()){
+				icon.setIcon(album.getThumbnail());
 			}else{
 				icon.setIcon(DEFAULT_DETAIL_ALBUM_ART);
 				process.add(new Thread(){
 					public void run(){
-						icon.setIcon(album.getImage());
+						icon.setIcon(album.getThumbnail());
 						list.repaint();
 					}
 				});
@@ -101,7 +102,7 @@ public class AlbumRenderer implements ListCellRenderer{
 		label.setVerticalTextPosition(JLabel.CENTER);
 		both.add(icon, BorderLayout.WEST);
 		both.add(label, BorderLayout.CENTER);
-		if (album.isHighQuality()){
+		if (Format.MP3_320_KBPS.compareTo(album.getQuality()) <= 0){
 			both.add(new JLabel(" ", SongRenderer.MP3_320_KBPS, JLabel.LEADING), BorderLayout.EAST);
 		}
 		if (isSelected) {
@@ -115,15 +116,15 @@ public class AlbumRenderer implements ListCellRenderer{
 	}
 	
 	private Component viewClassic(final JList list, Object value,int index, boolean isSelected, boolean cellHasFocus){
-		final Album album = (Album) value;
+		final IAlbum album = (IAlbum) value;
 		JLabel both = new JLabel();
 		both.setOpaque(true);
 		both.setLayout(new BoxLayout(both, BoxLayout.X_AXIS));
-		JLabel label = new JLabel(album.getTitle());
+		JLabel label = new JLabel(album.getFullTitle());
 		JLabel hq = null;
 		JLabel number = new JLabel(" " + numberToString(index + 1) + ".");
 		number.setForeground(Color.BLUE);
-		if (album.isHighQuality()){
+		if (Format.MP3_320_KBPS.compareTo(album.getQuality()) <= 0){
 			hq = new JLabel(SongRenderer.MP3_320_KBPS);
 			hq.setText(" ");
 		}

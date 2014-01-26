@@ -2,14 +2,17 @@ package huu.phong.musiconline.utils;
 
 import huu.phong.musiconline.Configure;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public final class Utils{
+public final class Utils {
 	
 	public static int[] ERROR_CODE = {403};
 	
@@ -67,6 +70,7 @@ public final class Utils{
 	}
 	
 	public static boolean isURLAvailable(String link, String userAgent){
+		if (link.startsWith("file:")) return true;
 		boolean ret = false;
 		try {
 			URL url = new URL(link);
@@ -97,5 +101,12 @@ public final class Utils{
 	
 	public static String formatNumber(long number){
 		return formatter.format(number);
+	}
+	
+	public static String streamToString(InputStream in) throws IOException{
+		Scanner scanner = new Scanner(in, "UTF-8").useDelimiter("\\A");
+		String ret = scanner.hasNext() ? scanner.next(): "";
+		in.close();
+		return ret;
 	}
 }

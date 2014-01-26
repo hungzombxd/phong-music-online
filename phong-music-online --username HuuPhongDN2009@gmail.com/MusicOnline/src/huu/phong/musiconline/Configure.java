@@ -1,11 +1,11 @@
 package huu.phong.musiconline;
 
-import huu.phong.musiconline.model.Album;
 import huu.phong.musiconline.model.AlbumRenderer;
 import huu.phong.musiconline.model.Format;
+import huu.phong.musiconline.model.IAlbum;
+import huu.phong.musiconline.model.ISong;
 import huu.phong.musiconline.model.ItemCombo;
 import huu.phong.musiconline.model.Playlist;
-import huu.phong.musiconline.model.Song;
 import huu.phong.musiconline.model.SongRenderer;
 
 import java.awt.Point;
@@ -22,20 +22,17 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-
-
 public class Configure implements Serializable{
 	private static final long serialVersionUID = 96678343791424943L;
 	private transient static Configure configure;
-	public List<Song> songs;
-	public List<Album> albums;
+	public List<ISong> songs;
+	public List<IAlbum> albums;
 	public List<Playlist> userPlaylists;
 	public String title = "Music Online v8.3.3";
 	public String host, port, username, password, total = "1", page = "1", defaultMediaPlayer = title;
 	public boolean useProxy, systemProxy;
 	public List<String> mediaPlayers;
 	public String type = "Song";
-//	public boolean highQuality = false;
 	public ItemCombo filter = new ItemCombo("Default", "");
 	public String repeat = "Default";
 	public String value = "";
@@ -54,10 +51,8 @@ public class Configure implements Serializable{
 	public String site = "mp3.zing.vn";
 	public String lastValueAlbum = "";
 	public int lastPageAlbum = 1;
-//	public String userAgent = "stagefright/1.2 (Linux;Android 4.2.2)";
 	public String userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1";
 	public Format format = Format.MP3_320_KBPS;
-	public int numberResult = 15;
 	
 	public static Configure getInstance(){
 		if (configure == null) configure = load();
@@ -72,15 +67,15 @@ public class Configure implements Serializable{
 		mediaPlayers.add("C:\\Program Files\\Windows Media Player\\wmplayer.exe");
 		mediaPlayers.add("C:\\Program Files (x86)\\Windows Media Player\\wmplayer.exe");
 		mediaPlayers.add("/usr/bin/audacious");
-		songs = new ArrayList<Song>();
-		albums = new ArrayList<Album>();
+		songs = new ArrayList<ISong>();
+		albums = new ArrayList<IAlbum>();
 		userPlaylists = new ArrayList<Playlist>();
 	}
 	
 	public void save(){
-		if (songs.size() > 0 && (songs.get(0).getLink() == null)){
-			songs = new ArrayList<Song>();		
-		}
+//		if (songs.size() > 0 && (songs.get(0).getLink() == null)){
+//			songs = new ArrayList<ISong>();		
+//		}
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("Music Online.conf"));
 			out.writeObject(this);

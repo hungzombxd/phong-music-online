@@ -3,19 +3,20 @@ package huu.phong.musiconline;
 import huu.phong.musiconline.audio.AudioPlayer;
 import huu.phong.musiconline.audio.AudioPlayerListener;
 import huu.phong.musiconline.audio.Streaming;
-import huu.phong.musiconline.model.Album;
 import huu.phong.musiconline.model.AlbumRenderer;
 import huu.phong.musiconline.model.Format;
 import huu.phong.musiconline.model.History;
+import huu.phong.musiconline.model.IAlbum;
+import huu.phong.musiconline.model.IMedia;
+import huu.phong.musiconline.model.ISong;
 import huu.phong.musiconline.model.ItemCombo;
+import huu.phong.musiconline.model.LocalSong;
 import huu.phong.musiconline.model.Playlist;
-import huu.phong.musiconline.model.Song;
 import huu.phong.musiconline.model.SongRenderer;
 import huu.phong.musiconline.sites.ChiaSeNhac;
 import huu.phong.musiconline.sites.MusicSite;
 import huu.phong.musiconline.sites.NhacCuaTui;
 import huu.phong.musiconline.sites.Radio;
-import huu.phong.musiconline.sites.Site;
 import huu.phong.musiconline.sites.Zing;
 import huu.phong.musiconline.utils.FileUtils;
 import huu.phong.musiconline.utils.Utils;
@@ -61,7 +62,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URI;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -95,7 +95,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-
 public class MusicOnline extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
@@ -120,9 +119,9 @@ public class MusicOnline extends JFrame {
 	private Clipboard clipboard = toolkit.getSystemClipboard();
 	private Runtime runtime = Runtime.getRuntime();
 	private JMenuBar menuBar;
-	private JMenuItem itemOpenLink, itemTopVietNamese, itemTopEnglish, itemTopKorea, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemUndo, itemRedo, itemSetProxy, itemExit, itemIcludeAlbum;
+	private JMenuItem itemOpenLink, itemShowLyric, itemShare, itemUpdate, itemSaveMP3, itemUndo, itemRedo, itemSetProxy, itemExit, itemIcludeAlbum;
 	private JMenu menuFile, menuSetup, menuMedia, menuUserPlaylists, menuAddToPlaylist;
-	private JMenuItem mediaPlay, mediaNext, mediaPrevious, menuTopSong;
+	private JMenuItem mediaPlay, mediaNext, mediaPrevious;
 	private ButtonGroup group;
 	private ProxySelector dialogProxy;
 	private FrameLyric frameLyric;
@@ -132,7 +131,7 @@ public class MusicOnline extends JFrame {
 	private JLabel startDuration, endDuration, info, songInfo, labelSearch, iconStatus;
 	private JLabel selectQuality;
 	private JPopupMenu popupMenu;
-	private History<List<Song>> history;
+	private History<List<? extends ISong>> history;
 	private Dimension dimension;
 	private Thread updateSong = null, updateAlbum = null;
 	private int toPage;
@@ -196,7 +195,7 @@ public class MusicOnline extends JFrame {
 			}
 		});
 		zing = Zing.getInstance();
-		history = new History<List<Song>>();
+		history = new History<List<? extends ISong>>();
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent arg0) {
 				player.release();
@@ -261,64 +260,6 @@ public class MusicOnline extends JFrame {
 		menuBar.add(initMenuAction());
 		menuBar.add(menuSetup);
 		menuBar.add(initMenuRadio());
-		menuBar.add(initMenuSong());
-		menuBar.add(menuTopSong = new JMenu("Top"));
-		menuTopSong.add(itemTopVietNamese = new JMenuItem("Việt Nam"));
-		itemTopVietNamese.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent arg0) {
-				new Thread(){
-					public void run(){
-						setTitle("Loading...");
-						try {
-							setSongs(zing.getTopVietnamese(), true);
-							setTitle(configure.title);
-						} catch (IOException e) {
-							out.println("Can not load Top Vietnamese");
-						}
-					}
-				}.start();
-			}
-		});
-		menuTopSong.add(itemTopEnglish = new JMenuItem("English"));
-		itemTopEnglish.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent arg0) {
-				new Thread(){
-					public void run(){
-						setTitle("Loading...");
-						try {
-							setSongs(zing.getTopEnglish(), true);
-							setTitle(configure.title);
-						} catch (UnsupportedEncodingException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}.start();
-			}
-		});
-		menuTopSong.add(itemTopKorea = new JMenuItem("Korea"));
-		itemTopKorea.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent arg0) {
-				new Thread(){
-					public void run(){
-						setTitle("Loading...");
-						try {
-							setSongs(zing.getTopKorea(), true);
-							setTitle(configure.title);
-						} catch (UnsupportedEncodingException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}.start();
-			}
-		});
-		menuBar.add(initMenuAlbum());
 		menuBar.add(initMenuMedia());
 		menuBar.add(initMenuUserPlaylists());
 		menuBar.add(Box.createHorizontalGlue());
@@ -462,42 +403,6 @@ public class MusicOnline extends JFrame {
 				saveLinks();
 			}
 		});
-		JMenuItem itemAddPlayList = new JMenuItem("Decode album link");
-		itemAddPlayList.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				final String link = JOptionPane.showInputDialog(MusicOnline.this,"Enter playlist link (HTML file)", "");
-				if (link == null || link.equals("")) return;
-				new Thread(){
-					public void run(){
-						try {
-							setSongs(zing.getAlbum(link), true);
-						} catch (IOException e1) {
-							setTitle(e1.toString());
-							e1.printStackTrace();
-						}
-					}
-				}.start();
-			}
-		});
-		JMenuItem itemAddXMLFile = new JMenuItem("Decode XML file");
-		itemAddXMLFile.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				final String linkXML = JOptionPane.showInputDialog("Enter XML file (XML file)");
-				if (linkXML == null || linkXML.equals("")) return;
-				new Thread(){
-					public void run(){
-						try {
-							setSongs(zing.xmlToSongs(linkXML), true);
-						} catch (IOException e1) {
-							setTitle(e1.toString());
-							e1.printStackTrace();
-						}
-					}
-				}.start();
-			}
-		});
 		itemCopy.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent arg0) {
@@ -525,17 +430,6 @@ public class MusicOnline extends JFrame {
 		});
 		JMenuItem itemRename = new JMenuItem("Rename title");
 		itemRename.setIcon(getImage("rename.png"));
-		itemRename.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent arg0) {
-				if (songs.getSelectedIndex() == -1) return;
-				String title = JOptionPane.showInputDialog(MusicOnline.this, "Enter title for song", configure.songs.get(songs.getSelectedIndex()).getTitle());
-				if (title != null){
-					configure.songs.get(songs.getSelectedIndex()).setTitle(title);
-					setSongs(configure.songs, true);
-				}
-			}
-		});
 		JMenuItem itemCopyLink = new JMenuItem("Copy links");
 		itemCopyLink.setIcon(getImage("copy.png"));
 		itemCopyLink.addActionListener(new ActionListener() {
@@ -587,7 +481,7 @@ public class MusicOnline extends JFrame {
 				if (frameLyric == null) frameLyric = new FrameLyric();
 				new Thread(){
 					public void run(){
-						Song song = configure.songs.get(songs.getSelectedIndex());
+						ISong song = configure.songs.get(songs.getSelectedIndex());
 						frameLyric.setTitle("Lyric - " + song.getTitle());
 						frameLyric.setLyric(song);
 					}
@@ -611,8 +505,6 @@ public class MusicOnline extends JFrame {
 		popupMenu.add(itemOpenLink);
 		popupMenu.add(itemSaveLinks);
 		popupMenu.add(itemSaveAsPlaylist);
-		popupMenu.add(itemAddPlayList);
-		popupMenu.add(itemAddXMLFile);
 		popupMenu.add(itemRename);
 		popupMenu.add(itemDelete);
 		popupMenu.addSeparator();
@@ -632,10 +524,12 @@ public class MusicOnline extends JFrame {
 				new Thread(){
 					public void run(){
 						configure.viewModeSong = SongRenderer.VIEW_MODE_DETAIL;
-						modelSongs.clear();
-						setSongs(configure.songs, true);
-//						songs.invalidate();
-//						songs.repaint();
+//						modelSongs.clear();
+//						setSongs(configure.songs, true);
+						songs.invalidate();
+						songs.validate();
+						songs.repaint();
+						songs.updateUI();
 					}
 				}.start();
 			}
@@ -646,8 +540,12 @@ public class MusicOnline extends JFrame {
 				new Thread(){
 					public void run(){
 						configure.viewModeSong = SongRenderer.VIEW_MODE_CLASSIC;
-						modelSongs.clear();
-						setSongs(configure.songs, true);
+//						modelSongs.clear();
+//						setSongs(configure.songs, true);
+						songs.invalidate();
+						songs.validate();
+						songs.repaint();
+						songs.updateUI();
 					}
 				}.start();
 			}
@@ -694,46 +592,47 @@ public class MusicOnline extends JFrame {
 			public synchronized void drop(DropTargetDropEvent evt) {
 				try {
 					evt.acceptDrop(DnDConstants.ACTION_COPY);
-					if (evt.isDataFlavorSupported(DRAG_DROP_URI)){
-						final URL url = (URL) evt.getTransferable().getTransferData(DRAG_DROP_URI);
-						new Thread(){
-							public void run(){
-								final Song song = new Song();
-								song.setTitle(url.toString());
-								song.setSongInfo(song.getTitle());
-								song.setDirectLink(Format.MP3_128_KBPS, song.getTitle());
-								song.setSite(Site.INTERNET_URL);
-								configure.songs.add(song);
-					            SwingUtilities.invokeLater(new Runnable() {
-									public void run() {
-										modelSongs.addElement(song);
-									}
-								});
-							}
-						}.start();
-					}
+//					if (evt.isDataFlavorSupported(DRAG_DROP_URI)){
+//						final URL url = (URL) evt.getTransferable().getTransferData(DRAG_DROP_URI);
+//						new Thread(){
+//							public void run(){
+//								final Song song = new Song();
+//								song.setTitle(url.toString());
+////								song.setSongInfo(song.getTitle());
+//								song.setDirectLink(Format.MP3_128_KBPS, song.getTitle());
+//								song.setSite(Site.INTERNET_URL);
+//								configure.songs.add(song);
+//					            SwingUtilities.invokeLater(new Runnable() {
+//									public void run() {
+//										modelSongs.addElement(song);
+//									}
+//								});
+//							}
+//						}.start();
+//					}
 					if (evt.isDataFlavorSupported(DataFlavor.javaFileListFlavor)){
 						final List<?> files = (List<?>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
 						new Thread(){
 							public void run(){
-								final List<Song> songs = new ArrayList<Song>();
+								final List<ISong> songs = new ArrayList<ISong>();
 								for (Object object : files) {
 									if (object instanceof File){
 										File file = (File) object;
-										if (!file.getName().toLowerCase().endsWith(".mp3") && !file.getName().toLowerCase().endsWith(".wav") && !file.getName().toLowerCase().endsWith(".flac")) continue;
-										Song song = new Song();
-										song.setTitle(file.getName());
-										song.setSongInfo(file.getAbsolutePath());
-//										song.songInfo = file.getAbsolutePath();
-										song.setDirectLink(Format.MP3_128_KBPS, "file:" + file.getAbsolutePath());
-										song.setSite(Site.MY_COMPUTER);
-					            		songs.add(song);
+										
+//										if (!file.getName().toLowerCase().endsWith(".mp3") && !file.getName().toLowerCase().endsWith(".wav") && !file.getName().toLowerCase().endsWith(".flac")) continue;
+//										Song song = new Song();
+//										song.setTitle(file.getName());
+////										song.setSongInfo(file.getAbsolutePath());
+////										song.songInfo = file.getAbsolutePath();
+//										song.setDirectLink(Format.MP3_128_KBPS, "file:" + file.getAbsolutePath());
+//										song.setSite(Site.MY_COMPUTER);
+					            		songs.add(new LocalSong(file));
 									}
 								}
 								configure.songs.addAll(songs);
 					            SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
-										for (Song song : songs){
+										for (ISong song : songs){
 											modelSongs.addElement(song);
 										}
 									}
@@ -795,8 +694,12 @@ public class MusicOnline extends JFrame {
 				new Thread(){
 					public void run(){
 						configure.viewModeAlbum = AlbumRenderer.VIEW_MODE_DETAIL;
-						modelAlbums.clear();
-						setAlbum(configure.albums, true);
+//						modelAlbums.clear();
+//						setAlbum(configure.albums, true);
+						albums.invalidate();
+						albums.validate();
+						albums.repaint();
+						albums.updateUI();
 					}
 				}.start();
 			}
@@ -807,8 +710,12 @@ public class MusicOnline extends JFrame {
 				new Thread(){
 					public void run(){
 						configure.viewModeAlbum = AlbumRenderer.VIEW_MODE_CLASSIC;
-						modelAlbums.clear();
-						setAlbum(configure.albums, true);
+//						modelAlbums.clear();
+//						setAlbum(configure.albums, true);
+						albums.invalidate();
+						albums.validate();
+						albums.repaint();
+						albums.updateUI();
 					}
 				}.start();
 			}
@@ -868,8 +775,8 @@ public class MusicOnline extends JFrame {
 	private void loadConfigure(){
 		total.setText(configure.total);
 		page.setText(configure.page);
-		setSongs(configure.songs, true);
-		setAlbum(configure.albums, true);
+		setSongs(configure.songs, false);
+		setAlbum(configure.albums, false);
 		itemIcludeAlbum.setSelected(configure.includeAlbum);
 		selectQuality.setIcon(configure.format.getImage());
 		itemUpdate.setSelected(configure.update);
@@ -888,14 +795,14 @@ public class MusicOnline extends JFrame {
 		new Thread() {
 			public void run() {
 				try {
-					List<Song> listSongs = configure.songs;
+					List<ISong> listSongs = configure.songs;
 					BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(str),"UTF-8"));
 					int[] lists = songs.getSelectedIndices();
 					setStatus("SAVING");
 					out.write("#EXTM3U");
 					out.newLine();
 					for (int i = 0; i < lists.length; i++) {
-						Song song = listSongs.get(lists[i]);
+						ISong song = listSongs.get(lists[i]);
 						out.write("#EXTINF:-1," + song.getTitle());
 						out.newLine();
 						out.write(song.getDirectLink(configure.format));
@@ -920,12 +827,12 @@ public class MusicOnline extends JFrame {
 		new Thread() {
 			public void run() {
 				try {
-					List<Song> listSongs = configure.songs;
+					List<ISong> listSongs = configure.songs;
 					BufferedWriter out = new BufferedWriter(new FileWriter(str));
 					int[] lists = songs.getSelectedIndices();
 					setStatus("SAVING");
 					for (int i = 0; i < lists.length; i++) {
-						Song song = listSongs.get(lists[i]);
+						ISong song = listSongs.get(lists[i]);
 						out.write(song.getDirectLink());
 						out.newLine();
 						setStatus("SAVING: " + (i + 1) + "/" + lists.length);
@@ -953,7 +860,7 @@ public class MusicOnline extends JFrame {
 		configure.oldFolder = dir;
 		new Thread() {
 			public void run() {
-				List<Song> listSongs = configure.songs;
+				List<ISong> listSongs = configure.songs;
 				int i = 0;
 				int[] lists = songs.getSelectedIndices();
 				setStatus("START SAVING");
@@ -965,14 +872,14 @@ public class MusicOnline extends JFrame {
 					}
 				};
 				for (i = 0; i < lists.length; i++) {
-					Song song = listSongs.get(lists[i]);
+					ISong song = listSongs.get(lists[i]);
 					String extension = configure.format.equals(Format.LOSSLESS) ? ".flac" : ".mp3";
-					String file = dir + File.separator + Utils.toANSI(song.getSongName()) + extension;
+					String file = dir + File.separator + Utils.toANSI(song.getFullTitle()) + extension;
 					info.setToolTipText(String.format("<html><b>Saving file %s</b></html>", file));
 					if(new File(file).exists() || song.getDirectLinks() == null) continue;
 					try {
-						FileUtils.copyURLToFile(new URL(song.getDirectLink()), new File(file), streaming);
-					} catch (IOException e) {
+						FileUtils.songToFile(song, new File(file), streaming);
+					} catch (Exception e) {
 						out.println(String.format("Can not save link %s", song.getDirectLinks()));
 					}
 					builder.delete(0, builder.length());
@@ -986,11 +893,12 @@ public class MusicOnline extends JFrame {
 		}.start();
 	}
 
-	private void setSongs(final List<Song> lists, boolean clear) {
+	private void setSongs(final List<? extends ISong> lists, boolean clear) {
 		if (!clear){
 			configure.songs.addAll(lists);
 		}else{
-			configure.songs = lists;
+			if (!modelSongs.isEmpty()) configure.songs.clear();
+			configure.songs.addAll(lists);
 			modelSongs.clear();
 			history.add(lists);
 			configure.lastValueSong = "";
@@ -1021,7 +929,7 @@ public class MusicOnline extends JFrame {
 		}
 	}
 	
-	private Queue<Thread> getThreadLoaders(final List<?> lists, final DefaultListModel model) {
+	private Queue<Thread> getThreadLoaders(final List<? extends IMedia> lists, final DefaultListModel model) {
 		Queue<Thread> threads = new ArrayDeque<Thread>();
 		int number = lists.size() / 20;
 		if ((lists.size() % 20) != 0) number ++;
@@ -1029,14 +937,14 @@ public class MusicOnline extends JFrame {
 			int index = i * 20;
 			int end = index + 20;
 			end = end > lists.size()? lists.size() : end;
-			final List<?> songs = lists.subList(index, end);
+			final List<? extends IMedia> medias = lists.subList(index, end);
 			threads.add(new Thread(){
 				public void run(){
 					SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {
-							for (Object song : songs) {
-								model.addElement(song);
+							for (IMedia media : medias) {
+								model.addElement(media);
 							}
 						}
 					});
@@ -1046,11 +954,12 @@ public class MusicOnline extends JFrame {
 		return threads;
 	}	
 	
-	private void setAlbum(final List<Album> lists, boolean clear){
+	private void setAlbum(final List<? extends IAlbum> lists, boolean clear){
 		if (!clear){
 			configure.albums.addAll(lists);
 		}else{
-			configure.albums = lists;
+			if (!modelAlbums.isEmpty()) configure.albums.clear();
+			configure.albums.addAll(lists);
 			modelAlbums.clear();
 			configure.lastValueAlbum = "";
 			configure.lastPageAlbum = 1;
@@ -1074,7 +983,7 @@ public class MusicOnline extends JFrame {
 	public void addSongsToLinks(){
 		int index = albums.getSelectedIndex();
 		if (configure.albums.isEmpty() || index >= configure.albums.size()) return;
-		final Album currentPlaylist = configure.albums.get(index);
+		final IAlbum currentPlaylist = configure.albums.get(index);
 		setTitle("Loading '" + currentPlaylist.getTitle() + "'...");
 		new Thread(){
 			public void run(){
@@ -1093,7 +1002,7 @@ public class MusicOnline extends JFrame {
 		setIconStatus(true);
 		songInfo.setText("Updating song...");
 		updateSong = new Thread(){
-			List<Song> lists = new ArrayList<Song>();
+			List<? extends ISong> lists = new ArrayList<ISong>();
 			public void run(){
 				configure.lastPageSong++;
 				ItemCombo itemFilter = (ItemCombo)filters.getSelectedItem();
@@ -1111,7 +1020,7 @@ public class MusicOnline extends JFrame {
 				configure.songs.addAll(lists);
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run(){
-						for (Song song : lists) {
+						for (ISong song : lists) {
 							modelSongs.addElement(song);
 						}
 					}
@@ -1130,7 +1039,7 @@ public class MusicOnline extends JFrame {
 		setIconStatus(true);
 		songInfo.setText("Updating album...");
 		updateAlbum = new Thread(){
-			List<Album> albums = new ArrayList<Album>();
+			List<? extends IAlbum> albums = new ArrayList<IAlbum>();
 			public void run(){
 				configure.lastPageAlbum++;
 				ItemCombo itemFilter = (ItemCombo)filters.getSelectedItem();
@@ -1148,7 +1057,7 @@ public class MusicOnline extends JFrame {
 				configure.albums.addAll(albums);
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run(){
-						for (Album album : albums) {
+						for (IAlbum album : albums) {
 							modelAlbums.addElement(album);
 						}
 					}
@@ -1167,7 +1076,7 @@ public class MusicOnline extends JFrame {
 			public void run(){
 				for (int i = fromPage; i <= toPage; i++) {
 					try {
-						final List<Song> lists = musicSite.searchSong(valueSearch, i, filter + by);
+						final List<? extends ISong> lists = musicSite.searchSong(valueSearch, i, filter + by);
 						if (i == fromPage){
 							setSongs(lists, true);
 						}else{
@@ -1203,7 +1112,7 @@ public class MusicOnline extends JFrame {
 			public void run(){
 				for (int i = fromPage; i <= toPage; i++) {
 					try {
-						final List<Album> lists = musicSite.searchAlbum(valueSearch, i, "");
+						final List<? extends IAlbum> lists = musicSite.searchAlbum(valueSearch, i, "");
 						if (i == fromPage){
 							setAlbum(lists, true);
 						}else{
@@ -1262,7 +1171,7 @@ public class MusicOnline extends JFrame {
 		if (configure.songs.isEmpty() || index >= configure.songs.size()) return;
 		currentIndex = index;
 		setCurrentSong(index);
-		Song song = configure.songs.get(currentIndex);
+		ISong song = configure.songs.get(currentIndex);
 		currentTitle = song.getTitle();
 		try {
 			if (configure.defaultMediaPlayer == null || configure.defaultMediaPlayer.equals("")
@@ -1310,7 +1219,7 @@ public class MusicOnline extends JFrame {
 		if (frameLyric != null && frameLyric.isVisible()){
 			new Thread(){
 				public void run(){
-					Song song = configure.songs.get(index);
+					ISong song = configure.songs.get(index);
 					frameLyric.setTitle("Lyric - " + song.getTitle());
 					frameLyric.setLyric(song);
 				}
@@ -1416,7 +1325,7 @@ public class MusicOnline extends JFrame {
 					setTitle("Loading...");
 					new Thread(){
 						public void run(){
-							List<Song> lists = new ArrayList<Song>();
+							List<ISong> lists = new ArrayList<ISong>();
 							int toPage = new Integer(total.getText().trim());
 							int fromPage = new Integer(page.getText().trim());
 							toPage = (toPage == 0) ? 3 : toPage;
@@ -1437,79 +1346,79 @@ public class MusicOnline extends JFrame {
 		return menuRadio;
 	}
 	
-	private JMenu initMenuAlbum(){
-		JMenu menuAlbum = new JMenu("Album");
-		for (int i = 0; i < Zing.titlesAlbumType.length; i++){
-			JMenuItem item = new JMenuItem(Zing.titlesAlbumType[i]);
-			item.setIcon(getImage("album16.png"));
-			final String type = Zing.titlesAlbumType[i];
-			item.addActionListener(new ActionListener() {
-				
-				public void actionPerformed(ActionEvent arg0) {
-					setTitle("Loading...");
-					new Thread(){
-						public void run(){
-							List<Album> lists = new ArrayList<Album>();
-							int toPage = new Integer(total.getText().trim());
-							int fromPage = new Integer(page.getText().trim());
-							toPage = (toPage == 0) ? 1 : toPage;
-							fromPage = (toPage == 0) ? 1 : fromPage;
-							for (int i = fromPage; i <= toPage; i++) {
-								try {
-									lists.addAll(zing.getAlbumBy(type, i));
-								} catch (IOException e) {
-									setTitle(e.toString());
-									e.printStackTrace();
-								}
-							}
-							setAlbum(lists, true);
-							setTitle(configure.title);
-						}
-					}.start();
-				}
-			});
-			menuAlbum.add(item);
-			
-		}
-		return menuAlbum;
-	}
+//	private JMenu initMenuAlbum(){
+//		JMenu menuAlbum = new JMenu("Album");
+//		for (int i = 0; i < Zing.titlesAlbumType.length; i++){
+//			JMenuItem item = new JMenuItem(Zing.titlesAlbumType[i]);
+//			item.setIcon(getImage("album16.png"));
+//			final String type = Zing.titlesAlbumType[i];
+//			item.addActionListener(new ActionListener() {
+//				
+//				public void actionPerformed(ActionEvent arg0) {
+//					setTitle("Loading...");
+//					new Thread(){
+//						public void run(){
+//							List<Album> lists = new ArrayList<Album>();
+//							int toPage = new Integer(total.getText().trim());
+//							int fromPage = new Integer(page.getText().trim());
+//							toPage = (toPage == 0) ? 1 : toPage;
+//							fromPage = (toPage == 0) ? 1 : fromPage;
+//							for (int i = fromPage; i <= toPage; i++) {
+//								try {
+//									lists.addAll(zing.getAlbumBy(type, i));
+//								} catch (IOException e) {
+//									setTitle(e.toString());
+//									e.printStackTrace();
+//								}
+//							}
+//							setAlbum(lists, true);
+//							setTitle(configure.title);
+//						}
+//					}.start();
+//				}
+//			});
+//			menuAlbum.add(item);
+//			
+//		}
+//		return menuAlbum;
+//	}
 	
-	private JMenu initMenuSong(){
-		JMenu menuAlbum = new JMenu("Song");
-		for (int i = 0; i < Zing.titlesSongType.length; i++){
-			JMenuItem item = new JMenuItem(Zing.titlesSongType[i]);
-			item.setIcon(getImage("song16.png"));
-			final String type = Zing.titlesSongType[i];
-			item.addActionListener(new ActionListener() {
-				
-				public void actionPerformed(ActionEvent arg0) {
-					setTitle("Loading...");
-					new Thread(){
-						public void run(){
-							List<Song> lists = new ArrayList<Song>();
-							int toPage = new Integer(total.getText().trim());
-							int fromPage = new Integer(page.getText().trim());
-							toPage = (toPage == 0) ? 1 : toPage;
-							fromPage = (toPage == 0) ? 1 : fromPage;
-							for (int i = fromPage; i <= toPage; i++) {
-								try {
-									lists.addAll(zing.getSongByType(type, i));
-								} catch (IOException e) {
-									setTitle(e.toString());
-									e.printStackTrace();
-								}
-							}
-							setSongs(lists, true);
-							setTitle(configure.title);
-						}
-					}.start();
-				}
-			});
-			menuAlbum.add(item);
-			
-		}
-		return menuAlbum;
-	}
+//	private JMenu initMenuSong(){
+//		JMenu menuAlbum = new JMenu("Song");
+//		for (int i = 0; i < Zing.titlesSongType.length; i++){
+//			JMenuItem item = new JMenuItem(Zing.titlesSongType[i]);
+//			item.setIcon(getImage("song16.png"));
+//			final String type = Zing.titlesSongType[i];
+//			item.addActionListener(new ActionListener() {
+//				
+//				public void actionPerformed(ActionEvent arg0) {
+//					setTitle("Loading...");
+//					new Thread(){
+//						public void run(){
+//							List<Song> lists = new ArrayList<Song>();
+//							int toPage = new Integer(total.getText().trim());
+//							int fromPage = new Integer(page.getText().trim());
+//							toPage = (toPage == 0) ? 1 : toPage;
+//							fromPage = (toPage == 0) ? 1 : fromPage;
+//							for (int i = fromPage; i <= toPage; i++) {
+//								try {
+//									lists.addAll(zing.getSongByType(type, i));
+//								} catch (IOException e) {
+//									setTitle(e.toString());
+//									e.printStackTrace();
+//								}
+//							}
+//							setSongs(lists, true);
+//							setTitle(configure.title);
+//						}
+//					}.start();
+//				}
+//			});
+//			menuAlbum.add(item);
+//			
+//		}
+//		return menuAlbum;
+//	}
 	
 	private JPanel initPanelSearch(){
 		JPanel panelSearch = new JPanel(new FlowLayout(0, 5, 5));

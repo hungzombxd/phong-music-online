@@ -1,6 +1,7 @@
 package huu.phong.musiconline.model;
 
 import huu.phong.musiconline.Configure;
+import huu.phong.musiconline.model.zing.ZingAlbum;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -24,8 +25,8 @@ public class SongRenderer implements ListCellRenderer{
 	Dimension dimension;
 	public static final int VIEW_MODE_CLASSIC = 1;
 	public static final int VIEW_MODE_DETAIL = 0;
-	public static final ImageIcon MP3_320_KBPS = new ImageIcon(Album.class.getResource("/images/320kbps.png"));
-	public static final ImageIcon LOSSLESS = new ImageIcon(Album.class.getResource("/images/lossless.png"));
+	public static final ImageIcon MP3_320_KBPS = new ImageIcon(ZingAlbum.class.getResource("/images/320kbps.png"));
+	public static final ImageIcon LOSSLESS = new ImageIcon(ZingAlbum.class.getResource("/images/lossless.png"));
 	
 	public SongRenderer(){
 		
@@ -40,11 +41,11 @@ public class SongRenderer implements ListCellRenderer{
 	}
 	
 	private Component viewClassic(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus){
-		Song song = (Song) value;
+		ISong song = (ISong) value;
 		JLabel both = new JLabel();
 		both.setOpaque(true);
 		both.setLayout(new BoxLayout(both, BoxLayout.X_AXIS));
-		JLabel label = new JLabel(song.getSongName());
+		JLabel label = new JLabel(song.getFullTitle());
 		JLabel hq = null;
 		JLabel number = new JLabel(" " + numberToString(index + 1) + ".");
 		number.setForeground(Color.BLUE);
@@ -90,11 +91,11 @@ public class SongRenderer implements ListCellRenderer{
 	}
 	
 	private Component viewDetail(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus){
-		Song song = (Song) value;
+		ISong song = (ISong) value;
 		JLabel both = new JLabel();
 		both.setOpaque(true);
 		both.setLayout(new BoxLayout(both, BoxLayout.X_AXIS));
-		JLabel label = new JLabel(value.toString());
+		JLabel label = new JLabel(song.getDetailTitle());
 		JLabel hq = null;
 		JLabel number = new JLabel(numberToString(index + 1) + ".");
 		number.setForeground(Color.BLUE);
