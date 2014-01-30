@@ -1,9 +1,12 @@
 package huu.phong.musiconline.model;
 
+import huu.phong.musiconline.sites.Site;
+
 import java.awt.MediaTracker;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 
@@ -124,5 +127,26 @@ public abstract class Media implements IMedia {
 			e.printStackTrace();
 		}
 		return icon;
+	}
+	
+	public String getDirectLink(Map<Format, String> directLinks, Format format, Site site){
+		String link = null;
+		switch (format) {
+		case LOSSLESS:
+			link = directLinks.get(Format.LOSSLESS); if (link != null) break;
+		
+		case MP3_320_KBPS:
+			link = directLinks.get(Format.MP3_320_KBPS); if (link != null) break;
+			
+		case MP3_128_KBPS:
+			link = directLinks.get(Format.MP3_128_KBPS); if (link != null) break;
+			
+		default:
+			link = directLinks.get(null); break;
+		}
+		
+		if (link == null) throw new RuntimeException("Can not find any direct link.");
+		
+		return link;
 	}
 }

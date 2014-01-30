@@ -1,8 +1,8 @@
 package huu.phong.musiconline.sites;
 
-import huu.phong.musiconline.model.Format;
 import huu.phong.musiconline.model.ISong;
-import huu.phong.musiconline.model.zing.ZingSong;
+import huu.phong.musiconline.model.RadioSong;
+import huu.phong.musiconline.utils.HtmlUtil;
 import huu.phong.musiconline.utils.Utils;
 
 import java.io.BufferedReader;
@@ -56,11 +56,11 @@ public class Radio {
 		}
 	}
 	
-	public List<ISong> getRadio(int page, String radioType) {
+	public List<? extends ISong> getRadio(int page, String radioType) {
 		return getSongs(mapRadio.get(radioType) + "&page=" + page);
 	}
 
-	public List<ISong> getSongs(String link) {
+	public List<? extends ISong> getSongs(String link) {
 		List<ISong> songs = new ArrayList<ISong>();
 		try {
 			URL url = new URL(link);
@@ -76,15 +76,14 @@ public class Radio {
 					title = in.readLine().trim();
 					title = Utils.ncrToUnicode(title);
 					i++;
-					ZingSong song = new ZingSong();
-					song.setTitle(title);
-					song.setLink(link);
-					song.setSite(Site.RADIO_VNMEDIA_VN);
-//					song.setSongInfo("");
+					RadioSong song = new RadioSong();
+					song.setFullTitle(title);
+					song.setLink(ln);
+					StringBuilder builder = new StringBuilder();
 					while ((str = in.readLine()) != null && !str.contains("</dl>")){
-//						song.setSongInfo(song.getSongInfo() + str); 
+						builder.append(str);
 					}
-//					song.setSongInfo(HtmlUtil.htmlToText(song.getSongInfo()));
+					song.setDescription(HtmlUtil.htmlToText(builder.toString()));
 					songs.add(song);
 				}
 			}
@@ -95,8 +94,8 @@ public class Radio {
 		return songs;
 	}
 
-	public Map<Format, String> getSong(String link) {
-		Map<Format, String> links = new HashMap<Format, String>();
+	public String getDirectLink(String link) {
+		String directLink = null;
 		try {
 			URL url = new URL(link);
 			BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -108,7 +107,8 @@ public class Radio {
 					index = str.indexOf("http://");
 					String ret = str.substring(index);
 					ret = new StringTokenizer(ret, "'").nextToken();
-					links.put(Format.MP3_128_KBPS, ret.replace(" ", "%20"));
+					directLink = ret.replace(" ", "%20");
+					break;
 				}
 			}
 			in.close();
@@ -116,6 +116,6 @@ public class Radio {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return links;
+		return directLink;
 	}
 }

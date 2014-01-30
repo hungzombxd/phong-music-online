@@ -86,7 +86,7 @@ public class NhacCuaTuiSong extends Song{
 
 	@Override
 	public String getFullTitle() {
-		return title + (artist == null ? "" : String.format(" - %s", artist));
+		return title + (artist == null || artist.equals("") ? "" : String.format(" - %s", artist));
 	}
 
 	@Override

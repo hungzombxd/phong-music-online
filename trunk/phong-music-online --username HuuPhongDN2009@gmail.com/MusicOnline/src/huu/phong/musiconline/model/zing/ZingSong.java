@@ -90,14 +90,15 @@ public class ZingSong extends ZingMedia implements ISong {
 	@Override
 	public String getDirectLink(Format format) throws IOException {
 		if (directLinks != null) {
-			if (Utils.isURLAvailable(getDirectLinkWithoutRefresh(format), site.getSongAgent())){
-				return getDirectLinkWithoutRefresh(format);
+			String oldDirectLink = getDirectLink(directLinks, format, site);
+			if (Utils.isURLAvailable(oldDirectLink, site.getSongAgent())){
+				return oldDirectLink;
 			}
 		}
 
 		if (!Utils.isURLAvailable(link)) throw new IOException(String.format("Link %s is not available", link));
 		directLinks = Zing.getInstance().getLink(id);
-		return getDirectLinkWithoutRefresh(format);
+		return getDirectLink(directLinks, format, site);
 	}
 
 	@Override
@@ -110,25 +111,6 @@ public class ZingSong extends ZingMedia implements ISong {
 			directLinks = new HashMap<Format, String>();
 		}
 		directLinks.put(format, directLink);
-	}
-
-	public String getDirectLinkWithoutRefresh(Format format){
-		String link = null;
-		switch (format) {
-		case LOSSLESS:
-			link = directLinks.get(Format.LOSSLESS); if (Utils.isURLAvailable(link, site.getSongAgent())) break;
-		
-		case MP3_320_KBPS:
-			link = directLinks.get(Format.MP3_320_KBPS); if (Utils.isURLAvailable(link, site.getSongAgent())) break;
-			
-		case MP3_128_KBPS:
-			link = directLinks.get(Format.MP3_128_KBPS); if (Utils.isURLAvailable(link, site.getSongAgent())) break;
-			
-		default:
-			link = directLinks.get(null); break;
-		}
-		
-		return link;
 	}
 
 	public Format getQuality() {

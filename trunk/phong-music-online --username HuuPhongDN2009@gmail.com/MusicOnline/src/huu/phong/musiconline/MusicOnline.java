@@ -895,9 +895,12 @@ public class MusicOnline extends JFrame {
 
 	private void setSongs(final List<? extends ISong> lists, boolean clear) {
 		if (!clear){
-			configure.songs.addAll(lists);
+			if (!(configure.songs.size() == lists.size() && configure.songs.size() > 1
+					&& configure.songs.get(0).equals(lists.get(0)))) {
+				configure.songs.addAll(lists);
+			}
 		}else{
-			if (!modelSongs.isEmpty()) configure.songs.clear();
+			configure.songs.clear();
 			configure.songs.addAll(lists);
 			modelSongs.clear();
 			history.add(lists);
@@ -956,9 +959,13 @@ public class MusicOnline extends JFrame {
 	
 	private void setAlbum(final List<? extends IAlbum> lists, boolean clear){
 		if (!clear){
-			configure.albums.addAll(lists);
+			if (!(configure.albums.size() == lists.size() && configure.albums.size() > 1
+					&& configure.albums.get(0).equals(lists.get(0)))) {
+				configure.albums.addAll(lists);
+			}
+			
 		}else{
-			if (!modelAlbums.isEmpty()) configure.albums.clear();
+			configure.albums.clear();
 			configure.albums.addAll(lists);
 			modelAlbums.clear();
 			configure.lastValueAlbum = "";

@@ -145,6 +145,6 @@ public abstract class ZingMedia extends Media{
 	
 	@Override
 	public String getFullTitle() {
-		return title + (artist == null ? "" : String.format(" - %s", artist));
+		return title + (artist == null || artist.equals("") ? "" : String.format(" - %s", artist));
 	}
 }

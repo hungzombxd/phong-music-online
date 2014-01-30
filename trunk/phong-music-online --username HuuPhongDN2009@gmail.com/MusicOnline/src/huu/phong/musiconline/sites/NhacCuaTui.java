@@ -64,8 +64,7 @@ public class NhacCuaTui extends MusicSite {
 
 	@Override
 	public List<? extends ISong> getAlbum(String id) throws IOException {
-		String[] data = id.split("|");
-		InputStream in = getInputStream(URLProvider.getPlaylistInfo(data[0], data[1]));
+		InputStream in = getInputStream(URLProvider.albumDetail(id));
 		String response = Utils.streamToString(in);
 		NhacCuaTuiAlbumDetail albumDetail = gson.fromJson(response, NhacCuaTuiAlbumDetail.class);
 		return albumDetail.getSongs();
