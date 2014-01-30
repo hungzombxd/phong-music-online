@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.Map;
 
 import huu.phong.musiconline.Configure;
+import huu.phong.musiconline.sites.ChiaSeNhac;
 import huu.phong.musiconline.sites.Site;
+import huu.phong.musiconline.utils.Utils;
 
 public class ChiaSeNhacSong extends Song {
 	
@@ -21,6 +23,8 @@ public class ChiaSeNhacSong extends Song {
 	
 	public String id;
 	
+	public Format quality;
+	
 	public ChiaSeNhacSong(){
 		id = new Date().toString();
 	}
@@ -32,8 +36,13 @@ public class ChiaSeNhacSong extends Song {
 
 	@Override
 	public String getDirectLink(Format format) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		if (directLinks == null){
+			directLinks = ChiaSeNhac.getInstance().getLink(link);
+		} else {
+			String oldDirectLink = getDirectLink(directLinks, format, Site.CHIA_SE_NHAC);
+			if (!Utils.isURLAvailable(oldDirectLink)) directLinks = ChiaSeNhac.getInstance().getLink(link);
+		}
+		return getDirectLink(directLinks, format, Site.CHIA_SE_NHAC);
 	}
 
 	@Override
@@ -53,38 +62,37 @@ public class ChiaSeNhacSong extends Song {
 
 	@Override
 	public String getFullTitle() {
-		// TODO Auto-generated method stub
-		return null;
+		return title + (artist == null || artist.equals("") ? "" : String.format(" - %s", artist));
 	}
 
 	@Override
 	public String getDetailTitle() {
-		// TODO Auto-generated method stub
-		return null;
+		return String.format("<html><b>%s</b><br/></html>", getFullTitle());
 	}
 
 	public void setTitle(String title) {
-		// TODO Auto-generated method stub
-		
+		this.title = title;
 	}
 
 	public void setArtist(String artist) {
-		// TODO Auto-generated method stub
-		
+		this.artist = artist;
 	}
 
 	public void setLink(String link) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setSite(Site chiaSeNhac) {
-		// TODO Auto-generated method stub
-		
+		this.link = link;
 	}
 
 	public void setQuality(Format format) {
-		// TODO Auto-generated method stub
-		
+		quality = format;
+	}
+	
+	@Override
+	public Format getQuality() {
+		return quality;
+	}
+	
+	@Override
+	public String getArtist() {
+		return artist;
 	}
 }

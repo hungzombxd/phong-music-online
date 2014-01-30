@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 
 import huu.phong.musiconline.model.Album;
 import huu.phong.musiconline.model.ISong;
+import huu.phong.musiconline.sites.NhacCuaTui;
 import huu.phong.musiconline.sites.Site;
 
 import com.google.gson.annotations.SerializedName;
@@ -62,8 +63,7 @@ public class NhacCuaTuiAlbum extends Album{
 
 	@Override
 	public List<? extends ISong> getSongs() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return NhacCuaTui.getInstance().getAlbum(playlistId);
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class NhacCuaTuiAlbum extends Album{
 
 	@Override
 	public String getFullTitle() {
-		return title + (artist == null ? "" : String.format(" - %s", artist));
+		return title + (artist == null || artist.equals("") ? "" : String.format(" - %s", artist));
 	}
 
 	@Override
