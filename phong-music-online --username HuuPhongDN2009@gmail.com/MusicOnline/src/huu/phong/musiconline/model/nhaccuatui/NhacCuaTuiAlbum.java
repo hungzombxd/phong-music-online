@@ -90,10 +90,10 @@ public class NhacCuaTuiAlbum extends Album{
 	public String getFullTitle() {
 		return title + (artist == null || artist.equals("") ? "" : String.format(" - %s", artist));
 	}
-
+	
 	@Override
-	public String getDetailTitle() {
-		return String.format("<html><b>%s</b><br/>Number like: %s</html>", getFullTitle(), liked);
+	public String getDescription() {
+		return String.format("Thích: %s | Lượt nghe: %s", liked, listened);
 	}
 	
 	@Override

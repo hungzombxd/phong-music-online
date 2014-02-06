@@ -46,10 +46,10 @@ public class LocalSong extends huu.phong.musiconline.model.Song {
 	public String getFullTitle() {
 		return file.getName();
 	}
-
+	
 	@Override
-	public String getDetailTitle() {
-		return String.format("<html><b>%s</b><br/>%s</html>", file.getName(), file.getParentFile().getAbsolutePath());
+	public String getDescription() {
+		return file.getParentFile().getAbsolutePath();
 	}
 
 	@Override

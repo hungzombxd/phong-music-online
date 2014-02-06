@@ -11,7 +11,6 @@ public abstract class ZingMedia extends Media{
 	private static final long serialVersionUID = 7902153106448791986L;
 	protected String link;
 	protected String title;
-	protected Site site = Site.MP3_ZING_VN;
 	protected Format quality = Format.MP3_128_KBPS;
 	protected String artist;
 	protected String genre;
@@ -32,7 +31,7 @@ public abstract class ZingMedia extends Media{
 
 	public String getLink() {
 		if (link == null) return link;
-		return link.contains("http") ? link : String.format("%s%s", site.getFullHost(), link);
+		return link.contains("http") ? link : String.format("%s%s", getSite().getFullHost(), link);
 	}
 
 	public void setLink(String link) {
@@ -48,11 +47,7 @@ public abstract class ZingMedia extends Media{
 	}
 
 	public Site getSite() {
-		return site;
-	}
-
-	public void setSite(Site site) {
-		this.site = site;
+		return Site.MP3_ZING_VN;
 	}
 
 	public Format getQuality() {

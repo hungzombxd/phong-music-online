@@ -53,6 +53,7 @@ public class ChiaSeNhac extends MusicSite{
 				song.setArtist(artist);
 				song.setLink(link);
 				song.setQuality(info.contains("Lossless") ? Format.LOSSLESS : info.contains("320kbps") ? Format.MP3_320_KBPS : Format.MP3_128_KBPS);
+				song.description = info;
 				songs.add(song);
 				if (songs.size() == 25) break;
 			}
