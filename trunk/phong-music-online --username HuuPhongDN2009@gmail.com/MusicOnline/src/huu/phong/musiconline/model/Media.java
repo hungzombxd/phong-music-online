@@ -1,7 +1,5 @@
 package huu.phong.musiconline.model;
 
-import huu.phong.musiconline.sites.Site;
-
 import java.awt.MediaTracker;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -93,10 +91,10 @@ public abstract class Media implements IMedia {
 	public Date getDate() {
 		return null;
 	}
-
+	
 	@Override
-	public String getDescription() {
-		return null;
+	public String getDetailTitle() {
+		return String.format("<html><b>%s</b><br/>%s<br/>Website: %s</html>", getFullTitle(), getDescription(), getSite().getHost());
 	}
 	
 	public int hashCode(){
@@ -129,7 +127,7 @@ public abstract class Media implements IMedia {
 		return icon;
 	}
 	
-	public String getDirectLink(Map<Format, String> directLinks, Format format, Site site){
+	public String getDirectLink(Map<Format, String> directLinks, Format format){
 		String link = null;
 		switch (format) {
 		case LOSSLESS:

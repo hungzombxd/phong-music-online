@@ -67,9 +67,9 @@ public class ZingSong extends ZingMedia implements ISong {
 	public boolean isThumbnailLoaded() {
 		return false;
 	}
-
+	
 	@Override
-	public String getDetailTitle() {
+	public String getDescription() {
 		String[] values = {Utils.toDuaration(duration * 1000), Utils.formatNumber(count), genre, songInfo};
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < DESCRIPTIONS.length; i++){
@@ -79,7 +79,7 @@ public class ZingSong extends ZingMedia implements ISong {
 			}
 		}
 		if (builder.length() > 0) builder.delete(builder.length() - 3, builder.length());
-		return String.format("<html><b>%s</b><br/>%s<br/>Website: %s<html>", getFullTitle(), builder.toString(), site.getHost());
+		return builder.toString();
 	}
 
 	@Override
@@ -90,15 +90,15 @@ public class ZingSong extends ZingMedia implements ISong {
 	@Override
 	public String getDirectLink(Format format) throws IOException {
 		if (directLinks != null) {
-			String oldDirectLink = getDirectLink(directLinks, format, site);
-			if (Utils.isURLAvailable(oldDirectLink, site.getSongAgent())){
+			String oldDirectLink = getDirectLink(directLinks, format);
+			if (Utils.isURLAvailable(oldDirectLink, getSite().getSongAgent())){
 				return oldDirectLink;
 			}
 		}
 
 		if (!Utils.isURLAvailable(link)) throw new IOException(String.format("Link %s is not available", link));
 		directLinks = Zing.getInstance().getLink(id);
-		return getDirectLink(directLinks, format, site);
+		return getDirectLink(directLinks, format);
 	}
 
 	@Override

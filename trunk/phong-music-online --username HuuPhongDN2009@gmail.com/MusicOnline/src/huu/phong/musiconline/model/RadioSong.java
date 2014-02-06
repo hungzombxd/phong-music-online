@@ -58,11 +58,6 @@ public class RadioSong extends Song {
 	}
 
 	@Override
-	public String getDetailTitle() {
-		return String.format("<html><b>%s</b><br/>%s<br/>Website: %s</html>", getFullTitle(), description, Site.RADIO_VNMEDIA_VN.getHost());
-	}
-
-	@Override
 	public String getDirectLink() throws IOException {
 		return getDirectLink(Configure.getInstance().format);
 	}

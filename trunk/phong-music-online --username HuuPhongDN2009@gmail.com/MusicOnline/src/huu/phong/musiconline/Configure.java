@@ -37,8 +37,7 @@ public class Configure implements Serializable{
 	public String repeat = "Default";
 	public String value = "";
 	public Point location = null;
-	public int numberReconnect = 5;
-	public boolean includeAlbum = true;
+	public boolean includeAlbum = false;
 	public List<String> valueRecently = new ArrayList<String>();
 	public String status = title + " | huuphongdn2009@gmail.com";
 	public String oldFolder = ".";
@@ -46,7 +45,7 @@ public class Configure implements Serializable{
 	public String lastValueSong = "";
 	public ItemCombo by = new ItemCombo("Default", "");
 	public boolean update = true;
-	public int viewModeSong = SongRenderer.VIEW_MODE_DETAIL;
+	public int viewModeSong = SongRenderer.VIEW_MODE_CLASSIC;
 	public int viewModeAlbum = AlbumRenderer.VIEW_MODE_DETAIL;
 	public String site = "mp3.zing.vn";
 	public String lastValueAlbum = "";

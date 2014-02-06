@@ -55,6 +55,11 @@ public class NhacCuaTuiSong extends Song{
 	
 	@SerializedName("LinkdownHQ")
 	public String urlHq;
+	
+	@Override
+	public Format getQuality() {
+		return urlHq != null ? Format.MP3_320_KBPS : Format.MP3_128_KBPS;
+	}
 
 	@Override
 	public String getDirectLink() throws IOException {
@@ -88,10 +93,9 @@ public class NhacCuaTuiSong extends Song{
 	public String getFullTitle() {
 		return title + (artist == null || artist.equals("") ? "" : String.format(" - %s", artist));
 	}
-
+	
 	@Override
-	public String getDetailTitle() {
-		return String.format("<html><b>%s</b><br/>Number like: %s</html>", getFullTitle(), liked);
+	public String getDescription() {
+		return String.format("Thích: %s | Lượt nghe: %s", liked, listened);
 	}
-
 }

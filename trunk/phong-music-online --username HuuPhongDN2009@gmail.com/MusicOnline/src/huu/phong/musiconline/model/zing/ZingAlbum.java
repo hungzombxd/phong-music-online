@@ -66,9 +66,8 @@ public class ZingAlbum extends ZingMedia implements IAlbum{
 	}
 
 	@Override
-	public String getDetailTitle() {
-		StringBuilder albumInfo = new StringBuilder();
-		return String.format("<html><b>%s</b><br/>%s<html>", getFullTitle(), albumInfo);
+	public String getDescription() {
+		return "";
 	}
 
 	@Override

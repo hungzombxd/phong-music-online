@@ -25,6 +25,8 @@ public class ChiaSeNhacSong extends Song {
 	
 	public Format quality;
 	
+	public String description;
+	
 	public ChiaSeNhacSong(){
 		id = new Date().toString();
 	}
@@ -39,10 +41,10 @@ public class ChiaSeNhacSong extends Song {
 		if (directLinks == null){
 			directLinks = ChiaSeNhac.getInstance().getLink(link);
 		} else {
-			String oldDirectLink = getDirectLink(directLinks, format, Site.CHIA_SE_NHAC);
+			String oldDirectLink = getDirectLink(directLinks, format);
 			if (!Utils.isURLAvailable(oldDirectLink)) directLinks = ChiaSeNhac.getInstance().getLink(link);
 		}
-		return getDirectLink(directLinks, format, Site.CHIA_SE_NHAC);
+		return getDirectLink(directLinks, format);
 	}
 
 	@Override
@@ -66,8 +68,8 @@ public class ChiaSeNhacSong extends Song {
 	}
 
 	@Override
-	public String getDetailTitle() {
-		return String.format("<html><b>%s</b><br/></html>", getFullTitle());
+	public String getDescription() {
+		return description;
 	}
 
 	public void setTitle(String title) {
