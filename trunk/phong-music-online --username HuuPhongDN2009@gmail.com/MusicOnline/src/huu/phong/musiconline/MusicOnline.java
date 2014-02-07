@@ -482,7 +482,7 @@ public class MusicOnline extends JFrame {
 				new Thread(){
 					public void run(){
 						ISong song = configure.songs.get(songs.getSelectedIndex());
-						frameLyric.setTitle("Lyric - " + song.getTitle());
+						frameLyric.setTitle("Lyric - " + song.getFullTitle());
 						frameLyric.setLyric(song);
 					}
 				}.start();
