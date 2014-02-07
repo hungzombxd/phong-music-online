@@ -33,7 +33,7 @@ public class NhacCuaTuiSong extends Song{
 	public String liked;
 
 	@SerializedName("LinkShare")
-	public String linkShare;
+	public String link;
 
 	@SerializedName("Listened")
 	public String listened;
@@ -50,15 +50,21 @@ public class NhacCuaTuiSong extends Song{
 	@SerializedName("SongTitle")
 	public String title;
 
-	@SerializedName("StreamURL")
+//	@SerializedName("StreamURL")
+	@SerializedName("Linkdown")
 	public String url;
 	
 	@SerializedName("LinkdownHQ")
 	public String urlHq;
 	
 	@Override
+	public String getLink() {
+		return link;
+	}
+	
+	@Override
 	public Format getQuality() {
-		return urlHq != null ? Format.MP3_320_KBPS : Format.MP3_128_KBPS;
+		return urlHq != null && !urlHq.equals(url) ? Format.MP3_320_KBPS : Format.MP3_128_KBPS;
 	}
 
 	@Override
