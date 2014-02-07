@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +73,7 @@ public class NhacCuaTui extends MusicSite {
 		InputStream in = getInputStream(URLProvider.getLyris(song.getId()));
 		String response = Utils.streamToString(in);
 		NhacCuaTuiLyricList lyricList = gson.fromJson(response, NhacCuaTuiLyricList.class);
-		return Arrays.asList(lyricList.lyric.lyric);
+		return lyricList.lyric.getLyric();
 	}
 
 	@Override

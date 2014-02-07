@@ -6,16 +6,14 @@ import huu.phong.musiconline.model.ISong;
 import huu.phong.musiconline.model.ItemCombo;
 import huu.phong.musiconline.model.zing.ZingAlbum;
 import huu.phong.musiconline.model.zing.ZingAlbumList;
+import huu.phong.musiconline.model.zing.ZingLyric;
 import huu.phong.musiconline.model.zing.ZingSongList;
-import huu.phong.musiconline.utils.HtmlUtil;
 import huu.phong.musiconline.utils.Utils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -93,23 +91,11 @@ public class Zing extends MusicSite{
 	}
 
 	public List<String> getLyric(ISong song) throws IOException {
-		List<String> lyrics = new ArrayList<String>();
-		BufferedReader in = getReader(song.getLink());
-		String str, lyric;
-		while ((str = in.readLine()) != null) {
-			if (str.contains("<p class=\"_lyricContent")) {
-				while ((str = in.readLine()) != null){
-					lyric = HtmlUtil.htmlToText(str);
-					if (!lyric.trim().equals("")) lyrics.add(lyric);
-					if (str.contains("</p>")){
-						in.close();
-						return lyrics;
-					}
-				}
-			}
-		}
-		in.close();
-		return lyrics;
+		InputStream in = getInputStream(String.format(URL_LYRIC, song.getId()));
+		String response = Utils.streamToString(in);
+		System.out.println(response);
+		ZingLyric result = gson.fromJson(response, ZingLyric.class);
+		return result.getLyric();
 	}
 
 	@Override
@@ -124,7 +110,6 @@ public class Zing extends MusicSite{
 
 	@Override
 	public Map<Format, String> getLink(String html) throws IOException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }
