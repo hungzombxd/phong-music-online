@@ -42,10 +42,6 @@ public class FrameLyric extends JFrame {
 	}
 	
 	public void setLyric(final ISong song){
-		if (song.getLink().equals("")){
-			lyric.setText("<h1 style='color: blue; text-align:center;'>Not found lyric<h1>");
-			return;
-		}
 		lyric.setText("<h1 style='color: blue; text-align:center;'>Searching lyric...</h1");
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -58,7 +54,7 @@ public class FrameLyric extends JFrame {
 					lyric.setText(getLyric(lyrics));
 					lyric.setCaretPosition(0);
 				} catch (IOException e) {
-					lyric.setText("<h1 style='text-align:center; color: blue;'>Error connect to server<h1>");
+					lyric.setText("<h1 style='text-align:center; color: blue;'>Can't connect to server<h1>");
 					e.printStackTrace();
 				}
 			}
