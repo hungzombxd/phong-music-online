@@ -1533,7 +1533,7 @@ public class MusicOnline extends JFrame {
 			
 			public void actionPerformed(ActionEvent arg0) {
 				configure.repeat = repeats.getSelectedItem().toString();
-				if(configure.repeat.equals("One song")) player.setRepeat(true);
+				player.setRepeat(configure.repeat.equals("One song"));
 			}
 		});
 		panelSearch.add(Box.createGlue());
