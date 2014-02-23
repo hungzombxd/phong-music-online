@@ -31,6 +31,7 @@ public class AudioPlayer {
 	private Stack<Thread> threads = new Stack<Thread>();
 	private Thread processPlay;
 	private boolean playing = false;
+	private boolean repeat = false;
 	
 	public AudioPlayer(){
 		listener = new AudioPlayerListener() {
@@ -187,7 +188,9 @@ public class AudioPlayer {
 		while (!stoped){
 			reading = decoder.getPCMData(buffer);
 			if (reading == -1){
-				break;
+				if(!repeat) break;
+				seek(0);
+				continue;
 			}
 			if (paused){
 				synchronized (source) {
@@ -301,5 +304,9 @@ public class AudioPlayer {
 	
 	public boolean isPlaying(){
 		return playing;
+	}
+	
+	public void setRepeat(boolean repeat){
+		this.repeat = repeat;
 	}
 }
