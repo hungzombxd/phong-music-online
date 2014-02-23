@@ -22,14 +22,16 @@ public final class Utils {
 			"u", "u", "d", "e", "e", "e", "e", "e", "e", "e", "e", "e", "e",
 			"i", "i", "i", "i", "i", "u", "u", "u", "u", "u", "y", "y", "y",
 			"y", "y", "o", "e", "o", "u", "a", "a"};
-	private static String[] utf8  = new String[] { "á", "à", "ả", "ạ", "ã", "ắ", "ằ",
+	private static String[] utf8  = new String[] {"á", "à", "ả", "ạ", "ã", "ắ", "ằ",
 					"ặ", "ẳ", "ẵ", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ớ", "ờ", "ợ", "ở", "ỡ",
 					"ó", "ò", "ọ", "ỏ", "õ", "ố", "ồ", "ộ", "ổ", "ỗ", "ứ", "ừ", "ự",
 					"ử", "ữ", "đ", "é", "è", "ẹ", "ẻ", "ẽ", "ế", "ề", "ệ", "ể", "ễ",
 					"í", "ì", "ị", "ỉ", "ĩ", "ú", "ù", "ụ", "ủ", "ũ", "ý", "ỳ", "ỵ",
-					"ỷ", "ỹ", "ô", "ê", "ơ", "ư", "ă", "â" };
+					"ỷ", "ỹ", "ô", "ê", "ơ", "ư", "ă", "â"};
 	
 	private static Pattern ncrDecimalPattern = Pattern.compile("&#(\\d+);");
+	
+	private static Pattern hexaUnicodePattern = Pattern.compile("\\\\u([0-9a-zA-Z]{4});");
 	
 	private static DecimalFormat formatter = new DecimalFormat("#,###,###");
 	
@@ -46,6 +48,17 @@ public final class Utils {
 		StringBuffer buffer = new StringBuffer();
 		while (matcher.find()){
 			matcher.appendReplacement(buffer, String.valueOf((char)Integer.parseInt(matcher.group(1))));
+		}
+		matcher.appendTail(buffer);
+		return buffer.toString();
+	}
+	
+	public static String hexaToUnicode(String str){
+		Matcher matcher = hexaUnicodePattern.matcher(str);
+		StringBuffer buffer = new StringBuffer();
+		while (matcher.find()){
+			int code = Integer.decode(String.format("0x%s", matcher.group(1))).intValue();
+			matcher.appendReplacement(buffer, String.valueOf((char)code));
 		}
 		matcher.appendTail(buffer);
 		return buffer.toString();
